@@ -30,33 +30,46 @@ function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day
     group.acts.push(act);
   });
 
+
   // Index du créneau affiché
   const [currentIdx, setCurrentIdx] = useState(0);
   const timerRef = useRef();
 
-  // Avancer automatiquement si créneau sans choix
+  // Remettre à zéro à chaque changement de jour ou d'activités
   useEffect(() => {
-    const group = creneaux[currentIdx];
-    if (!group) return;
-    if (group.acts.length === 1 || group.acts[0].type === 'obligatoire') {
-      timerRef.current = setTimeout(() => {
-        setCurrentIdx(idx => Math.min(idx + 1, creneaux.length - 1));
-      }, 5000);
-    }
-    return () => clearTimeout(timerRef.current);
-  }, [currentIdx, creneaux]);
+    setCurrentIdx(0);
+  }, [day]);
+
+  // Suppression de l'avance automatique pour les activités obligatoires
 
   // Validation d'un créneau à choix
   const [choix, setChoix] = useState(selectedCreneaux || {});
   const handleChoix = (creneauKey, actId) => {
     setChoix(prev => ({ ...prev, [creneauKey]: actId }));
   };
+  const [readyToSave, setReadyToSave] = useState(false);
   const handleValider = () => {
     const group = creneaux[currentIdx];
     if (group.acts.length > 1) {
       onValidateCreneau(group.key, choix[group.key]);
     }
-    setCurrentIdx(idx => Math.min(idx + 1, creneaux.length - 1));
+    // Si c'est le dernier créneau, on prépare l'enregistrement
+    if (currentIdx === creneaux.length - 1) {
+      setReadyToSave(true);
+    } else {
+      setCurrentIdx(idx => Math.min(idx + 1, creneaux.length - 1));
+    }
+  };
+  const handleSuivant = () => {
+    // Si c'est le dernier créneau, on prépare l'enregistrement
+    if (currentIdx === creneaux.length - 1) {
+      setReadyToSave(true);
+    } else {
+      setCurrentIdx(idx => Math.min(idx + 1, creneaux.length - 1));
+    }
+  };
+  const handleEnregistrer = () => {
+    onFinish && onFinish(choix);
   };
 
   // Fin du jour
@@ -117,14 +130,36 @@ function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day
           </div>
         ))}
       </div>
-      {group.acts.length > 1 && (
+      {/* Si on est prêt à enregistrer (après validation du dernier créneau) */}
+      {readyToSave ? (
         <button
           className="planning-btn-valider"
-          onClick={handleValider}
-          disabled={!choix[group.key]}
+          onClick={handleEnregistrer}
         >
-          Valider ce choix
+          Enregistrer mes choix
         </button>
+      ) : (
+        <>
+          {/* Si créneau à choix multiples : bouton valider */}
+          {group.acts.length > 1 && (
+            <button
+              className="planning-btn-valider"
+              onClick={handleValider}
+              disabled={!choix[group.key]}
+            >
+              Valider ce choix
+            </button>
+          )}
+          {/* Si activité obligatoire ou unique : bouton suivant ou valider (dernier créneau) */}
+          {group.acts.length === 1 && (
+            <button
+              className="planning-btn-valider"
+              onClick={handleSuivant}
+            >
+              {currentIdx === creneaux.length - 1 ? 'Valider' : 'Suivant'}
+            </button>
+          )}
+        </>
       )}
     </div>
   );

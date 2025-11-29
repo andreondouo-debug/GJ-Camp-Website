@@ -48,7 +48,6 @@ const Header = () => {
           <li><Link to="/activites">ACTIVITES</Link></li>
           <li><Link to="/#apropos">GJ CRPT</Link></li>
           {isAuthenticated && <li><Link to="/tableau-de-bord">TABLEAU DE BORD</Link></li>}
-          {isAuthenticated && <li><Link to="/profil">MON PROFIL</Link></li>}
           {isAuthenticated && canAccessGestion && (
             <li
               className={`dropdown ${isGestionOpen ? 'dropdown-open' : ''}`}
@@ -70,6 +69,7 @@ const Header = () => {
                 </svg>
               </button>
               <ul className={`dropdown-menu ${isGestionOpen ? 'dropdown-menu-open' : ''}`}>
+                <li><Link to="/profil">Profil</Link></li>
                 {canAccessInscriptions && (
                   <li><Link to="/suivi-inscriptions">Suivi des inscriptions</Link></li>
                 )}

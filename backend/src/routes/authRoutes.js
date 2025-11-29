@@ -31,5 +31,7 @@ router.get('/me', auth, authController.getMe);
 router.put('/profile', auth, authController.updateProfile);
 router.post('/upload-photo', auth, upload.single('profilePhoto'), authController.uploadPhoto);
 router.patch('/update-selected-activities', auth, authController.updateSelectedActivities);
+// Enregistrer les choix d'activités par créneau
+router.patch('/update-selected-creneaux', auth, authController.updateSelectedCreneaux);
 
 module.exports = router;

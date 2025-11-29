@@ -17,6 +17,7 @@ import ActivitiesManagement from './pages/ActivitiesManagement';
 import ProgrammePage from './pages/ProgrammePage';
 import ActivitiesPage from './pages/ActivitiesPage';
 import ProfilePage from './pages/ProfilePage';
+import NewsletterPage from './pages/NewsletterPage';
 import UserManagementPage from './pages/UserManagementPage';
 import AccessDeniedPage from './pages/AccessDeniedPage';
 import GuardedRoute from './components/GuardedRoute';
@@ -74,6 +75,7 @@ function App() {
             />
             <Route path="/programme" element={<ProgrammePage />} />
             <Route path="/activites" element={<ActivitiesPage />} />
+            <Route path="/newsletter" element={<NewsletterPage />} />
             <Route path="/acces-refuse" element={<AccessDeniedPage />} />
           </Routes>
           <Footer />

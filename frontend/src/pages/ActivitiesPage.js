@@ -1,20 +1,34 @@
-import PlanningCarousel from '../components/PlanningCarousel';
 import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
-import '../styles/ActivitiesPage.css';
+import PlanningCarousel from '../components/PlanningCarousel';
+
 
 function ActivitiesPage() {
-  const { user, token, updateUserActivities } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { user, token, updateUserActivities, refreshUser } = useContext(AuthContext);
   const [activities, setActivities] = useState([]);
   // Pour la sélection exclusive par créneau :
   // { '08:00-09:00': 'activityId1', '10:00-11:00': 'activityId2', ... }
   const [selectedCreneaux, setSelectedCreneaux] = useState(user?.selectedCreneaux || {});
+  const [selectedDay, setSelectedDay] = useState(1);
+  // showCarousel dynamique selon le jour sélectionné et les choix enregistrés
   const [showCarousel, setShowCarousel] = useState(true);
+
+  useEffect(() => {
+    // Vérifie s'il y a des choix enregistrés pour le jour sélectionné
+    const hasChoicesForDay = Object.entries(user?.selectedCreneaux || {}).some(([creneau, actId]) => {
+      // On suppose que les créneaux sont uniques par jour (clé = heureDebut-heureFin)
+      // Si besoin, adapter la logique pour filtrer par jour
+      const act = activities.find(a => a._id === actId);
+      return act && act.jour === selectedDay;
+    });
+    setShowCarousel(!hasChoicesForDay);
+  }, [selectedDay, user?.selectedCreneaux, activities]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [selectedDay, setSelectedDay] = useState(1);
   const [selectedActivityDetail, setSelectedActivityDetail] = useState(null);
 
   useEffect(() => {
@@ -46,7 +60,7 @@ function ActivitiesPage() {
   };
 
   // Sauvegarder les choix de créneaux (mapping creneau -> activitéId)
-  const handleSaveSelection = async () => {
+  const handleSaveSelection = async (creneauxToSave = selectedCreneaux) => {
     if (!token) {
       setError('Vous devez être connecté pour enregistrer vos activités');
       return;
@@ -56,14 +70,13 @@ function ActivitiesPage() {
       // On envoie le mapping creneau -> activitéId au backend
       const response = await axios.patch(
         '/api/auth/update-selected-creneaux',
-        { selectedCreneaux },
+        { selectedCreneaux: creneauxToSave },
         {
           headers: {
             Authorization: `Bearer ${token}`
           }
         }
       );
-      // updateUserActivities peut être adapté pour stocker selectedCreneaux
       setSuccess('✅ Vos choix ont été enregistrés avec succès !');
       setError('');
       setTimeout(() => setSuccess(''), 3000);
@@ -136,7 +149,18 @@ function ActivitiesPage() {
   return (
     <div className="activities-page">
       <div className="activities-hero">
-        <h1>🎯 Mon Planning</h1>
+        <h1>
+          <span style={{display:'inline-block', verticalAlign:'middle', marginRight:'10px'}}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#764ba2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="4" fill="#fff" stroke="#764ba2" strokeWidth="2"/>
+              <path d="M16 2v4M8 2v4M3 10h18" stroke="#764ba2" strokeWidth="2"/>
+              <rect x="7" y="14" width="2" height="2" fill="#764ba2"/>
+              <rect x="11" y="14" width="2" height="2" fill="#764ba2"/>
+              <rect x="15" y="14" width="2" height="2" fill="#764ba2"/>
+            </svg>
+          </span>
+          Mon Planning
+        </h1>
         <p>Sélectionnez vos activités pour chaque créneau, puis validez.</p>
       </div>
 
@@ -149,7 +173,11 @@ function ActivitiesPage() {
           <button
             key={day}
             className={`day-button ${selectedDay === day ? 'active' : ''}`}
-            onClick={() => setSelectedDay(day)}
+            onClick={() => {
+              setSelectedDay(day);
+              setSelectedCreneaux({});
+              setShowCarousel(true);
+            }}
           >
             <span className="day-label">Jour {day}</span>
             <span className="activity-count">{count} activité{count > 1 ? 's' : ''}</span>
@@ -164,26 +192,30 @@ function ActivitiesPage() {
           selectedCreneaux={selectedCreneaux}
           onValidateCreneau={(creneauKey, actId) => setSelectedCreneaux(prev => ({ ...prev, [creneauKey]: actId }))}
           day={selectedDay}
-          onFinish={(choix) => {
+          onFinish={async (choix) => {
             setSelectedCreneaux(choix);
             setShowCarousel(false);
-            // Tu peux ici appeler handleSaveSelection(choix) pour sauvegarder côté backend
+            await handleSaveSelection(choix);
+            await refreshUser();
+            setTimeout(() => navigate('/programme'), 800); // Redirige après confirmation
           }}
         />
       )}
 
-      {/* Récapitulatif après validation */}
+      {/* Récapitulatif après validation + bouton pour recommencer */}
       {!showCarousel && (
         <div className="planning-recap">
           <h2>✅ Récapitulatif de mes choix pour le jour {selectedDay}</h2>
-          <ul>
-            {Object.entries(selectedCreneaux).map(([creneau, actId]) => {
-              const act = currentDayActivities.find(a => a._id === actId);
-              return act ? (
-                <li key={creneau}><b>{act.titre}</b> ({act.heureDebut}{act.heureFin && ` - ${act.heureFin}`})</li>
-              ) : null;
-            })}
-          </ul>
+          <button
+            className="planning-btn-valider"
+            style={{marginTop: '1.5rem'}}
+            onClick={() => {
+              setSelectedCreneaux({});
+              setShowCarousel(true);
+            }}
+          >
+            Modifier mon planning pour ce jour
+          </button>
         </div>
       )}
     </div>

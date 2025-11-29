@@ -86,6 +86,11 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Activity'
   }],
+  // Mapping créneau -> activité choisie
+  selectedCreneaux: {
+    type: Object,
+    default: {},
+  },
   createdAt: {
     type: Date,
     default: Date.now,

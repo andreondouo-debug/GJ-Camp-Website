@@ -26,14 +26,14 @@
 }
 .planning-activity-card {
   background: #f9f7fd;
-  border-radius: 14px;
-  box-shadow: 0 2px 12px #764ba222;
-  padding: 1.2rem 1rem 1.2rem 1rem;
-  min-width: 220px;
-  max-width: 260px;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px #764ba233;
+  padding: 2rem 1.5rem 2rem 1.5rem;
+  min-width: 300px;
+  max-width: 370px;
   cursor: pointer;
   border: 2px solid transparent;
-  transition: border 0.2s, box-shadow 0.2s;
+  transition: border 0.2s, box-shadow 0.2s, transform 0.18s;
   position: relative;
 }
 .planning-activity-card.selected {
@@ -42,8 +42,8 @@
 }
 .planning-activity-image {
   width: 100%;
-  height: 120px;
-  margin-bottom: 0.7rem;
+  height: 180px;
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;

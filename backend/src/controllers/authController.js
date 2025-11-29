@@ -1,3 +1,23 @@
+// @route   PATCH /api/auth/update-selected-creneaux
+// @desc    Enregistrer les choix d'activités par créneau pour l'utilisateur connecté
+exports.updateSelectedCreneaux = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { selectedCreneaux } = req.body;
+    if (!selectedCreneaux || typeof selectedCreneaux !== 'object') {
+      return res.status(400).json({ message: 'selectedCreneaux doit être un objet' });
+    }
+    await User.findByIdAndUpdate(userId, { selectedCreneaux });
+    console.log(`✅ Choix de créneaux mis à jour pour l'utilisateur ${userId}`);
+    res.status(200).json({
+      message: 'Choix de créneaux enregistrés avec succès',
+      selectedCreneaux
+    });
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour des créneaux:', error);
+    res.status(500).json({ message: 'Erreur lors de la mise à jour des créneaux' });
+  }
+};
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');

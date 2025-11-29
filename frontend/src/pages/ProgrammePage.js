@@ -6,11 +6,10 @@ import '../styles/ProgrammePage.css';
 
 function ProgrammePage() {
   const [activities, setActivities] = useState([]);
-  // On détecte tous les jours disponibles dans les activités
+  const { isAuthenticated, token, user } = useContext(AuthContext);
+  const selectedCreneaux = user?.selectedCreneaux || {};
   const joursDisponibles = Array.from(new Set(activities.map(act => act.jour))).sort((a, b) => a - b);
   const [selectedDay, setSelectedDay] = useState(joursDisponibles[0] || 1);
-  const [selectedActivities, setSelectedActivities] = useState([]);
-  const { isAuthenticated, token } = useContext(AuthContext);
 
   // Charger les activités depuis l'API
   async function fetchActivities() {
@@ -22,48 +21,13 @@ function ProgrammePage() {
     }
   }
 
-  // Charger les activités sélectionnées de l'utilisateur
-  async function fetchUserSelectedActivities() {
-    try {
-      const response = await axios.get('/api/auth/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setSelectedActivities(response.data.selectedActivities || []);
-    } catch (error) {
-      console.error('Erreur lors du chargement des activités sélectionnées', error);
-    }
-  }
 
   // Sélectionner/désélectionner une activité optionnelle
-  async function toggleActivitySelection(activityId) {
-    if (!isAuthenticated) {
-      alert('Veuillez vous connecter pour sélectionner des activités');
-      return;
-    }
-    try {
-      const isSelected = selectedActivities.includes(activityId);
-      const newSelected = isSelected
-        ? selectedActivities.filter(id => id !== activityId)
-        : [...selectedActivities, activityId];
-      await axios.patch(
-        '/api/auth/update-selected-activities',
-        { selectedActivities: newSelected },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setSelectedActivities(newSelected);
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour des activités sélectionnées', error);
-      alert('Erreur lors de la mise à jour de vos activités');
-    }
-  }
 
   useEffect(() => {
     fetchActivities();
-    if (isAuthenticated) {
-      fetchUserSelectedActivities();
-    }
     // eslint-disable-next-line
-  }, [isAuthenticated]);
+  }, []);
 
   // Filtrer et trier les activités du jour sélectionné
   const currentDayActivities = activities
@@ -78,12 +42,21 @@ function ProgrammePage() {
       return toMinutes(a.heureDebut) - toMinutes(b.heureDebut);
     });
 
-  // Les activités obligatoires du jour
+
+  // Fusionner et trier toutes les activités du jour (obligatoires + optionnelles choisies)
   const activitesObligatoires = currentDayActivities.filter(act => act.type === 'obligatoire');
-  // Les activités optionnelles choisies par l'utilisateur pour ce jour (enregistrées)
   const activitesOptionnellesChoisies = currentDayActivities.filter(
-    act => act.type === 'optionnelle' && selectedActivities.includes(act._id)
+    act => act.type === 'optionnelle' && Object.values(selectedCreneaux).includes(act._id)
   );
+  // Fusion chronologique
+  const activitesChrono = [...activitesObligatoires, ...activitesOptionnellesChoisies].sort((a, b) => {
+    const toMinutes = (heure) => {
+      if (!heure) return 0;
+      const [hh, mm] = heure.split(':');
+      return parseInt(hh, 10) * 60 + (parseInt(mm, 10) || 0);
+    };
+    return toMinutes(a.heureDebut) - toMinutes(b.heureDebut);
+  });
 
   return (
     <div className="programme-page-container">
@@ -109,15 +82,15 @@ function ProgrammePage() {
           </div>
         ) : (
           <ul className="timeline-list">
-            {/* Affichage des activités obligatoires */}
-            {activitesObligatoires.map((activity, index) => (
-              <li key={activity._id} className="timeline-item obligatoire">
+            {/* Affichage chronologique de toutes les activités du jour (obligatoires + optionnelles choisies) */}
+            {activitesChrono.map((activity, index) => (
+              <li key={activity._id} className={`timeline-item ${activity.type}`}>
                 <div className="timeline-dot" />
                 <div className="timeline-content">
                   <div className="timeline-time">{activity.heureDebut}{activity.heureFin && ` - ${activity.heureFin}`}</div>
                   <div className="timeline-title-row">
                     <h3 className="timeline-title">{activity.titre}</h3>
-                    <span className="timeline-badge obligatoire">Obligatoire</span>
+                    <span className={`timeline-badge ${activity.type}`}>{activity.type === 'obligatoire' ? 'Obligatoire' : 'Optionnelle (choisie)'}</span>
                   </div>
                   <p className="timeline-desc">{activity.description}</p>
                   {activity.fichierPdf && (
@@ -130,30 +103,8 @@ function ProgrammePage() {
                       Voir le document
                     </a>
                   )}
-                  <div className="obligatoire-notice">Activité obligatoire pour tous</div>
-                </div>
-              </li>
-            ))}
-            {/* Affichage des activités optionnelles choisies (une seule par créneau, déjà enregistrée) */}
-            {activitesOptionnellesChoisies.map((activity, index) => (
-              <li key={activity._id} className="timeline-item optionnelle">
-                <div className="timeline-dot" />
-                <div className="timeline-content">
-                  <div className="timeline-time">{activity.heureDebut}{activity.heureFin && ` - ${activity.heureFin}`}</div>
-                  <div className="timeline-title-row">
-                    <h3 className="timeline-title">{activity.titre}</h3>
-                    <span className="timeline-badge optionnelle">Optionnelle (choisie)</span>
-                  </div>
-                  <p className="timeline-desc">{activity.description}</p>
-                  {activity.fichierPdf && (
-                    <a
-                      href={`http://localhost:5000${activity.fichierPdf}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="timeline-pdf-link"
-                    >
-                      Voir le document
-                    </a>
+                  {activity.type === 'obligatoire' && (
+                    <div className="obligatoire-notice">Activité obligatoire pour tous</div>
                   )}
                 </div>
               </li>
