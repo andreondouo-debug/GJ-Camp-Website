@@ -46,6 +46,7 @@ const Header = () => {
           <li><Link to="/">ACCUEIL</Link></li>
           <li><Link to="/programme">PROGRAMME</Link></li>
           <li><Link to="/activites">ACTIVITES</Link></li>
+          <li><Link to="/newsletter">NEWSLETTER</Link></li>
           <li><Link to="/#apropos">GJ CRPT</Link></li>
           {isAuthenticated && <li><Link to="/tableau-de-bord">TABLEAU DE BORD</Link></li>}
           {isAuthenticated && canAccessGestion && (
