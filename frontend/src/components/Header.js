@@ -1,12 +1,15 @@
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import { MailIcon } from './Icons';
 // import logoGJ from '../assets/images/logo-gj.png';
 import '../styles/App.css';
 
 const Header = () => {
-  const { isAuthenticated, user, logout } = useContext(AuthContext);
+  const { isAuthenticated, user, logout, token } = useContext(AuthContext);
   const [isGestionOpen, setIsGestionOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const openGestionMenu = useCallback(() => setIsGestionOpen(true), []);
   const closeGestionMenu = useCallback(() => setIsGestionOpen(false), []);
@@ -18,6 +21,39 @@ const Header = () => {
       setIsGestionOpen(false);
     }
   }, []);
+
+  // Récupérer le nombre de messages non lus
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      if (isAuthenticated && token) {
+        try {
+          const response = await axios.get('/api/messages/unread-count', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setUnreadCount(response.data.unreadCount || 0);
+        } catch (error) {
+          console.error('Erreur lors de la récupération des messages:', error);
+          setUnreadCount(0);
+        }
+      } else {
+        setUnreadCount(0);
+      }
+    };
+
+    fetchUnreadCount();
+    
+    // Actualiser toutes les 30 secondes
+    const interval = setInterval(fetchUnreadCount, 30000);
+    
+    // Écouter l'événement personnalisé pour rafraîchir immédiatement
+    const handleRefreshMessages = () => fetchUnreadCount();
+    window.addEventListener('messagesUpdated', handleRefreshMessages);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('messagesUpdated', handleRefreshMessages);
+    };
+  }, [isAuthenticated, token]);
 
   const normalizedRole = user?.role === 'user' ? 'utilisateur' : user?.role || 'utilisateur';
   const canAccessGestion = ['referent', 'responsable', 'admin'].includes(normalizedRole);
@@ -47,7 +83,17 @@ const Header = () => {
           <li><Link to="/">ACCUEIL</Link></li>
           <li><Link to="/programme">PROGRAMME</Link></li>
           <li><Link to="/activites">ACTIVITES</Link></li>
-          <li><Link to="/newsletter">NEWSLETTER</Link></li>
+          <li><Link to="/newsletter">GJ NEWS</Link></li>
+          {isAuthenticated && (
+            <li className="messages-menu-item">
+              <Link to="/messages" className="messages-link">
+                <MailIcon size={24} color="#ffffff" />
+                {unreadCount > 0 && (
+                  <span className="message-badge">{unreadCount}</span>
+                )}
+              </Link>
+            </li>
+          )}
           <li><Link to="/#apropos">GJ CRPT</Link></li>
           {isAuthenticated && <li><Link to="/tableau-de-bord">TABLEAU DE BORD</Link></li>}
           {isAuthenticated && canAccessGestion && (
@@ -71,21 +117,31 @@ const Header = () => {
                 </svg>
               </button>
               <ul className={`dropdown-menu ${isGestionOpen ? 'dropdown-menu-open' : ''}`}>
-                <li><Link to="/profil">Profil</Link></li>
+                <li><Link to="/profil">Mon Profil</Link></li>
                 {canAccessInscriptions && (
-                  <li><Link to="/suivi-inscriptions">Suivi des inscriptions</Link></li>
+                  <li><Link to="/suivi-inscriptions">Inscriptions</Link></li>
                 )}
                 {canAccessActivities && (
-                  <li><Link to="/gestion-activites">Gestion des activités</Link></li>
+                  <li><Link to="/gestion-activites">Activités</Link></li>
                 )}
                 {canAccessPayouts && (
-                  <li><Link to="/suivi-activites">📊 Suivi des activités</Link></li>
+                  <li><Link to="/suivi-activites">Suivi Activités</Link></li>
                 )}
                 {canAccessUserAdmin && (
-                  <li><Link to="/gestion/utilisateurs">Gestion des utilisateurs</Link></li>
+                  <li><Link to="/gestion/utilisateurs">Utilisateurs</Link></li>
+                )}
+                {canAccessUserAdmin && (
+                  <li className="dropdown-messages-item">
+                    <Link to="/gestion/messages">
+                      Messages
+                      {unreadCount > 0 && (
+                        <span className="dropdown-message-badge">{unreadCount}</span>
+                      )}
+                    </Link>
+                  </li>
                 )}
                 {canAccessPayouts && (
-                  <li><Link to="/gestion/redistributions">Gestion des redistributions</Link></li>
+                  <li><Link to="/gestion/redistributions">Redistributions</Link></li>
                 )}
               </ul>
             </li>

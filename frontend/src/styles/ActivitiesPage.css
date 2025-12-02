@@ -5,7 +5,7 @@
 }
 
 .activities-hero {
-  background: linear-gradient(135deg, #a01e1e 0%, #7a1616 100%);
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
   color: white;
   padding: 4rem 2rem;
   text-align: center;
@@ -89,16 +89,16 @@
 }
 
 .day-button:hover {
-  border-color: #a01e1e;
+  border-color: #e74c3c;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(160, 30, 30, 0.2);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.25);
 }
 
 .day-button.active {
-  background: linear-gradient(135deg, #a01e1e 0%, #7a1616 100%);
-  border-color: #a01e1e;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  border-color: #e74c3c;
   color: white;
-  box-shadow: 0 6px 20px rgba(160, 30, 30, 0.3);
+  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
 }
 
 .day-label {
@@ -394,7 +394,7 @@
 }
 
 .btn-select:hover {
-  background: #a01e1e;
+  background: #e74c3c;
   color: white;
 }
 
@@ -572,7 +572,7 @@
 }
 
 .modal-close:hover {
-  background: #a01e1e;
+  background: #e74c3c;
   color: white;
   transform: rotate(90deg);
 }
@@ -681,19 +681,19 @@
   align-items: center;
   gap: 0.5rem;
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #a01e1e 0%, #7a1616 100%);
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
   color: white;
   text-decoration: none;
   border-radius: 50px;
   font-weight: 600;
   font-size: 1rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(160, 30, 30, 0.3);
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
 }
 
 .btn-download-pdf:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(160, 30, 30, 0.4);
+  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
 }
 
 .activity-detail-actions {

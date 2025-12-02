@@ -150,6 +150,13 @@ exports.login = async (req, res) => {
       });
     }
 
+    // Vérifier si le compte est suspendu
+    if (user.isActive === false) {
+      return res.status(403).json({ 
+        message: 'Votre compte a été suspendu. Veuillez contacter un administrateur pour plus d\'informations.' 
+      });
+    }
+
     user.lastLoginAt = new Date();
     await user.save({ validateBeforeSave: false });
 

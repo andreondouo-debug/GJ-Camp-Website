@@ -149,6 +149,26 @@ const RegistrationDashboard = () => {
     setShowSearchResults(false);
   };
 
+  const handleDeleteRegistration = async (registrationId, firstName, lastName) => {
+    if (!window.confirm(`⚠️ ATTENTION : Cette action est irréversible !\n\nÊtes-vous sûr de vouloir supprimer l'inscription de ${firstName} ${lastName} ?`)) {
+      return;
+    }
+
+    try {
+      await axios.delete(`/api/registration/${registrationId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Retirer l'inscription de la liste
+      setRegistrations(registrations.filter(reg => reg._id !== registrationId));
+      
+      alert(`✅ Inscription de ${firstName} ${lastName} supprimée avec succès`);
+    } catch (err) {
+      console.error('Erreur lors de la suppression:', err);
+      alert('❌ Erreur lors de la suppression de l\'inscription');
+    }
+  };
+
   const updatePaymentStatus = async (id, newStatus) => {
     try {
       await axios.patch(
@@ -528,12 +548,13 @@ const RegistrationDashboard = () => {
                 Reste <SortIcon column="amountRemaining" />
               </th>
               <th>Statut</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredRegistrations.length === 0 ? (
               <tr>
-                <td colSpan="12" className="no-data">
+                <td colSpan="13" className="no-data">
                   Aucune inscription trouvée
                 </td>
               </tr>
@@ -567,6 +588,15 @@ const RegistrationDashboard = () => {
                         {getStatusBadge(reg.paymentStatus).text}
                       </span>
                     </td>
+                    <td>
+                      <button
+                        className="delete-registration-btn"
+                        onClick={() => handleDeleteRegistration(reg._id, reg.firstName, reg.lastName)}
+                        title="Supprimer l'inscription"
+                      >
+                        🗑️
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 
@@ -581,6 +611,7 @@ const RegistrationDashboard = () => {
                   <td className="amount-cell" style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>
                     {filteredStats.totalRemaining}€
                   </td>
+                  <td></td>
                   <td></td>
                 </tr>
               </>

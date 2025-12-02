@@ -59,16 +59,19 @@ function NewsletterPage() {
       setLoading(true);
       const response = await axios.get(`/api/posts?page=${pageNum}&limit=10`);
       
+      const newPosts = response.data?.posts || [];
+      
       if (append) {
-        setPosts(prev => [...prev, ...response.data.posts]);
+        setPosts(prev => [...prev, ...newPosts]);
       } else {
-        setPosts(response.data.posts);
+        setPosts(newPosts);
       }
       
-      setHasMore(response.data.currentPage < response.data.totalPages);
+      setHasMore(response.data?.currentPage < response.data?.totalPages);
       setLoading(false);
     } catch (error) {
       console.error('Erreur chargement posts:', error);
+      setPosts([]);
       setLoading(false);
     }
   };
@@ -286,14 +289,20 @@ function NewsletterPage() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Mettre à jour le post avec les résultats du sondage
-      setPosts(posts.map(p => 
-        p._id === postId 
-          ? { ...p, poll: { ...p.poll, results: response.data.poll.results, totalVotes: response.data.poll.totalVotes } }
-          : p
-      ));
-
-      alert('✅ Vote enregistré !');
+      // Mettre à jour le post avec les résultats du sondage immédiatement (comme les likes)
+      if (response.data && response.data.poll) {
+        setPosts(posts.map(p => 
+          p._id === postId 
+            ? { 
+                ...p, 
+                poll: {
+                  ...response.data.poll,
+                  options: Array.isArray(response.data.poll.options) ? response.data.poll.options : []
+                }
+              }
+            : p
+        ));
+      }
     } catch (error) {
       console.error('Erreur vote:', error);
       alert(error.response?.data?.message || '❌ Erreur lors du vote');
@@ -429,7 +438,7 @@ function NewsletterPage() {
           <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'middle', marginRight: '10px'}}>
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
           </svg>
-          Fil d'Actualités GJ
+          GJ NEWS
         </h1>
         <p>Partagez vos moments, photos, vidéos et actualités</p>
       </div>
@@ -642,7 +651,7 @@ function NewsletterPage() {
                     />
 
                     <div className="poll-options-list">
-                      {pollData.options.map((option, index) => (
+                      {pollData.options && Array.isArray(pollData.options) && pollData.options.map((option, index) => (
                         <div key={index} className="poll-option-item">
                           <input
                             type="text"
@@ -724,7 +733,7 @@ function NewsletterPage() {
 
       {/* Fil de posts avec infinite scroll */}
       <div className="posts-feed">
-        {posts.map((post, index) => {
+        {posts && Array.isArray(posts) && posts.map((post, index) => {
           const isLastPost = posts.length === index + 1;
           
           return (
@@ -946,8 +955,9 @@ function NewsletterPage() {
                   <div className="post-poll">
                     <h4 className="poll-question">📊 {post.poll.question}</h4>
                     <div className="poll-options">
-                      {post.poll.options.map((option, index) => {
-                        const totalVotes = post.poll.options.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0);
+                      {post.poll.options && Array.isArray(post.poll.options) && post.poll.options.map((option, index) => {
+                        const pollOptions = post.poll.options || [];
+                        const totalVotes = pollOptions.reduce((sum, opt) => sum + (opt.votes?.length || 0), 0);
                         const votes = option.votes?.length || 0;
                         const percentage = totalVotes > 0 ? ((votes / totalVotes) * 100).toFixed(1) : 0;
                         const hasVoted = option.votes?.some(v => v.user === user?._id);
@@ -1024,7 +1034,7 @@ function NewsletterPage() {
                 <div className="comments-section">
                   {/* Liste des commentaires */}
                   <div className="comments-list">
-                    {post.comments && post.comments.length > 0 ? (
+                    {post.comments && Array.isArray(post.comments) && post.comments.length > 0 ? (
                       post.comments.map(comment => (
                         <div key={comment._id} className="comment-item">
                           <div className="comment-avatar">

@@ -5,6 +5,43 @@ const { requireAdminRole } = require('../middleware/roleCheck');
 const Message = require('../models/Message');
 const User = require('../models/User');
 
+// Récupérer la liste des responsables pour la sélection
+router.get('/responsables', auth, async (req, res) => {
+  try {
+    const responsables = await User.find({ 
+      role: { $in: ['responsable', 'admin', 'referent'] },
+      isActive: true 
+    })
+    .select('firstName lastName email role profilePhoto')
+    .sort({ firstName: 1, lastName: 1 });
+
+    res.json(responsables);
+  } catch (error) {
+    console.error('❌ Erreur récupération responsables:', error);
+    res.status(500).json({ message: 'Erreur lors de la récupération des responsables' });
+  }
+});
+
+// Compter les messages non lus (sans les marquer comme lus)
+router.get('/unread-count', auth, async (req, res) => {
+  try {
+    const messages = await Message.find({ 
+      'recipients.user': req.user.userId 
+    });
+
+    // Compter uniquement les messages où l'utilisateur n'a pas encore lu
+    const unreadCount = messages.filter(m => {
+      const recipient = m.recipients.find(r => r.user._id.toString() === req.user.userId);
+      return recipient && !recipient.read;
+    }).length;
+
+    res.json({ unreadCount });
+  } catch (error) {
+    console.error('❌ Erreur comptage messages non lus:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
 // Envoyer un message
 router.post('/', auth, async (req, res) => {
   try {

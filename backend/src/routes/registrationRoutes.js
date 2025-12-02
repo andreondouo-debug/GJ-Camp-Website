@@ -30,4 +30,13 @@ router.patch(
 	registrationController.updatePaymentStatus
 );
 
+// Route pour supprimer une inscription (admin uniquement)
+router.delete(
+	'/:id',
+	auth,
+	requireVerifiedEmail,
+	authorize('admin'),
+	registrationController.deleteRegistration
+);
+
 module.exports = router;

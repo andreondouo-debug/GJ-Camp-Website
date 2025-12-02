@@ -467,3 +467,32 @@ exports.getUserGuests = async (req, res) => {
   }
 };
 
+// Supprimer une inscription (admin uniquement)
+exports.deleteRegistration = async (req, res) => {
+  try {
+    const registrationId = req.params.id;
+
+    // Vérifier que l'inscription existe
+    const registration = await Registration.findById(registrationId);
+    
+    if (!registration) {
+      return res.status(404).json({ message: 'Inscription non trouvée' });
+    }
+
+    // Supprimer l'inscription
+    await Registration.findByIdAndDelete(registrationId);
+
+    console.log(`✅ Inscription supprimée: ${registration.firstName} ${registration.lastName} (ID: ${registrationId})`);
+    
+    res.status(200).json({ 
+      message: 'Inscription supprimée avec succès',
+      deletedRegistration: {
+        id: registrationId,
+        name: `${registration.firstName} ${registration.lastName}`
+      }
+    });
+  } catch (error) {
+    console.error('❌ Erreur lors de la suppression de l\'inscription:', error);
+    res.status(500).json({ message: 'Erreur lors de la suppression de l\'inscription' });
+  }
+};

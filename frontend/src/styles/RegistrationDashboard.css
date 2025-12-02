@@ -518,6 +518,31 @@
   border-color: #667eea;
 }
 
+.delete-registration-btn {
+  background: linear-gradient(135deg, #f44336 0%, #e53935 100%);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+}
+
+.delete-registration-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+  background: linear-gradient(135deg, #e53935 0%, #d32f2f 100%);
+}
+
+.delete-registration-btn:active {
+  transform: translateY(0);
+}
+
 .status-select:focus {
   outline: none;
   border-color: #667eea;

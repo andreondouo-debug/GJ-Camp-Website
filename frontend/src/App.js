@@ -23,6 +23,8 @@ import AboutPage from './pages/AboutPage';
 import NewsletterPageNew from './pages/NewsletterPageNew';
 import UserManagementPage from './pages/UserManagementPage';
 import PayoutManagementPage from './pages/PayoutManagementPage';
+import MessagesPage from './pages/MessagesPage';
+import MessageManagementPage from './pages/MessageManagementPage';
 import AccessDeniedPage from './pages/AccessDeniedPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
@@ -99,6 +101,23 @@ function App() {
               element={
                 <GuardedRoute
                   element={<PayoutManagementPage />}
+                  roles={['responsable', 'admin']}
+                />
+              }
+            />
+            <Route
+              path="/messages"
+              element={
+                <GuardedRoute
+                  element={<MessagesPage />}
+                />
+              }
+            />
+            <Route
+              path="/gestion/messages"
+              element={
+                <GuardedRoute
+                  element={<MessageManagementPage />}
                   roles={['responsable', 'admin']}
                 />
               }

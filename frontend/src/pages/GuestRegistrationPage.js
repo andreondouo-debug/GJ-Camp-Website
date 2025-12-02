@@ -87,8 +87,8 @@ const GuestRegistrationPage = () => {
       const registrationData = {
         ...form,
         paymentDetails: {
-          orderId: details.id,
-          payerId: details.payer.payer_id,
+          orderID: details.id,
+          payerID: details.payer.payer_id,
           payerEmail: details.payer.email_address,
           status: details.status,
           amountPaid: parseFloat(form.amountPaid)

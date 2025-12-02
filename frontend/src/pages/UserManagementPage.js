@@ -166,6 +166,72 @@ const UserManagementPage = () => {
     }
   };
 
+  const handleSuspendUser = async (userId, isCurrentlyActive) => {
+    if (!isAdmin) {
+      setFeedback({ type: 'error', message: 'Seul un administrateur peut suspendre un compte' });
+      return;
+    }
+
+    const action = isCurrentlyActive ? 'désactiver' : 'activer';
+    if (!window.confirm(`Êtes-vous sûr de vouloir ${action} ce compte utilisateur ?`)) {
+      return;
+    }
+
+    setFeedback({ type: null, message: '' });
+
+    try {
+      const endpoint = isCurrentlyActive ? 'deactivate' : 'activate';
+      const response = await axios.patch(
+        `/api/users/${userId}/${endpoint}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const updatedUser = response.data.user || {};
+      const normalizedUser = {
+        ...updatedUser,
+        role: updatedUser.role === 'user' ? 'utilisateur' : updatedUser.role,
+      };
+
+      setUsers((prev) => prev.map((item) => (
+        item._id === normalizedUser._id
+          ? { ...item, ...normalizedUser }
+          : item
+      )));
+
+      setFeedback({ type: 'success', message: response.data.message || `Compte ${action === 'désactiver' ? 'désactivé' : 'activé'} avec succès` });
+    } catch (error) {
+      console.error(`❌ Erreur ${action}:`, error);
+      setFeedback({ type: 'error', message: error.response?.data?.message || `Impossible de ${action} ce compte` });
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!isAdmin) {
+      setFeedback({ type: 'error', message: 'Seul un administrateur peut supprimer un compte' });
+      return;
+    }
+
+    if (!window.confirm('⚠️ ATTENTION : Cette action est irréversible !\n\nÊtes-vous sûr de vouloir supprimer définitivement ce compte utilisateur ?')) {
+      return;
+    }
+
+    setFeedback({ type: null, message: '' });
+
+    try {
+      await axios.delete(
+        `/api/users/${userId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setUsers((prev) => prev.filter((item) => item._id !== userId));
+      setFeedback({ type: 'success', message: 'Compte utilisateur supprimé avec succès' });
+    } catch (error) {
+      console.error('❌ Erreur suppression:', error);
+      setFeedback({ type: 'error', message: error.response?.data?.message || 'Impossible de supprimer ce compte' });
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="user-management-container">
@@ -259,6 +325,9 @@ const UserManagementPage = () => {
                       <span className={`badge ${item.isEmailVerified ? 'badge-success' : 'badge-warning'}`}>
                         {item.isEmailVerified ? 'Email vérifié' : 'Email en attente'}
                       </span>
+                      <span className={`badge ${item.isActive !== false ? 'badge-success' : 'badge-danger'}`}>
+                        {item.isActive !== false ? 'Compte actif' : 'Compte suspendu'}
+                      </span>
                       <span className="badge badge-ghost">
                         Dernière connexion {item.lastLoginAt ? new Date(item.lastLoginAt).toLocaleDateString('fr-FR') : 'n/a'}
                       </span>
@@ -307,6 +376,24 @@ const UserManagementPage = () => {
                             {verifyingUserId === item._id ? 'Confirmation...' : 'Confirmer l\'email'}
                           </button>
                         )}
+
+                        <button
+                          type="button"
+                          className={item.isActive !== false ? 'suspend-button' : 'activate-button'}
+                          onClick={() => handleSuspendUser(item._id, item.isActive !== false)}
+                          title={item.isActive !== false ? 'Suspendre le compte' : 'Activer le compte'}
+                        >
+                          {item.isActive !== false ? '🚫 Suspendre' : '✅ Activer'}
+                        </button>
+
+                        <button
+                          type="button"
+                          className="delete-button"
+                          onClick={() => handleDeleteUser(item._id)}
+                          title="Supprimer définitivement le compte"
+                        >
+                          🗑️ Supprimer
+                        </button>
                       </div>
                     ) : (
                       <span className="badge badge-ghost">Lecture seule</span>

@@ -121,7 +121,8 @@ router.post('/:id/like', auth, async (req, res) => {
 
     res.json({ 
       message: 'Like mis à jour', 
-      likes: post.likes.length,
+      likes: post.likes,
+      likesCount: post.likes.length,
       isLiked: likeIndex === -1
     });
   } catch (error) {
@@ -333,22 +334,18 @@ router.post('/:id/poll/vote', auth, async (req, res) => {
     post.poll.options[optionIndex].votes.push({ user: userId });
     await post.save();
 
-    // Calculer les résultats
-    const results = post.poll.options.map(opt => ({
-      text: opt.text,
-      votes: opt.votes.length,
-      percentage: (opt.votes.length / post.poll.options.reduce((sum, o) => sum + o.votes.length, 0) * 100) || 0,
-      hasVoted: opt.votes.some(v => v.user.toString() === userId)
-    }));
-
+    // Retourner le poll complet avec la structure attendue par le frontend
     res.json({ 
       message: 'Vote enregistré', 
       poll: {
         question: post.poll.question,
-        results,
-        totalVotes: post.poll.options.reduce((sum, o) => sum + o.votes.length, 0),
+        options: post.poll.options.map(opt => ({
+          text: opt.text,
+          votes: opt.votes
+        })),
         pollType: post.poll.pollType,
-        isActive: post.poll.isActive
+        isActive: post.poll.isActive,
+        endsAt: post.poll.endsAt
       }
     });
   } catch (error) {
