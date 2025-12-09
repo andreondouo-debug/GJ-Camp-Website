@@ -86,7 +86,7 @@ const Header = () => {
               </Link>
             </li>
           )}
-          <li><Link to="/#apropos">GJ CRPT</Link></li>
+          <li><Link to="/gj-crpt">GJ CRPT</Link></li>
           {isAuthenticated && <li><Link to="/tableau-de-bord">TABLEAU DE BORD</Link></li>}
           {isAuthenticated && canAccessGestion && (
             <li
@@ -116,6 +116,9 @@ const Header = () => {
                 {canAccessActivities && (
                   <li><Link to="/gestion-activites">Activités</Link></li>
                 )}
+                {canAccessUserAdmin && (
+                  <li><Link to="/gestion-carrousel">🎨 Carrousel</Link></li>
+                )}
                 {canAccessPayouts && (
                   <li><Link to="/suivi-activites">Suivi Activités</Link></li>
                 )}
@@ -133,7 +136,10 @@ const Header = () => {
                   </li>
                 )}
                 {canAccessPayouts && (
-                  <li><Link to="/gestion/redistributions">Redistributions</Link></li>
+                  <>
+                    <li><Link to="/gestion/redistributions">Redistributions</Link></li>
+                    <li><Link to="/gestion/paiements-especes">Paiements espèces</Link></li>
+                  </>
                 )}
                 {canAccessUserAdmin && (
                   <li><Link to="/gestion/reinitialisations">Mots de passe</Link></li>

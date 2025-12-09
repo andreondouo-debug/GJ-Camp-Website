@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import PayPalButton from '../components/PayPalButton';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
+import { getApiUrl } from '../config/api';
 import '../styles/UserDashboard.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -77,6 +78,7 @@ const UserDashboard = () => {
   const [selectedGuest, setSelectedGuest] = useState(null);
   const [partialAmount, setPartialAmount] = useState(0);
   const [showPayPalButton, setShowPayPalButton] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('paypal'); // 'paypal' ou 'cash'
   const { token, user } = useContext(AuthContext);
 
   useEffect(() => {
@@ -247,9 +249,38 @@ const UserDashboard = () => {
       setSelectedGuest(null);
       setPartialAmount(0);
       setShowPayPalButton(false);
+      setPaymentMethod('paypal');
     } catch (err) {
       console.error('Erreur lors du paiement supplémentaire:', err);
       alert('❌ Erreur lors du paiement. Veuillez réessayer.');
+    }
+  };
+
+  const handleCashPayment = async () => {
+    try {
+      const targetRegistration = selectedGuest || registration;
+      const response = await axios.post(
+        `/api/registration/${targetRegistration._id}/cash-payment`,
+        { amount: parseFloat(partialAmount) },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      alert(`✅ Paiement de ${partialAmount}€ en espèces enregistré. En attente de validation par un responsable.`);
+      
+      if (selectedGuest) {
+        fetchUserGuests();
+      } else {
+        fetchUserRegistration();
+      }
+      
+      setShowPaymentModal(false);
+      setSelectedGuest(null);
+      setPartialAmount(0);
+      setShowPayPalButton(false);
+      setPaymentMethod('paypal');
+    } catch (err) {
+      console.error('Erreur lors de l\'enregistrement du paiement espèces:', err);
+      alert(err.response?.data?.message || '❌ Erreur lors de l\'enregistrement du paiement');
     }
   };
 
@@ -539,7 +570,7 @@ const UserDashboard = () => {
                     <div className="activity-header-item">
                       {activity.image && (
                         <div className="activity-image-small">
-                          <img src={`http://localhost:5000${activity.image}`} alt={activity.titre} />
+                          <img src={getApiUrl(activity.image)} alt={activity.titre} />
                         </div>
                       )}
                       <div className="activity-info">
@@ -552,7 +583,7 @@ const UserDashboard = () => {
                     <p className="activity-description">{activity.description}</p>
                     {activity.fichierPdf && (
                       <a 
-                        href={`http://localhost:5000${activity.fichierPdf}`} 
+                        href={getApiUrl(activity.fichierPdf)} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="activity-pdf-link"
@@ -635,6 +666,7 @@ const UserDashboard = () => {
           setSelectedGuest(null);
           setPartialAmount(0);
           setShowPayPalButton(false);
+          setPaymentMethod('paypal');
         }}>
           <div className="payment-modal" onClick={(e) => e.stopPropagation()}>
             <div className="payment-modal-header">
@@ -645,6 +677,7 @@ const UserDashboard = () => {
                 setSelectedGuest(null);
                 setPartialAmount(0);
                 setShowPayPalButton(false);
+                setPaymentMethod('paypal');
               }}>×</button>
             </div>
             <div className="payment-modal-body">
@@ -680,18 +713,71 @@ const UserDashboard = () => {
                 <p className="payment-note">
                   Vous pouvez payer de 1€ à {(selectedGuest || registration).amountRemaining}€
                 </p>
+
+                {/* Choix du mode de paiement */}
+                <div className="payment-method-choice">
+                  <label>Mode de paiement :</label>
+                  <div className="payment-method-options-modal">
+                    <label className={`payment-method-option-modal ${paymentMethod === 'paypal' ? 'active' : ''}`}>
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="paypal"
+                        checked={paymentMethod === 'paypal'}
+                        onChange={(e) => {
+                          setPaymentMethod(e.target.value);
+                          setShowPayPalButton(false);
+                        }}
+                      />
+                      <span className="method-icon">💳</span>
+                      <span className="method-text">PayPal</span>
+                    </label>
+                    
+                    <label className={`payment-method-option-modal ${paymentMethod === 'cash' ? 'active' : ''}`}>
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="cash"
+                        checked={paymentMethod === 'cash'}
+                        onChange={(e) => {
+                          setPaymentMethod(e.target.value);
+                          setShowPayPalButton(false);
+                        }}
+                      />
+                      <span className="method-icon">💵</span>
+                      <span className="method-text">Espèces</span>
+                    </label>
+                  </div>
+                </div>
+
+                {paymentMethod === 'cash' && (
+                  <div className="cash-info-modal">
+                    <p>⚠️ <strong>Paiement en espèces</strong></p>
+                    <ul>
+                      <li>Remettez le montant à un responsable</li>
+                      <li>Votre paiement sera validé dans le système</li>
+                      <li>Vous recevrez un email de confirmation</li>
+                    </ul>
+                  </div>
+                )}
                 
                 {!showPayPalButton && partialAmount > 0 && partialAmount <= (selectedGuest || registration).amountRemaining && (
                   <button 
                     className="btn-validate-amount"
-                    onClick={() => setShowPayPalButton(true)}
+                    onClick={() => {
+                      if (paymentMethod === 'paypal') {
+                        setShowPayPalButton(true);
+                      } else {
+                        handleCashPayment();
+                      }
+                    }}
                   >
-                    ✓ Valider et payer {partialAmount}€
+                    ✓ {paymentMethod === 'paypal' ? `Valider et payer ${partialAmount}€` : `Enregistrer paiement espèces ${partialAmount}€`}
                   </button>
                 )}
               </div>
 
-              {showPayPalButton && partialAmount > 0 && partialAmount <= (selectedGuest || registration).amountRemaining && (
+              {showPayPalButton && paymentMethod === 'paypal' && partialAmount > 0 && partialAmount <= (selectedGuest || registration).amountRemaining && (
                 <div className="paypal-container-modal">
                   <PayPalButton
                     amount={parseFloat(partialAmount)}

@@ -24,10 +24,48 @@ const ActivityTrackingPage = () => {
   const [error, setError] = useState('');
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [showParticipants, setShowParticipants] = useState(false);
+  const [hasRegistration, setHasRegistration] = useState(false);
+  const [checkingRegistration, setCheckingRegistration] = useState(true);
+
+  // Vérifier si l'utilisateur a une inscription validée
+  useEffect(() => {
+    const checkRegistration = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setCheckingRegistration(false);
+        setHasRegistration(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get('/api/registration/my-registration', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        // Vérifier si l'inscription a un paiement complet (paid = 120€)
+        if (response.data && response.data.paymentStatus === 'paid') {
+          setHasRegistration(true);
+        } else {
+          setHasRegistration(false);
+        }
+      } catch (err) {
+        console.log('Aucune inscription trouvée ou non validée');
+        setHasRegistration(false);
+      } finally {
+        setCheckingRegistration(false);
+      }
+    };
+
+    checkRegistration();
+  }, []);
 
   useEffect(() => {
-    loadStatistics();
-  }, []);
+    if (hasRegistration) {
+      loadStatistics();
+    } else {
+      setLoading(false);
+    }
+  }, [hasRegistration]);
 
   const loadStatistics = async () => {
     try {
@@ -96,7 +134,55 @@ const ActivityTrackingPage = () => {
     return age;
   };
 
-  if (loading) {
+  if (checkingRegistration) {
+    return (
+      <div className="activity-tracking-container">
+        <div className="loading-spinner">
+          <RefreshIcon size={40} color="#a01e1e" />
+          <span>Vérification de votre inscription...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasRegistration) {
+    return (
+      <div className="activity-tracking-container">
+        <div style={{
+          backgroundColor: '#fff3cd',
+          border: '2px solid #ffc107',
+          borderRadius: '12px',
+          padding: '30px',
+          maxWidth: '600px',
+          margin: '80px auto',
+          textAlign: 'center'
+        }}>
+          <h2 style={{ color: '#856404', marginBottom: '20px' }}>🔒 Accès restreint</h2>
+          <p style={{ color: '#856404', fontSize: '16px', marginBottom: '20px' }}>
+            Vous devez être inscrit au camp avec un paiement validé pour accéder au programme.
+          </p>
+          <a
+            href="/inscription"
+            style={{
+              display: 'inline-block',
+              backgroundColor: '#a01e1e',
+              color: 'white',
+              padding: '12px 30px',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              textDecoration: 'none',
+              marginTop: '10px'
+            }}
+          >
+            S'inscrire au camp
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading && statistiques.length === 0) {
     return (
       <div className="activity-tracking-container">
         <div className="loading-spinner">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getApiUrl } from '../config/api';
 import '../styles/ActivitiesManagement.css';
 
 // Icônes SVG
@@ -163,7 +164,7 @@ function ActivitiesManagement() {
         jour: activity.jour || 1,
         referent: activity.referent?._id || activity.referent || ''
       });
-      setImagePreview(activity.image ? `http://localhost:5000${activity.image}` : null);
+      setImagePreview(activity.image ? getApiUrl(activity.image) : null);
     } else {
       setEditingActivity(null);
       setFormData(createInitialFormState());
@@ -349,7 +350,7 @@ function ActivitiesManagement() {
                 </div>
                 <div className="activity-image">
                   {activity.image ? (
-                    <img src={`http://localhost:5000${activity.image}`} alt={activity.titre} />
+                    <img src={getApiUrl(activity.image)} alt={activity.titre} />
                   ) : (
                     <span>Pas d'image</span>
                   )}
@@ -524,7 +525,7 @@ function ActivitiesManagement() {
 
             {detailActivity.image && (
               <div className="detail-image">
-                <img src={`http://localhost:5000${detailActivity.image}`} alt={detailActivity.titre} />
+                <img src={getApiUrl(detailActivity.image)} alt={detailActivity.titre} />
               </div>
             )}
 
@@ -556,7 +557,7 @@ function ActivitiesManagement() {
 
             {detailActivity.fichierPdf && (
               <a 
-                href={`http://localhost:5000${detailActivity.fichierPdf}`}
+                href={getApiUrl(detailActivity.fichierPdf)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="activity-pdf-link detail-pdf-link"

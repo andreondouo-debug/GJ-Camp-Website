@@ -7,7 +7,7 @@ const SectionICCOnline = () => (
     <p className="crt-desc">
       Christ Refuge Pour Tous (CRPT) est une famille de foi dynamique et accueillante, ouverte à tous ceux qui cherchent à grandir spirituellement et à vivre l’amour de Dieu au quotidien. Rejoins-nous pour découvrir une communauté engagée, des enseignements inspirants et des temps forts dans la présence de Dieu.
     </p>
-    <a className="crt-btn" href="/cg-crpt">
+    <a className="crt-btn" href="/gj-crpt">
       Découvrir CRPT
     </a>
   </section>

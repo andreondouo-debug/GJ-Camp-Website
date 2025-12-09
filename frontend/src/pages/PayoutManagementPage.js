@@ -126,6 +126,45 @@ function PayoutManagementPage() {
     }
   };
 
+  const handleRefreshPayoutStatus = async (payoutId) => {
+    try {
+      const response = await axios.get(`/api/payouts/${payoutId}/status`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setFeedback({ type: 'success', message: `Statut mis à jour: ${STATUS_LABELS[response.data.status]}` });
+      fetchPayouts();
+    } catch (error) {
+      console.error('❌ Erreur rafraîchissement statut:', error);
+      setFeedback({ type: 'error', message: 'Impossible de vérifier le statut' });
+    }
+  };
+
+  const handleRefreshAllProcessing = async () => {
+    const processingPayouts = payouts.filter(p => p.status === 'processing');
+    if (processingPayouts.length === 0) {
+      setFeedback({ type: 'info', message: 'Aucun payout en cours à vérifier' });
+      return;
+    }
+
+    setFeedback({ type: null, message: '' });
+    let updated = 0;
+
+    for (const payout of processingPayouts) {
+      try {
+        await axios.get(`/api/payouts/${payout._id}/status`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        updated++;
+      } catch (error) {
+        console.error(`Erreur payout ${payout._id}:`, error);
+      }
+    }
+
+    setFeedback({ type: 'success', message: `${updated} payout(s) vérifié(s)` });
+    fetchPayouts();
+  };
+
   const handleSaveCampus = async (e) => {
     e.preventDefault();
     setFeedback({ type: null, message: '' });
@@ -214,6 +253,13 @@ function PayoutManagementPage() {
               >
                 {executing ? '⏳ Exécution...' : '🚀 Redistribuer maintenant'}
               </button>
+              <button
+                className="btn-execute"
+                onClick={handleRefreshAllProcessing}
+                style={{ marginLeft: '10px', backgroundColor: '#3498db' }}
+              >
+                🔄 Vérifier statuts PayPal
+              </button>
             </div>
 
             <div className="filters-row">
@@ -268,6 +314,24 @@ function PayoutManagementPage() {
                         >
                           {STATUS_LABELS[payout.status]}
                         </span>
+                        {payout.status === 'processing' && (
+                          <button
+                            onClick={() => handleRefreshPayoutStatus(payout._id)}
+                            style={{
+                              marginLeft: '8px',
+                              padding: '4px 8px',
+                              fontSize: '12px',
+                              backgroundColor: '#3498db',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer'
+                            }}
+                            title="Vérifier le statut auprès de PayPal"
+                          >
+                            🔄
+                          </button>
+                        )}
                         <div className="payout-date">
                           {new Date(payout.createdAt).toLocaleDateString('fr-FR')}
                         </div>

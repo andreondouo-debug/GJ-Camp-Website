@@ -520,8 +520,8 @@ const RegistrationDashboard = () => {
       </div>
 
       {/* Tableau des inscriptions */}
-      <div className="dashboard-table-container">
-        <table className="dashboard-table">
+      <div className="dashboard-table-container" style={{ overflowX: 'auto', width: '100%' }}>
+        <table className="dashboard-table" style={{ minWidth: '1400px' }}>
           <thead>
             <tr>
               <th onClick={() => handleSort('date')} style={{ cursor: 'pointer' }}>

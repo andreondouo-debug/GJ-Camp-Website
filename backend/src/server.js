@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const connectDB = require('./config/db');
+const { connectDB } = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const registrationRoutes = require('./routes/registrationRoutes');
 const activitiesRoutes = require('./routes/activitiesRoutes');
@@ -47,7 +47,7 @@ app.use('/api/password-reset', passwordResetRoutes);
 
 // Route de test
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ message: '✅ Backend fonctionnaire' });
+  res.status(200).json({ message: '✅ Backend fonctionnel' });
 });
 
 // Gestion des erreurs 404

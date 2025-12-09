@@ -103,7 +103,13 @@ const SettingsPage = () => {
     facebookUrl: '',
     youtubeUrl: '',
     twitterUrl: '',
-    linkedinUrl: ''
+    linkedinUrl: '',
+    
+    // Paramètres du carrousel
+    carouselEnabled: true,
+    carouselHeight: '500px',
+    carouselAutoplayInterval: 6000,
+    carouselTransitionDuration: 1000,
   });
 
   const [loading, setLoading] = useState(false);
@@ -113,6 +119,11 @@ const SettingsPage = () => {
   const [logoPreview, setLogoPreview] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  
+  // États pour le verrouillage de la page
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockInfo, setLockInfo] = useState(null);
+  const [hasLock, setHasLock] = useState(false);
   
   // États pour la gestion du carrousel
   const [carouselSlides, setCarouselSlides] = useState([]);
@@ -147,6 +158,72 @@ const SettingsPage = () => {
       navigate('/access-denied');
     }
   }, [user, navigate]);
+
+  // Vérifier et acquérir le verrou de la page
+  useEffect(() => {
+    let lockCheckInterval;
+    let currentHasLock = false;
+
+    const checkLockStatus = async () => {
+      try {
+        const response = await axios.get('/api/settings/lock/status', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (response.data.locked && !response.data.ownedByCurrentUser) {
+          setIsLocked(true);
+          setLockInfo(response.data);
+          setHasLock(false);
+        } else {
+          setIsLocked(false);
+          setLockInfo(null);
+          
+          // Si pas de verrou actif, essayer de l'acquérir
+          if (!response.data.locked) {
+            await acquireLock();
+          } else {
+            setHasLock(true);
+            currentHasLock = true;
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du verrou:', error);
+      }
+    };
+
+    const acquireLock = async () => {
+      try {
+        await axios.post('/api/settings/lock/acquire', {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setHasLock(true);
+        currentHasLock = true;
+        console.log('🔒 Verrou de paramétrage acquis');
+      } catch (error) {
+        if (error.response?.status === 423) {
+          setIsLocked(true);
+          setLockInfo(error.response.data);
+          setHasLock(false);
+        }
+      }
+    };
+
+    // Vérifier le statut au montage
+    checkLockStatus();
+
+    // Renouveler le verrou toutes les 5 minutes
+    lockCheckInterval = setInterval(checkLockStatus, 5 * 60 * 1000);
+
+    // Libérer le verrou lors du démontage du composant
+    return () => {
+      clearInterval(lockCheckInterval);
+      if (currentHasLock) {
+        axios.post('/api/settings/lock/release', {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(err => console.error('Erreur libération verrou:', err));
+      }
+    };
+  }, [token, navigate]);
 
   // Charger les paramètres depuis le serveur
   useEffect(() => {
@@ -268,6 +345,21 @@ const SettingsPage = () => {
   // Réinitialiser aux valeurs par défaut
   const handleReset = () => {
     if (window.confirm('⚠️ Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?')) {
+      // ✅ Sauvegarder les paramètres du logo avant réinitialisation
+      const currentLogoSettings = {
+        logoUrl: settings.logoUrl,
+        logoWidth: settings.logoWidth,
+        logoHeight: settings.logoHeight,
+        logoShape: settings.logoShape,
+        logoEffect: settings.logoEffect,
+        logoAnimation: settings.logoAnimation,
+        logoBorderColor: settings.logoBorderColor,
+        logoGlowColor: settings.logoGlowColor,
+        logoPosition: settings.logoPosition,
+        logoCustomX: settings.logoCustomX,
+        logoCustomY: settings.logoCustomY,
+      };
+
       setSettings({
         colorPrimary: '#a01e1e',
         colorPrimaryLight: '#e74c3c',
@@ -304,17 +396,8 @@ const SettingsPage = () => {
         glassmorphismEnabled: true,
         countdownDate: '2026-08-19T00:00:00',
         countdownTitle: 'Camp GJ dans',
-        logoUrl: '',
-        logoWidth: '120px',
-        logoHeight: 'auto',
-        logoShape: 'none',
-        logoEffect: 'none',
-        logoAnimation: 'none',
-        logoBorderColor: '#d4af37',
-        logoGlowColor: '#d4af37',
-        logoPosition: 'header',
-        logoCustomX: '50',
-        logoCustomY: '50',
+        // ✅ Restaurer les paramètres du logo sauvegardés
+        ...currentLogoSettings,
         backgroundType: 'gradient',
         backgroundImage: '',
         backgroundColorStart: '#667eea',
@@ -329,9 +412,13 @@ const SettingsPage = () => {
         facebookUrl: '',
         youtubeUrl: '',
         twitterUrl: '',
-        linkedinUrl: ''
+        linkedinUrl: '',
+        carouselEnabled: true,
+        carouselHeight: '500px',
+        carouselAutoplayInterval: 6000,
+        carouselTransitionDuration: 1000,
       });
-      setMessage('🔄 Paramètres réinitialisés aux valeurs par défaut');
+      setMessage('🔄 Paramètres réinitialisés aux valeurs par défaut (logo préservé)');
     }
   };
 
@@ -428,34 +515,6 @@ const SettingsPage = () => {
       }));
       
       console.log(`✅ Image sélectionnée : ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
-    }
-  };
-
-  // Gérer l'upload du logo
-  const handleLogoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Vérifier la taille du fichier (5MB max)
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      if (file.size > maxSize) {
-        setMessage(`❌ Logo trop volumineux ! Maximum : 5MB. Votre fichier : ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-        setTimeout(() => setMessage(''), 5000);
-        e.target.value = ''; // Réinitialiser l'input
-        return;
-      }
-
-      // Vérifier le type de fichier
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/svg+xml', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
-        setMessage('❌ Format de fichier non supporté. Utilisez PNG, JPG, SVG ou WebP');
-        setTimeout(() => setMessage(''), 5000);
-        e.target.value = '';
-        return;
-      }
-      
-      setLogoFile(file);
-      setLogoPreview(URL.createObjectURL(file));
-      console.log(`✅ Logo sélectionné : ${file.name} (${(file.size / 1024).toFixed(2)}KB)`);
     }
   };
 
@@ -805,16 +864,60 @@ const SettingsPage = () => {
   return (
     <div className="settings-page">
       <div className="settings-container">
-        {/* En-tête */}
-        <div className="settings-header">
-          <h1>⚙️ Paramètres du Site</h1>
-          <p className="settings-subtitle">
-            Personnalisez l'apparence et le comportement du site GJ Camp
-          </p>
-        </div>
+        {/* Message de verrouillage si la page est verrouillée par un autre admin */}
+        {isLocked && lockInfo && (
+          <div style={{
+            backgroundColor: '#fff3cd',
+            border: '2px solid #ffc107',
+            borderRadius: '8px',
+            padding: '20px',
+            margin: '20px 0',
+            textAlign: 'center'
+          }}>
+            <h2 style={{ color: '#856404', marginBottom: '10px' }}>
+              🔒 Page de paramétrage verrouillée
+            </h2>
+            <p style={{ color: '#856404', marginBottom: '15px' }}>
+              {lockInfo.message}
+            </p>
+            <p style={{ color: '#856404', fontSize: '14px' }}>
+              Le verrou sera automatiquement libéré dans {lockInfo.expiresIn} ou lorsque 
+              {' '}{lockInfo.lockedBy} quitte la page.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                marginTop: '15px',
+                padding: '10px 20px',
+                backgroundColor: '#a01e1e',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer'
+              }}
+            >
+              🔄 Rafraîchir la page
+            </button>
+          </div>
+        )}
 
-        {/* Onglets */}
-        <div className="settings-tabs">
+        {/* Contenu de la page (désactivé si verrouillé) */}
+        <div style={{ opacity: isLocked ? 0.5 : 1, pointerEvents: isLocked ? 'none' : 'auto' }}>
+          {/* En-tête */}
+          <div className="settings-header">
+            <h1>⚙️ Paramètres du Site</h1>
+            <p className="settings-subtitle">
+              Personnalisez l'apparence et le comportement du site GJ Camp
+            </p>
+            {hasLock && (
+              <p style={{ color: '#28a745', fontSize: '14px', marginTop: '10px' }}>
+                ✅ Vous avez le contrôle de cette page
+              </p>
+            )}
+          </div>
+
+          {/* Onglets */}
+          <div className="settings-tabs">
           <button
             className={`tab-btn ${activeTab === 'colors' ? 'active' : ''}`}
             onClick={() => setActiveTab('colors')}
@@ -2844,6 +2947,8 @@ const SettingsPage = () => {
           </button>
         </div>
       )}
+      </div>
+      {/* Fin du div d'opacité pour verrouillage */}
     </div>
   );
 };

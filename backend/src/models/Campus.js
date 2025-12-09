@@ -11,7 +11,14 @@ const campusSchema = new mongoose.Schema({
     type: String,
     trim: true,
     lowercase: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Email PayPal invalide'],
+    validate: {
+      validator: function(v) {
+        // Permettre vide OU valide email
+        if (!v || v === '') return true;
+        return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v);
+      },
+      message: 'Email PayPal invalide'
+    }
   },
   iban: {
     type: String,

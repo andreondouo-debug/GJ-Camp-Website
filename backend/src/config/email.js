@@ -300,9 +300,246 @@ const sendPasswordResetEmail = async (email, firstName, resetToken) => {
   return info;
 };
 
+// Envoyer un email de confirmation d'inscription au camp (après validation du paiement)
+const sendCampRegistrationConfirmation = async (email, firstName, registration, options = {}) => {
+  let transporter = createTransporter();
+  
+  if (!transporter) {
+    const testAccount = await nodemailer.createTestAccount();
+    transporter = nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass,
+      },
+    });
+  }
+
+  const isCashPayment = registration.paymentMethod === 'cash' || registration.paymentMethod === 'mixed';
+  const hasPendingCash = registration.cashPayments?.some(p => p.status === 'pending');
+  const isPartialPayment = registration.paymentStatus !== 'paid';
+  
+  let paymentStatusText, subjectText, messageIntro, nextSteps;
+
+  // Paiement en espèces en attente
+  if (options.cashPaymentPending) {
+    paymentStatusText = `⏳ En attente de validation (${options.cashAmount}€ en espèces)`;
+    subjectText = '⏳ Inscription en attente - GJ Camp 2026 (Paiement espèces)';
+    messageIntro = `Merci pour votre inscription au <span class="highlight">GJ Camp 2026</span>. Votre paiement de <strong>${options.cashAmount}€ en espèces</strong> est en attente de validation par un responsable.`;
+    nextSteps = `
+      <li>Remettez le montant de <strong>${options.cashAmount}€</strong> à un responsable</li>
+      <li>Le responsable validera votre paiement dans le système</li>
+      <li>Vous recevrez un email de confirmation une fois validé</li>
+      <li>Votre inscription sera alors complète</li>
+    `;
+  }
+  // Paiement en espèces validé
+  else if (options.cashPaymentValidated) {
+    const isComplete = registration.paymentStatus === 'paid';
+    paymentStatusText = isComplete ? '✅ Complet' : `⏳ Partiel (${registration.amountRemaining}€ restants)`;
+    subjectText = isComplete 
+      ? '✅ Paiement validé - GJ Camp 2026' 
+      : '✅ Paiement partiel validé - GJ Camp 2026';
+    messageIntro = `Bonne nouvelle ! Votre paiement de <strong>${options.validatedAmount}€ en espèces</strong> a été validé par un responsable.`;
+    nextSteps = `
+      <li>Votre paiement a été validé, vous pouvez maintenant accéder au planning des activités !</li>
+      ${isComplete 
+        ? '<li>Votre inscription est complète (120€ payés)</li>'
+        : `<li>Vous pouvez compléter le paiement restant de <strong>${registration.amountRemaining}€</strong> à tout moment</li>`
+      }
+      <li>Connectez-vous à votre compte pour voir tous les détails</li>
+    `;
+  }
+  // Paiement partiel classique
+  else if (isPartialPayment) {
+    paymentStatusText = `⏳ Partiel (${registration.amountRemaining}€ restants)`;
+    subjectText = '📝 Inscription enregistrée - GJ Camp 2026 (Paiement partiel)';
+    messageIntro = `Merci pour votre inscription au <span class="highlight">GJ Camp 2026</span>. Votre paiement partiel de <strong>${registration.amountPaid}€</strong> a bien été enregistré.`;
+    nextSteps = `
+      <li>Votre paiement a été validé, vous pouvez maintenant accéder au planning des activités !</li>
+      <li>Vous pouvez compléter le paiement restant de <strong>${registration.amountRemaining}€</strong> à tout moment depuis votre compte</li>
+      <li>Connectez-vous à votre compte pour voir tous les détails</li>
+    `;
+  }
+  // Paiement complet
+  else {
+    paymentStatusText = '✅ Complet';
+    subjectText = '✅ Inscription confirmée - GJ Camp 2026';
+    messageIntro = `Félicitations ! Votre inscription au <span class="highlight">GJ Camp 2026</span> est maintenant <strong>confirmée</strong>.`;
+    nextSteps = `
+      <li>Vous pouvez maintenant accéder au planning des activités et sélectionner vos créneaux</li>
+      <li>Connectez-vous à votre compte pour voir tous les détails</li>
+      <li>Vous recevrez prochainement plus d'informations sur le camp</li>
+    `;
+  }
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER || 'noreply@gjcamp.com',
+    to: email,
+    subject: subjectText,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background-color: #a01e1e; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+            .content { background-color: #f9f9f9; padding: 30px; border: 1px solid #ddd; }
+            .button { display: inline-block; background-color: #a01e1e; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+            .info-box { background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0; }
+            .warning-box { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
+            .footer { text-align: center; padding: 20px; color: #777; font-size: 12px; }
+            .highlight { color: #a01e1e; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>${options.cashPaymentPending ? '⏳ Inscription en attente !' : 
+                    (options.cashPaymentValidated ? '✅ Paiement validé !' :
+                    (isPartialPayment ? '📝 Inscription enregistrée !' : '🎉 Inscription confirmée !'))}</h1>
+            </div>
+            <div class="content">
+              <p>Bonjour <strong>${firstName}</strong>,</p>
+              
+              <p>${messageIntro}</p>
+              
+              ${options.cashPaymentPending || (isPartialPayment && !options.cashPaymentValidated) ? `
+                <div class="warning-box">
+                  <h4>💰 ${options.cashPaymentPending ? 'Paiement en espèces en attente' : 'Paiement partiel'}</h4>
+                  ${options.cashPaymentPending ? `
+                    <p><strong>Montant déclaré :</strong> ${options.cashAmount}€</p>
+                    <p><strong>Statut :</strong> ⏳ En attente de validation</p>
+                    <p><strong>Instructions :</strong></p>
+                    <ol>
+                      <li>Remettez le montant en espèces à un responsable</li>
+                      <li>Le responsable validera votre paiement</li>
+                      <li>Vous recevrez un email de confirmation</li>
+                    </ol>
+                  ` : `
+                    <p><strong>Montant payé :</strong> ${registration.amountPaid}€ / 120€</p>
+                    <p><strong>Reste à payer :</strong> ${registration.amountRemaining}€</p>
+                    <p style="color: #4caf50;"><strong>✅ Vous avez accès au planning des activités dès maintenant !</strong></p>
+                    <p>Vous pouvez compléter le paiement à tout moment depuis votre compte.</p>
+                  `}
+                </div>
+              ` : ''}
+              
+              ${options.cashPaymentValidated ? `
+                <div class="info-box">
+                  <h4>✅ Paiement validé</h4>
+                  <p><strong>Montant validé :</strong> ${options.validatedAmount}€</p>
+                  <p><strong>Total payé :</strong> ${registration.amountPaid}€ / 120€</p>
+                  ${registration.amountRemaining > 0 ? `
+                    <p><strong>Reste à payer :</strong> ${registration.amountRemaining}€</p>
+                  ` : `
+                    <p style="color: #4caf50;"><strong>✅ Votre inscription est maintenant complète !</strong></p>
+                  `}
+                </div>
+              ` : ''}
+              
+              <div class="info-box">
+                <h3>📋 Récapitulatif de votre inscription :</h3>
+                <ul>
+                  <li><strong>Nom :</strong> ${registration.firstName} ${registration.lastName}</li>
+                  <li><strong>Email :</strong> ${registration.email}</li>
+                  <li><strong>Téléphone :</strong> ${registration.phone}</li>
+                  <li><strong>Refuge CRPT :</strong> ${registration.refuge}</li>
+                  <li><strong>Montant payé :</strong> ${registration.amountPaid}€ / 120€</li>
+                  <li><strong>Statut du paiement :</strong> ${paymentStatusText}</li>
+                  ${registration.paymentMethod && registration.paymentMethod !== 'paypal' ? `
+                    <li><strong>Mode de paiement :</strong> ${
+                      registration.paymentMethod === 'cash' ? '💵 Espèces' : 
+                      registration.paymentMethod === 'mixed' ? '💳💵 Mixte (PayPal + Espèces)' : 
+                      '💳 PayPal'
+                    }</li>
+                  ` : ''}
+                </ul>
+              </div>
+              
+              ${registration.hasAllergies ? `
+                <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+                  <h4>⚠️ Allergies signalées :</h4>
+                  <p>${registration.allergyDetails}</p>
+                </div>
+              ` : ''}
+              
+              <p><strong>Prochaines étapes :</strong></p>
+              <ol>
+                ${nextSteps}
+              </ol>
+              
+              <div style="text-align: center;">
+                <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/${
+                  options.cashPaymentPending ? 'profil' : 
+                  (isPartialPayment ? 'profil' : 'activites')
+                }" class="button">
+                  ${options.cashPaymentPending ? 'Voir mon inscription' :
+                    (isPartialPayment ? 'Compléter mon paiement' : 'Voir les activités disponibles')}
+                </a>
+              </div>
+              
+              <p style="margin-top: 30px;">Si vous avez des questions, n'hésitez pas à nous contacter.</p>
+              
+              <p>À très bientôt au GJ Camp 2026 ! 🏕️</p>
+              
+              <p>Cordialement,<br>L'équipe GJ Camp</p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} GJ Camp - Tous droits réservés</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+    text: `
+      Bonjour ${firstName},
+      
+      Félicitations ! Votre inscription au GJ Camp 2026 est maintenant confirmée.
+      
+      RÉCAPITULATIF DE VOTRE INSCRIPTION :
+      - Nom : ${registration.firstName} ${registration.lastName}
+      - Email : ${registration.email}
+      - Téléphone : ${registration.phone}
+      - Refuge CRPT : ${registration.refuge}
+      - Montant payé : ${registration.amountPaid}€ / 120€
+      - Statut du paiement : Complet
+      
+      ${registration.hasAllergies ? `ALLERGIES SIGNALÉES : ${registration.allergyDetails}\n` : ''}
+      
+      PROCHAINES ÉTAPES :
+      1. Vous pouvez maintenant accéder au planning des activités et sélectionner vos créneaux
+      2. Connectez-vous à votre compte pour voir tous les détails
+      3. Vous recevrez prochainement plus d'informations sur le camp
+      
+      Accédez aux activités : ${process.env.FRONTEND_URL || 'http://localhost:3000'}/activites
+      
+      Si vous avez des questions, n'hésitez pas à nous contacter.
+      
+      À très bientôt au GJ Camp 2026 !
+      
+      Cordialement,
+      L'équipe GJ Camp
+    `,
+  };
+
+  const info = await transporter.sendMail(mailOptions);
+  
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('📨 Email de confirmation d\'inscription envoyé');
+    console.log('🔗 Prévisualisation:', nodemailer.getTestMessageUrl(info));
+  }
+  
+  return info;
+};
+
 module.exports = {
   sendVerificationEmail,
   resendVerificationEmail,
   sendPasswordResetRequestEmail,
   sendPasswordResetEmail,
+  sendCampRegistrationConfirmation,
 };

@@ -26,6 +26,36 @@ const carouselSlideSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  subtitle: {
+    type: String,
+    default: ''
+  },
+  highlight: {
+    type: String,
+    default: ''
+  },
+  subtitle2: {
+    type: String,
+    default: ''
+  },
+  highlight2: {
+    type: String,
+    default: ''
+  },
+  date: {
+    type: String,
+    default: ''
+  },
+  textAnimation: {
+    type: String,
+    enum: ['fade-up', 'slide-left', 'zoom-in', 'rotate-in', 'bounce-in'],
+    default: 'fade-up'
+  },
+  imageAnimation: {
+    type: String,
+    enum: ['ken-burns', 'zoom-out', 'slide-right', 'fade-scale'],
+    default: 'ken-burns'
+  },
   order: {
     type: Number,
     default: 0

@@ -16,7 +16,7 @@ const Footer = () => {
         </div>
         <div className="footer-right">
           <nav className="footer-nav">
-            <Link className="footer-link" to="/a-propos">GJ CRPT</Link>
+            <Link className="footer-link" to="/gj-crpt">GJ CRPT</Link>
             <Link className="footer-link" to="/activites">Activités</Link>
             <Link className="footer-link" to="/politique-confidentialite">Confidentialité</Link>
             <Link className="footer-link" to="/conditions-utilisation">CGU</Link>

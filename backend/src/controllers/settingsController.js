@@ -94,7 +94,13 @@ const DEFAULT_SETTINGS = {
   facebookUrl: '',
   youtubeUrl: '',
   twitterUrl: '',
-  linkedinUrl: ''
+  linkedinUrl: '',
+  
+  // Paramètres du carrousel
+  carouselEnabled: true,
+  carouselHeight: '500px',
+  carouselAutoplayInterval: 6000, // 6 secondes par défaut
+  carouselTransitionDuration: 1000, // 1 seconde de transition
 };
 
 /**

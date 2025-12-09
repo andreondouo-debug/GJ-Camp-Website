@@ -14,6 +14,31 @@ router.put('/:id/additional-payment', auth, registrationController.addAdditional
 router.post('/guest', auth, requireVerifiedEmail, registrationController.createGuestRegistration);
 router.get('/mes-invites', auth, registrationController.getUserGuests);
 
+// Routes pour paiement en espèces (routes spécifiques AVANT les routes avec paramètres)
+router.post('/cash', auth, requireVerifiedEmail, registrationController.createCashRegistration);
+router.get(
+	'/cash/stats',
+	auth,
+	requireVerifiedEmail,
+	authorize('responsable', 'admin'),
+	registrationController.getCashPaymentsStats
+);
+router.post('/:registrationId/cash-payment', auth, registrationController.addCashPayment);
+router.patch(
+	'/:registrationId/cash-payment/:paymentId/validate',
+	auth,
+	requireVerifiedEmail,
+	authorize('responsable', 'admin'),
+	registrationController.validateCashPayment
+);
+router.patch(
+	'/:registrationId/cash-payment/:paymentId/reject',
+	auth,
+	requireVerifiedEmail,
+	authorize('responsable', 'admin'),
+	registrationController.rejectCashPayment
+);
+
 // Routes admin pour le suivi des inscriptions
 router.get(
 	'/all',

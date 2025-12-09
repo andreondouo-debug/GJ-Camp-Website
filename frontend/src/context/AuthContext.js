@@ -4,7 +4,10 @@ import axios from 'axios';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(false);
 
@@ -12,6 +15,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setToken(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
   }, []);
 
   const fetchUser = useCallback(async () => {
@@ -20,6 +24,7 @@ export const AuthProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(response.data);
+      localStorage.setItem('user', JSON.stringify(response.data));
     } catch (error) {
       console.error('Erreur lors de la récupération du profil:', error);
       logout();
@@ -47,6 +52,7 @@ export const AuthProvider = ({ children }) => {
       setToken(newToken);
       setUser(newUser);
       localStorage.setItem('token', newToken);
+      localStorage.setItem('user', JSON.stringify(newUser));
       return { success: true };
     } catch (error) {
       // Gérer les erreurs de validation
@@ -68,6 +74,7 @@ export const AuthProvider = ({ children }) => {
       setToken(newToken);
       setUser(newUser);
       localStorage.setItem('token', newToken);
+      localStorage.setItem('user', JSON.stringify(newUser));
       return { success: true };
     } catch (error) {
       // Gérer les erreurs de validation
@@ -90,6 +97,7 @@ export const AuthProvider = ({ children }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setUser(response.data.user);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
       return { success: true };
     } catch (error) {
       return { success: false, error: error.response?.data?.message };

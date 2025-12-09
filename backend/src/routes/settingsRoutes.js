@@ -1,6 +1,6 @@
 /**
  * Routes API pour la gestion des paramètres du site
- * Accessible uniquement aux administrateurs
+ * Accessible uniquement aux administrateurs avec système de verrouillage
  */
 
 const express = require('express');
@@ -8,6 +8,12 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const logoUpload = require('../middleware/logoUpload');
 const settingsController = require('../controllers/settingsController');
+const { 
+  acquireSettingsLock, 
+  releaseSettingsLock, 
+  checkSettingsLockStatus,
+  forceReleaseSettingsLock 
+} = require('../middleware/settingsLock');
 
 // Middleware pour vérifier le rôle admin
 const requireAdmin = (req, res, next) => {
@@ -19,10 +25,16 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
-// Routes protégées (admin uniquement)
+// Routes protégées (admin uniquement avec verrouillage)
 router.get('/', settingsController.getSettings); // Public pour charger le logo
-router.put('/', auth, requireAdmin, settingsController.updateSettings);
-router.post('/reset', auth, requireAdmin, settingsController.resetSettings);
-router.post('/upload-logo', auth, requireAdmin, logoUpload, settingsController.uploadLogo);
+router.get('/lock/status', auth, requireAdmin, checkSettingsLockStatus); // Vérifier état du verrou
+router.post('/lock/acquire', auth, requireAdmin, acquireSettingsLock, (req, res) => {
+  res.json({ message: 'Verrou acquis avec succès', locked: true });
+}); // Acquérir le verrou
+router.post('/lock/release', auth, requireAdmin, releaseSettingsLock); // Libérer le verrou
+router.post('/lock/force-release', auth, requireAdmin, forceReleaseSettingsLock); // Forcer libération (urgence)
+router.put('/', auth, requireAdmin, acquireSettingsLock, settingsController.updateSettings);
+router.post('/reset', auth, requireAdmin, acquireSettingsLock, settingsController.resetSettings);
+router.post('/upload-logo', auth, requireAdmin, acquireSettingsLock, logoUpload, settingsController.uploadLogo);
 
 module.exports = router;

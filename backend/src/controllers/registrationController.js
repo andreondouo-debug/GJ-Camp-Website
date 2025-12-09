@@ -2,6 +2,8 @@ const Registration = require('../models/Registration');
 const User = require('../models/User');
 const TransactionLog = require('../models/TransactionLog');
 const paypalService = require('../services/paypalService');
+const payoutService = require('../services/payoutService');
+const { sendCampRegistrationConfirmation } = require('../config/email');
 
 // Créer une inscription au camp
 exports.createRegistration = async (req, res) => {
@@ -149,6 +151,30 @@ exports.createRegistration = async (req, res) => {
     } catch (logError) {
       console.error('⚠️ Erreur logging transaction:', logError.message);
       // Ne pas bloquer l'inscription si le log échoue
+    }
+
+    // ✅ Envoyer l'email de confirmation (même pour paiement partiel)
+    try {
+      await sendCampRegistrationConfirmation(
+        registration.email,
+        registration.firstName,
+        registration
+      );
+      console.log('✅ Email de confirmation d\'inscription envoyé à:', registration.email);
+    } catch (emailError) {
+      console.error('⚠️ Erreur lors de l\'envoi de l\'email de confirmation:', emailError.message);
+      // Ne pas bloquer l'inscription si l'email échoue
+    }
+
+    // ✅ Créer/mettre à jour le payout pour redistribution (même pour paiements partiels)
+    try {
+      console.log(`🔍 Tentative création payout pour registration._id: ${registration._id}`);
+      const payout = await payoutService.createPayoutForRegistration(registration._id, user._id);
+      console.log('✅ Payout créé/mis à jour automatiquement pour redistribution:', payout);
+    } catch (payoutError) {
+      console.error('⚠️ Erreur lors de la création du payout:', payoutError.message);
+      console.error('Stack:', payoutError.stack);
+      // Ne pas bloquer l'inscription si la création du payout échoue
     }
 
     res.status(201).json({
@@ -335,6 +361,30 @@ exports.addAdditionalPayment = async (req, res) => {
       console.error('⚠️ Erreur logging paiement additionnel:', logError.message);
     }
 
+    // ✅ Envoyer l'email de confirmation (à chaque paiement)
+    try {
+      await sendCampRegistrationConfirmation(
+        registration.email,
+        registration.firstName,
+        registration
+      );
+      console.log('✅ Email de confirmation d\'inscription envoyé à:', registration.email);
+    } catch (emailError) {
+      console.error('⚠️ Erreur lors de l\'envoi de l\'email de confirmation:', emailError.message);
+      // Ne pas bloquer le paiement si l'email échoue
+    }
+
+    // ✅ Créer/mettre à jour le payout pour redistribution (à chaque paiement)
+    try {
+      console.log(`🔍 Tentative création payout pour registration._id: ${registration._id}`);
+      const payout = await payoutService.createPayoutForRegistration(registration._id, req.user.userId);
+      console.log('✅ Payout créé/mis à jour automatiquement pour redistribution:', payout);
+    } catch (payoutError) {
+      console.error('⚠️ Erreur lors de la création du payout:', payoutError.message);
+      console.error('Stack:', payoutError.stack);
+      // Ne pas bloquer le paiement si la création du payout échoue
+    }
+
     res.status(200).json({
       message: '✅ Paiement supplémentaire enregistré avec succès',
       registration
@@ -438,6 +488,30 @@ exports.createGuestRegistration = async (req, res) => {
     await guestRegistration.save();
     console.log('✅ Invité enregistré:', guestRegistration._id);
 
+    // ✅ Envoyer l'email de confirmation (même pour paiement partiel)
+    try {
+      await sendCampRegistrationConfirmation(
+        guestRegistration.email,
+        guestRegistration.firstName,
+        guestRegistration
+      );
+      console.log('✅ Email de confirmation envoyé à l\'invité');
+    } catch (emailError) {
+      console.error('⚠️ Erreur lors de l\'envoi de l\'email de confirmation:', emailError.message);
+      // Ne pas bloquer l'inscription si l'email échoue
+    }
+
+    // ✅ Créer/mettre à jour le payout pour redistribution (même pour paiements partiels)
+    try {
+      console.log(`🔍 Tentative création payout pour invité registration._id: ${guestRegistration._id}`);
+      const payout = await payoutService.createPayoutForRegistration(guestRegistration._id, req.user.userId);
+      console.log('✅ Payout créé/mis à jour automatiquement pour redistribution invité:', payout);
+    } catch (payoutError) {
+      console.error('⚠️ Erreur lors de la création du payout invité:', payoutError.message);
+      console.error('Stack:', payoutError.stack);
+      // Ne pas bloquer l'inscription si la création du payout échoue
+    }
+
     res.status(201).json({
       message: '✅ Invité inscrit au camp avec succès !',
       registration: guestRegistration
@@ -494,5 +568,351 @@ exports.deleteRegistration = async (req, res) => {
   } catch (error) {
     console.error('❌ Erreur lors de la suppression de l\'inscription:', error);
     res.status(500).json({ message: 'Erreur lors de la suppression de l\'inscription' });
+  }
+};
+
+// ========== PAIEMENT EN ESPÈCES ==========
+
+// Créer une inscription avec paiement en espèces
+exports.createCashRegistration = async (req, res) => {
+  try {
+    console.log('🎯 Début createCashRegistration');
+    console.log('📦 Body:', req.body);
+    
+    const {
+      firstName,
+      lastName,
+      email,
+      sex,
+      dateOfBirth,
+      address,
+      phone,
+      refuge,
+      hasAllergies,
+      allergyDetails,
+      amountPaid,
+      isGuest = false
+    } = req.body;
+
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+
+    // Vérifier si l'utilisateur a déjà une inscription (sauf pour invités)
+    if (!isGuest) {
+      const existingRegistration = await Registration.findOne({
+        user: req.user.userId,
+        $or: [
+          { isGuest: false },
+          { isGuest: { $exists: false } }
+        ]
+      });
+
+      if (existingRegistration) {
+        return res.status(400).json({ 
+          message: 'Vous avez déjà une inscription active au camp.' 
+        });
+      }
+    }
+
+    // Validation
+    const validRefuges = ['Lorient', 'Laval', 'Amiens', 'Nantes', 'Autres'];
+    if (!refuge || !validRefuges.includes(refuge)) {
+      return res.status(400).json({ message: 'Veuillez sélectionner un refuge CRPT valide.' });
+    }
+
+    if (!sex || !['M', 'F'].includes(sex)) {
+      return res.status(400).json({ message: 'Veuillez sélectionner un sexe valide (M ou F).' });
+    }
+
+    const paid = parseFloat(amountPaid);
+    if (isNaN(paid) || paid < 20 || paid > 120) {
+      return res.status(400).json({ message: 'Le montant doit être entre 20€ et 120€.' });
+    }
+
+    if (hasAllergies && !allergyDetails) {
+      return res.status(400).json({ message: 'Veuillez préciser vos allergies.' });
+    }
+
+    const totalPrice = 120;
+    const remaining = totalPrice - paid;
+    const status = remaining === 0 ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
+
+    // Créer l'inscription
+    const registration = new Registration({
+      user: user._id,
+      isGuest,
+      registeredBy: isGuest ? req.user.userId : null,
+      firstName: firstName || user.firstName,
+      lastName: lastName || user.lastName,
+      email: email || user.email,
+      sex,
+      dateOfBirth,
+      address,
+      phone,
+      refuge,
+      hasAllergies: !!hasAllergies,
+      allergyDetails: hasAllergies ? allergyDetails : null,
+      totalPrice,
+      amountPaid: 0, // Montant validé = 0 au début
+      amountRemaining: totalPrice,
+      paymentStatus: 'unpaid',
+      paymentMethod: 'cash',
+      cashPayments: [{
+        amount: paid,
+        status: 'pending',
+        submittedAt: new Date()
+      }]
+    });
+
+    await registration.save();
+
+    // Envoyer email de confirmation avec statut "en attente"
+    try {
+      await sendCampRegistrationConfirmation(
+        registration.email,
+        registration.firstName,
+        registration,
+        { cashPaymentPending: true, cashAmount: paid }
+      );
+      console.log('✅ Email confirmation paiement espèces envoyé');
+    } catch (emailError) {
+      console.error('⚠️ Erreur email:', emailError.message);
+    }
+
+    res.status(201).json({
+      message: `✅ Inscription enregistrée ! Votre paiement de ${paid}€ en espèces est en attente de validation par un responsable.`,
+      registration,
+      instructions: {
+        step1: 'Remettez le montant en espèces à un responsable',
+        step2: 'Le responsable validera votre paiement dans le système',
+        step3: 'Vous recevrez un email de confirmation une fois validé',
+        step4: 'Votre inscription sera alors complète et vous pourrez accéder aux activités'
+      }
+    });
+  } catch (error) {
+    console.error('❌ Erreur inscription espèces:', error);
+    console.error('❌ Stack:', error.stack);
+    res.status(500).json({ 
+      message: 'Erreur serveur',
+      error: error.message 
+    });
+  }
+};
+
+// Ajouter un paiement en espèces supplémentaire
+exports.addCashPayment = async (req, res) => {
+  try {
+    const { registrationId } = req.params;
+    const { amount } = req.body;
+
+    const paid = parseFloat(amount);
+    if (isNaN(paid) || paid <= 0) {
+      return res.status(400).json({ message: 'Montant invalide' });
+    }
+
+    const registration = await Registration.findById(registrationId);
+    if (!registration) {
+      return res.status(404).json({ message: 'Inscription non trouvée' });
+    }
+
+    // Vérifier que c'est bien l'inscription de l'utilisateur
+    if (registration.user.toString() !== req.user.userId && 
+        registration.registeredBy?.toString() !== req.user.userId) {
+      return res.status(403).json({ message: 'Non autorisé' });
+    }
+
+    // Ajouter le paiement
+    registration.cashPayments.push({
+      amount: paid,
+      status: 'pending',
+      submittedAt: new Date()
+    });
+
+    if (!registration.paymentMethod || registration.paymentMethod === 'paypal') {
+      registration.paymentMethod = 'mixed';
+    }
+
+    await registration.save();
+
+    res.status(200).json({
+      message: `✅ Paiement de ${paid}€ en espèces ajouté. En attente de validation.`,
+      registration
+    });
+  } catch (error) {
+    console.error('❌ Erreur ajout paiement espèces:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+// Valider un paiement en espèces (responsable/admin)
+exports.validateCashPayment = async (req, res) => {
+  try {
+    const { registrationId, paymentId } = req.params;
+    const { amount, note } = req.body;
+
+    const registration = await Registration.findById(registrationId);
+    if (!registration) {
+      return res.status(404).json({ message: 'Inscription non trouvée' });
+    }
+
+    const payment = registration.cashPayments.id(paymentId);
+    if (!payment) {
+      return res.status(404).json({ message: 'Paiement non trouvé' });
+    }
+
+    if (payment.status !== 'pending') {
+      return res.status(400).json({ message: 'Ce paiement a déjà été traité' });
+    }
+
+    // Valider le paiement
+    payment.status = 'validated';
+    payment.validatedBy = req.user.userId;
+    payment.validatedAt = new Date();
+    payment.note = note || '';
+    
+    // Si le montant est modifié par le responsable
+    if (amount && parseFloat(amount) !== payment.amount) {
+      payment.amount = parseFloat(amount);
+    }
+
+    // Mettre à jour le montant total payé
+    const totalCashValidated = registration.cashPayments
+      .filter(p => p.status === 'validated')
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    const totalPayPal = registration.paymentDetails?.amountPaid || 0;
+    const newTotalPaid = totalCashValidated + totalPayPal;
+    
+    registration.amountPaid = newTotalPaid;
+    registration.amountRemaining = registration.totalPrice - newTotalPaid;
+    registration.paymentStatus = registration.amountRemaining === 0 ? 'paid' : 
+                                  (newTotalPaid > 0 ? 'partial' : 'unpaid');
+
+    await registration.save();
+
+    // Créer/mettre à jour le payout pour redistribution
+    try {
+      const payout = await payoutService.createPayoutForRegistration(registrationId, req.user.userId);
+      console.log('✅ Payout mis à jour après validation espèces:', payout);
+    } catch (payoutError) {
+      console.error('⚠️ Erreur payout:', payoutError.message);
+    }
+
+    // Envoyer email de confirmation
+    try {
+      await sendCampRegistrationConfirmation(
+        registration.email,
+        registration.firstName,
+        registration,
+        { cashPaymentValidated: true, validatedAmount: payment.amount }
+      );
+    } catch (emailError) {
+      console.error('⚠️ Erreur email:', emailError.message);
+    }
+
+    res.status(200).json({
+      message: `✅ Paiement de ${payment.amount}€ validé avec succès`,
+      registration
+    });
+  } catch (error) {
+    console.error('❌ Erreur validation paiement:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+// Rejeter un paiement en espèces (responsable/admin)
+exports.rejectCashPayment = async (req, res) => {
+  try {
+    const { registrationId, paymentId } = req.params;
+    const { reason } = req.body;
+
+    const registration = await Registration.findById(registrationId);
+    if (!registration) {
+      return res.status(404).json({ message: 'Inscription non trouvée' });
+    }
+
+    const payment = registration.cashPayments.id(paymentId);
+    if (!payment) {
+      return res.status(404).json({ message: 'Paiement non trouvé' });
+    }
+
+    if (payment.status !== 'pending') {
+      return res.status(400).json({ message: 'Ce paiement a déjà été traité' });
+    }
+
+    payment.status = 'rejected';
+    payment.validatedBy = req.user.userId;
+    payment.validatedAt = new Date();
+    payment.rejectionReason = reason || 'Non spécifié';
+
+    await registration.save();
+
+    res.status(200).json({
+      message: '❌ Paiement rejeté',
+      registration
+    });
+  } catch (error) {
+    console.error('❌ Erreur rejet paiement:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+// Obtenir les statistiques des paiements espèces (admin/responsable)
+exports.getCashPaymentsStats = async (req, res) => {
+  try {
+    const registrations = await Registration.find({
+      $or: [
+        { paymentMethod: 'cash' },
+        { paymentMethod: 'mixed' }
+      ]
+    }).populate('user', 'firstName lastName email');
+
+    const stats = {
+      totalCashRegistrations: 0,
+      pendingPayments: [],
+      validatedPayments: [],
+      rejectedPayments: [],
+      totalPending: 0,
+      totalValidated: 0,
+      totalRejected: 0
+    };
+
+    registrations.forEach(reg => {
+      reg.cashPayments.forEach(payment => {
+        const paymentInfo = {
+          registrationId: reg._id,
+          paymentId: payment._id,
+          userName: `${reg.firstName} ${reg.lastName}`,
+          userEmail: reg.email,
+          refuge: reg.refuge,
+          amount: payment.amount,
+          submittedAt: payment.submittedAt,
+          validatedAt: payment.validatedAt,
+          note: payment.note
+        };
+
+        if (payment.status === 'pending') {
+          stats.pendingPayments.push(paymentInfo);
+          stats.totalPending += payment.amount;
+        } else if (payment.status === 'validated') {
+          stats.validatedPayments.push(paymentInfo);
+          stats.totalValidated += payment.amount;
+        } else if (payment.status === 'rejected') {
+          stats.rejectedPayments.push(paymentInfo);
+          stats.totalRejected += payment.amount;
+        }
+      });
+
+      if (reg.cashPayments.length > 0) {
+        stats.totalCashRegistrations++;
+      }
+    });
+
+    res.status(200).json(stats);
+  } catch (error) {
+    console.error('❌ Erreur stats espèces:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };

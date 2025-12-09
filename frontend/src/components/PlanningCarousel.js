@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { getApiUrl } from '../config/api';
 import './PlanningCarousel.css';
 
 /**
@@ -7,7 +8,7 @@ import './PlanningCarousel.css';
  * - Affiche les créneaux à choix multiples avec validation obligatoire
  * - Affiche images, titres, descriptions
  */
-function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day, onFinish }) {
+function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day, onFinish, hasRegistration = true }) {
   // Trier les activités par heure de début
   const sorted = [...activities].sort((a, b) => {
     const toMinutes = h => {
@@ -93,12 +94,13 @@ function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day
         {group.acts.map(act => (
           <div
             key={act._id}
-            className={`planning-activity-card${choix[group.key] === act._id ? ' selected' : ''}`}
-            onClick={() => group.acts.length > 1 && handleChoix(group.key, act._id)}
+            className={`planning-activity-card${choix[group.key] === act._id ? ' selected' : ''}${!hasRegistration && group.acts.length > 1 ? ' disabled' : ''}`}
+            onClick={() => hasRegistration && group.acts.length > 1 && handleChoix(group.key, act._id)}
+            style={!hasRegistration && group.acts.length > 1 ? { cursor: 'not-allowed', opacity: 0.7 } : {}}
           >
             {act.image && (
               <div className="planning-activity-image">
-                <img src={`http://localhost:5000${act.image}`} alt={act.titre} />
+                <img src={getApiUrl(act.image)} alt={act.titre} />
               </div>
             )}
             <div className="planning-activity-content">
@@ -106,7 +108,7 @@ function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day
               <p>{act.description}</p>
               {act.fichierPdf && (
                 <a
-                  href={`http://localhost:5000${act.fichierPdf}`}
+                  href={getApiUrl(act.fichierPdf)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="planning-pdf-link"
@@ -122,7 +124,8 @@ function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day
                   type="radio"
                   name={`creneau-${group.key}`}
                   checked={choix[group.key] === act._id}
-                  onChange={() => handleChoix(group.key, act._id)}
+                  onChange={() => hasRegistration && handleChoix(group.key, act._id)}
+                  disabled={!hasRegistration}
                 />
               </div>
             )}
@@ -131,7 +134,7 @@ function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day
         ))}
       </div>
       {/* Si on est prêt à enregistrer (après validation du dernier créneau) */}
-      {readyToSave ? (
+      {readyToSave && hasRegistration ? (
         <button
           className="planning-btn-valider"
           onClick={handleEnregistrer}
@@ -140,8 +143,8 @@ function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day
         </button>
       ) : (
         <>
-          {/* Si créneau à choix multiples : bouton valider */}
-          {group.acts.length > 1 && (
+          {/* Si créneau à choix multiples : bouton valider (seulement si inscrit) */}
+          {group.acts.length > 1 && hasRegistration && (
             <button
               className="planning-btn-valider"
               onClick={handleValider}
@@ -150,13 +153,22 @@ function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day
               Valider ce choix
             </button>
           )}
-          {/* Si activité obligatoire ou unique : bouton suivant ou valider (dernier créneau) */}
+          {/* Si créneau à choix multiples MAIS non inscrit : bouton suivant */}
+          {group.acts.length > 1 && !hasRegistration && (
+            <button
+              className="planning-btn-valider"
+              onClick={handleSuivant}
+            >
+              {currentIdx === creneaux.length - 1 ? 'Terminer' : 'Suivant'}
+            </button>
+          )}
+          {/* Si activité obligatoire ou unique : bouton suivant */}
           {group.acts.length === 1 && (
             <button
               className="planning-btn-valider"
               onClick={handleSuivant}
             >
-              {currentIdx === creneaux.length - 1 ? 'Valider' : 'Suivant'}
+              {currentIdx === creneaux.length - 1 ? 'Terminer' : 'Suivant'}
             </button>
           )}
         </>

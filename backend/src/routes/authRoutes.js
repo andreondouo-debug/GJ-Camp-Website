@@ -2,6 +2,7 @@ const express = require('express');
 const { body } = require('express-validator');
 const authController = require('../controllers/authController');
 const auth = require('../middleware/auth');
+const requireCampRegistration = require('../middleware/requireCampRegistration');
 const upload = require('../middleware/upload');
 
 const router = express.Router();
@@ -34,9 +35,9 @@ router.post('/reset-password/:token', authController.resetPassword);
 router.get('/me', auth, authController.getMe);
 router.put('/profile', auth, authController.updateProfile);
 router.post('/upload-photo', auth, upload.single('profilePhoto'), authController.uploadPhoto);
-router.patch('/update-selected-activities', auth, authController.updateSelectedActivities);
-// Enregistrer les choix d'activités par créneau
-router.patch('/update-selected-creneaux', auth, authController.updateSelectedCreneaux);
+router.patch('/update-selected-activities', auth, requireCampRegistration, authController.updateSelectedActivities);
+// Enregistrer les choix d'activités par créneau (nécessite inscription validée)
+router.patch('/update-selected-creneaux', auth, requireCampRegistration, authController.updateSelectedCreneaux);
 
 // Routes RGPD
 router.get('/my-data', auth, authController.downloadMyData);

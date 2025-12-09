@@ -34,7 +34,24 @@ exports.getSlides = async (req, res) => {
  */
 exports.addSlide = async (req, res) => {
   try {
-    const { title, description, description2, description3, order, imageSize, page, overlayOpacity, contentPosition } = req.body;
+    const { 
+      title, 
+      subtitle,
+      highlight,
+      subtitle2,
+      highlight2,
+      description, 
+      description2, 
+      description3,
+      date,
+      textAnimation,
+      imageAnimation,
+      order, 
+      imageSize, 
+      page, 
+      overlayOpacity, 
+      contentPosition 
+    } = req.body;
     
     if (!req.file) {
       return res.status(400).json({ 
@@ -45,9 +62,16 @@ exports.addSlide = async (req, res) => {
     const slide = new CarouselSlide({
       image: req.file.filename,
       title: title || '',
+      subtitle: subtitle || '',
+      highlight: highlight || '',
+      subtitle2: subtitle2 || '',
+      highlight2: highlight2 || '',
       description: description || '',
       description2: description2 || '',
       description3: description3 || '',
+      date: date || '',
+      textAnimation: textAnimation || 'fade-up',
+      imageAnimation: imageAnimation || 'ken-burns',
       order: order || 0,
       imageSize: imageSize || 'cover',
       page: page || 'home',
@@ -113,7 +137,24 @@ exports.updateSlideOrder = async (req, res) => {
 exports.updateSlide = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, description2, description3, order, imageSize, page, overlayOpacity, contentPosition } = req.body;
+    const { 
+      title, 
+      subtitle,
+      highlight,
+      subtitle2,
+      highlight2,
+      description, 
+      description2, 
+      description3,
+      date,
+      textAnimation,
+      imageAnimation,
+      order, 
+      imageSize, 
+      page, 
+      overlayOpacity, 
+      contentPosition 
+    } = req.body;
     
     const slide = await CarouselSlide.findById(id);
     
@@ -125,9 +166,16 @@ exports.updateSlide = async (req, res) => {
     
     // Mettre à jour les champs textuels
     if (title !== undefined) slide.title = title;
+    if (subtitle !== undefined) slide.subtitle = subtitle;
+    if (highlight !== undefined) slide.highlight = highlight;
+    if (subtitle2 !== undefined) slide.subtitle2 = subtitle2;
+    if (highlight2 !== undefined) slide.highlight2 = highlight2;
     if (description !== undefined) slide.description = description;
     if (description2 !== undefined) slide.description2 = description2;
     if (description3 !== undefined) slide.description3 = description3;
+    if (date !== undefined) slide.date = date;
+    if (textAnimation !== undefined) slide.textAnimation = textAnimation;
+    if (imageAnimation !== undefined) slide.imageAnimation = imageAnimation;
     if (order !== undefined) slide.order = parseInt(order);
     if (imageSize !== undefined) slide.imageSize = imageSize;
     if (page !== undefined) slide.page = page;

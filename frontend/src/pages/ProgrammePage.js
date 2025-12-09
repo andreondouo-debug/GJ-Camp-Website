@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import { getApiUrl } from '../config/api';
 import '../styles/ProgrammePage.css';
 
 
@@ -10,6 +11,42 @@ function ProgrammePage() {
   const [selectedCreneaux, setSelectedCreneaux] = useState(user?.selectedCreneaux || {});
   const joursDisponibles = Array.from(new Set(activities.map(act => act.jour))).sort((a, b) => a - b);
   const [selectedDay, setSelectedDay] = useState(joursDisponibles[0] || 1);
+  const [hasRegistration, setHasRegistration] = useState(false);
+  const [checkingRegistration, setCheckingRegistration] = useState(true);
+
+  // Vérifier si l'utilisateur a une inscription validée
+  useEffect(() => {
+    const checkRegistration = async () => {
+      if (!token) {
+        setCheckingRegistration(false);
+        setHasRegistration(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get('/api/registration/mes-inscriptions', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        // Vérifier si l'utilisateur a au moins une inscription
+        if (response.data?.registrations && response.data.registrations.length > 0) {
+          // Prendre la première inscription (la plus récente)
+          const registration = response.data.registrations[0];
+          // Autoriser l'accès même avec paiement partiel
+          setHasRegistration(true);
+        } else {
+          setHasRegistration(false);
+        }
+      } catch (err) {
+        console.log('Aucune inscription trouvée ou non validée');
+        setHasRegistration(false);
+      } finally {
+        setCheckingRegistration(false);
+      }
+    };
+
+    checkRegistration();
+  }, [token]);
 
   // Mettre à jour selectedCreneaux quand user change
   useEffect(() => {
@@ -73,6 +110,53 @@ function ProgrammePage() {
     return toMinutes(a.heureDebut) - toMinutes(b.heureDebut);
   });
 
+  if (checkingRegistration) {
+    return (
+      <div className="programme-page-container">
+        <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+          ⏳ Vérification de votre inscription...
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasRegistration) {
+    return (
+      <div className="programme-page-container">
+        <div style={{
+          backgroundColor: '#fff3cd',
+          border: '2px solid #ffc107',
+          borderRadius: '12px',
+          padding: '30px',
+          maxWidth: '600px',
+          margin: '80px auto',
+          textAlign: 'center'
+        }}>
+          <h2 style={{ color: '#856404', marginBottom: '20px' }}>🔒 Accès restreint</h2>
+          <p style={{ color: '#856404', fontSize: '16px', marginBottom: '20px' }}>
+            Vous devez être inscrit au camp avec un paiement validé pour accéder à votre programme personnalisé.
+          </p>
+          <a
+            href="/inscription"
+            style={{
+              display: 'inline-block',
+              backgroundColor: '#a01e1e',
+              color: 'white',
+              padding: '12px 30px',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              textDecoration: 'none',
+              marginTop: '10px'
+            }}
+          >
+            S'inscrire au camp
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="programme-page-container">
       <h2 className="programme-title">Mon programme personnalisé</h2>
@@ -110,7 +194,7 @@ function ProgrammePage() {
                   <p className="timeline-desc">{activity.description}</p>
                   {activity.fichierPdf && (
                     <a
-                      href={`http://localhost:5000${activity.fichierPdf}`}
+                      href={getApiUrl(activity.fichierPdf)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="timeline-pdf-link"

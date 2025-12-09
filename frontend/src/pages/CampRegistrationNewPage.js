@@ -22,7 +22,8 @@ const CampRegistrationNewPage = () => {
     refuge: '',
     hasAllergies: false,
     allergyDetails: '',
-    amountPaid: 20
+    amountPaid: 20,
+    paymentMethod: 'paypal' // 'paypal' ou 'cash'
   });
   
   const [loading, setLoading] = useState(false);
@@ -100,7 +101,23 @@ const CampRegistrationNewPage = () => {
         return;
       }
 
-      // Afficher le bouton PayPal
+      // Si paiement en espèces, enregistrer directement
+      if (form.paymentMethod === 'cash') {
+        const response = await axios.post('/api/registration/cash', form, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        setMessage('✅ Inscription enregistrée ! Votre paiement en espèces est en attente de validation par un responsable.');
+        
+        setTimeout(() => {
+          navigate('/tableau-de-bord');
+        }, 3000);
+        
+        setLoading(false);
+        return;
+      }
+
+      // Si paiement PayPal, afficher le bouton
       setFormValidated(true);
       setShowPayPal(true);
       setMessage('✅ Formulaire validé ! Procédez au paiement via PayPal ci-dessous.');
@@ -418,6 +435,63 @@ const CampRegistrationNewPage = () => {
               <p className="new-payment-note">Vous pouvez payer en plusieurs fois</p>
             </div>
 
+            {/* Choix du mode de paiement */}
+            <div className="new-input-group">
+              <label>Mode de paiement</label>
+              <div className="new-payment-method-options">
+                <label className="new-payment-method-option">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="paypal"
+                    checked={form.paymentMethod === 'paypal'}
+                    onChange={handleChange}
+                  />
+                  <div className="method-content">
+                    <span className="method-icon">💳</span>
+                    <div>
+                      <strong>PayPal</strong>
+                      <small>Paiement en ligne sécurisé</small>
+                    </div>
+                  </div>
+                </label>
+                
+                <label className="new-payment-method-option">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="cash"
+                    checked={form.paymentMethod === 'cash'}
+                    onChange={handleChange}
+                  />
+                  <div className="method-content">
+                    <span className="method-icon">💵</span>
+                    <div>
+                      <strong>Espèces</strong>
+                      <small>Paiement à remettre à un responsable</small>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {form.paymentMethod === 'cash' && (
+              <div className="new-cash-instructions">
+                <h4>📌 Instructions pour le paiement en espèces :</h4>
+                <ol>
+                  <li>Indiquez le montant que vous allez remettre ci-dessous</li>
+                  <li>Validez le formulaire pour enregistrer votre inscription</li>
+                  <li>Remettez le montant en espèces à un responsable</li>
+                  <li>Le responsable validera votre paiement dans le système</li>
+                  <li>Vous recevrez un email de confirmation et pourrez accéder aux activités</li>
+                </ol>
+                <p className="new-cash-note">
+                  ⚠️ <strong>Important :</strong> Votre inscription sera enregistrée mais en attente de validation 
+                  jusqu'à ce qu'un responsable confirme la réception du paiement.
+                </p>
+              </div>
+            )}
+
             <div className="new-input-group">
               <label>Montant à payer maintenant</label>
               <div className="new-payment-options">
@@ -467,10 +541,13 @@ const CampRegistrationNewPage = () => {
           </div>
 
           <button type="submit" className="new-btn-submit" disabled={loading || showPayPal}>
-            {loading ? '⏳ Inscription en cours...' : showPayPal ? '✅ Formulaire validé' : '✅ Valider mon inscription'}
+            {loading ? '⏳ Inscription en cours...' : 
+             showPayPal ? '✅ Formulaire validé' : 
+             form.paymentMethod === 'cash' ? '✅ Enregistrer mon inscription' :
+             '✅ Valider mon inscription'}
           </button>
 
-          {showPayPal && (
+          {showPayPal && form.paymentMethod === 'paypal' && (
             <div className="paypal-section">
               <h3>💳 Paiement sécurisé via PayPal</h3>
               <p className="paypal-info">Montant à régler : <strong>{form.amountPaid}€</strong></p>

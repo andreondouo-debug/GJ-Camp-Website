@@ -19,9 +19,37 @@ class PayoutService {
         throw new Error('Inscription introuvable');
       }
 
-      if (registration.paymentStatus !== 'paid') {
-        throw new Error('Le paiement n\'est pas complet');
+      // Récupérer les infos du campus
+      let campus = await Campus.findOne({ name: registration.refuge, isActive: true });
+
+      // ✅ Si le campus n'existe pas, le créer automatiquement
+      if (!campus) {
+        console.log(`📝 Création automatique du campus: ${registration.refuge}`);
+        campus = await Campus.create({
+          name: registration.refuge,
+          paypalEmail: '', // À configurer manuellement plus tard
+          iban: '',
+          redistributionPercentage: 100,
+          isActive: true,
+          contactPerson: {
+            name: '',
+            email: '',
+            phone: ''
+          },
+          notes: 'Campus créé automatiquement lors d\'une inscription'
+        });
       }
+
+      // Vérifier si l'email PayPal est configuré
+      if (!campus.paypalEmail) {
+        console.warn(`⚠️ Email PayPal non configuré pour le campus ${registration.refuge}`);
+        // Ne pas bloquer, créer quand même le payout en attente de configuration
+      }
+
+      // Calculer le montant à redistribuer
+      const originalAmount = registration.amountPaid || 0;
+      const percentage = campus.redistributionPercentage || 100;
+      const amountToSend = (originalAmount * percentage) / 100;
 
       // Vérifier si un payout existe déjà
       const existingPayout = await Payout.findOne({ 
@@ -30,42 +58,37 @@ class PayoutService {
       });
 
       if (existingPayout) {
-        throw new Error('Un payout existe déjà pour cette inscription');
+        // ✅ Mettre à jour le payout existant avec le nouveau montant
+        existingPayout.amount = amountToSend;
+        existingPayout.originalAmount = originalAmount;
+        existingPayout.redistributionPercentage = percentage;
+        existingPayout.recipientEmail = campus.paypalEmail || '';
+        existingPayout.note = `Redistribution pour inscription de ${registration.firstName} ${registration.lastName} (mis à jour: ${originalAmount}€/${registration.totalPrice}€)`;
+        existingPayout.updatedAt = new Date();
+        
+        await existingPayout.save();
+        
+        console.log(`🔄 Payout mis à jour: ${amountToSend}€ pour ${campus.name} (${originalAmount}€ payés)`);
+        return existingPayout;
       }
 
-      // Récupérer les infos du campus
-      const campus = await Campus.findOne({ name: registration.refuge, isActive: true });
-
-      if (!campus || !campus.paypalEmail) {
-        throw new Error(`Aucun email PayPal configuré pour le campus ${registration.refuge}`);
-      }
-
-      // Calculer le montant à redistribuer
-      const originalAmount = registration.amountPaid || 0;
-      const percentage = campus.redistributionPercentage || 100;
-      const amountToSend = (originalAmount * percentage) / 100;
-
-      if (amountToSend < 0.01) {
-        throw new Error('Le montant est trop faible pour être redistribué');
-      }
-
-      // Créer l'enregistrement du payout
+      // Créer l'enregistrement du payout (même si montant faible ou email manquant)
       const payout = new Payout({
         registration: registrationId,
         campus: registration.refuge,
         amount: amountToSend,
         originalAmount: originalAmount,
         redistributionPercentage: percentage,
-        recipientEmail: campus.paypalEmail,
+        recipientEmail: campus.paypalEmail || '',
         recipientType: 'paypal',
         status: 'pending',
         processedBy: processedBy,
-        note: `Redistribution pour inscription de ${registration.firstName} ${registration.lastName}`,
+        note: `Redistribution pour inscription de ${registration.firstName} ${registration.lastName} (${originalAmount}€/${registration.totalPrice}€)`,
       });
 
       await payout.save();
 
-      console.log(`✅ Payout créé: ${amountToSend}€ pour ${campus.name} (${campus.paypalEmail})`);
+      console.log(`✅ Payout créé: ${amountToSend}€ pour ${campus.name} (${originalAmount}€ payés)`);
       return payout;
     } catch (error) {
       console.error('❌ Erreur création payout:', error);

@@ -14,7 +14,7 @@ const payoutSchema = new mongoose.Schema({
   amount: {
     type: Number,
     required: [true, 'Le montant est obligatoire'],
-    min: [0.01, 'Le montant doit être supérieur à 0'],
+    min: [0, 'Le montant doit être supérieur ou égal à 0'],
   },
   originalAmount: {
     type: Number,
@@ -27,9 +27,9 @@ const payoutSchema = new mongoose.Schema({
   },
   recipientEmail: {
     type: String,
-    required: [true, 'L\'email du bénéficiaire est obligatoire'],
     trim: true,
     lowercase: true,
+    default: '',
   },
   recipientType: {
     type: String,

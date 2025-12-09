@@ -70,8 +70,9 @@ const registrationSchema = new mongoose.Schema({
   amountPaid: {
     type: Number,
     required: [true, 'Le montant payé est obligatoire'],
-    min: [20, 'Le montant minimum est de 20 euros'],
-    max: [120, 'Le montant ne peut pas dépasser 120 euros']
+    min: [0, 'Le montant ne peut pas être négatif'],
+    max: [120, 'Le montant ne peut pas dépasser 120 euros'],
+    default: 0
   },
   amountRemaining: {
     type: Number,
@@ -82,6 +83,33 @@ const registrationSchema = new mongoose.Schema({
     enum: ['unpaid', 'partial', 'paid'],
     default: 'unpaid'
   },
+  paymentMethod: {
+    type: String,
+    enum: ['paypal', 'cash', 'mixed'],
+    default: 'paypal'
+  },
+  cashPayments: [{
+    amount: {
+      type: Number,
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'validated', 'rejected'],
+      default: 'pending'
+    },
+    submittedAt: {
+      type: Date,
+      default: Date.now
+    },
+    validatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    validatedAt: Date,
+    note: String,
+    rejectionReason: String
+  }],
   paymentDetails: {
     orderId: String,
     payerId: String,

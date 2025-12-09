@@ -16,6 +16,35 @@ function ActivitiesPage() {
   const [selectedDay, setSelectedDay] = useState(1);
   // showCarousel dynamique selon le jour sélectionné et les choix enregistrés
   const [showCarousel, setShowCarousel] = useState(true);
+  const [hasRegistration, setHasRegistration] = useState(false);
+
+  // Vérifier si l'utilisateur a une inscription validée (pour activer la sélection)
+  useEffect(() => {
+    const checkRegistration = async () => {
+      if (!token) {
+        setHasRegistration(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get('/api/registration/my-registration', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        // Vérifier si l'inscription a un paiement complet (paid = 120€)
+        if (response.data && response.data.paymentStatus === 'paid') {
+          setHasRegistration(true);
+        } else {
+          setHasRegistration(false);
+        }
+      } catch (err) {
+        console.log('Aucune inscription trouvée ou non validée');
+        setHasRegistration(false);
+      }
+    };
+
+    checkRegistration();
+  }, [token]);
 
   useEffect(() => {
     // Vérifie s'il y a des choix enregistrés pour le jour sélectionné
@@ -139,6 +168,9 @@ function ActivitiesPage() {
     count: getActivitiesByDay(day).length
   }));
 
+  // Message d'information pour les non-inscrits (sans bloquer l'accès)
+  const showInfoMessage = !hasRegistration && token;
+
   if (loading && activities.length === 0) {
     return (
       <div className="activities-page">
@@ -151,6 +183,24 @@ function ActivitiesPage() {
     <div className="activities-page">
       {/* Carrousel dynamique pour la page Activités */}
       <DynamicCarousel page="activities" height={350} />
+
+      {/* Message d'information pour les non-inscrits */}
+      {showInfoMessage && (
+        <div style={{
+          backgroundColor: '#e7f3ff',
+          border: '2px solid #2196F3',
+          borderRadius: '12px',
+          padding: '20px',
+          maxWidth: '800px',
+          margin: '20px auto',
+          textAlign: 'center'
+        }}>
+          <p style={{ color: '#0d47a1', fontSize: '15px', margin: 0 }}>
+            ℹ️ Vous pouvez consulter les activités, mais pour faire vos sélections, 
+            veuillez vous <a href="/inscription" style={{ color: '#a01e1e', fontWeight: 'bold' }}>inscrire au camp</a>.
+          </p>
+        </div>
+      )}
 
       <div className="activities-hero">
         <h1>
@@ -196,6 +246,7 @@ function ActivitiesPage() {
           selectedCreneaux={selectedCreneaux}
           onValidateCreneau={(creneauKey, actId) => setSelectedCreneaux(prev => ({ ...prev, [creneauKey]: actId }))}
           day={selectedDay}
+          hasRegistration={hasRegistration}
           onFinish={async (choix) => {
             setSelectedCreneaux(choix);
             setShowCarousel(false);
