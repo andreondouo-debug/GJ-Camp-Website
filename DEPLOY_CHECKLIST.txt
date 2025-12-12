@@ -1,0 +1,75 @@
+# CHECKLIST DEPLOIEMENT RENDER
+
+## ETAPE 1 : MongoDB Atlas
+- [x] Compte MongoDB Atlas existe deja
+- [ ] Network Access > Add IP Address > 0.0.0.0/0
+- [ ] Confirmer l'ajout
+
+## ETAPE 2 : Compte Render
+- [ ] Aller sur https://render.com
+- [ ] Sign up with GitHub
+- [ ] Autoriser acces repos
+
+## ETAPE 3 : Deployer Backend
+- [ ] Dashboard > New + > Web Service
+- [ ] Connecter repo : GJ-Camp-Website
+- [ ] Configuration :
+  - Name: gj-camp-backend
+  - Region: Frankfurt
+  - Branch: main
+  - Root Directory: backend
+  - Runtime: Node
+  - Build Command: npm install
+  - Start Command: node src/server.js
+  - Instance Type: Free
+- [ ] Environment Variables : Copier depuis render-backend-env.txt
+- [ ] Create Web Service
+- [ ] Attendre build (~5 minutes)
+- [ ] Tester : https://gj-camp-backend.onrender.com/api/health
+
+## ETAPE 4 : Deployer Frontend
+- [ ] Dashboard > New + > Static Site
+- [ ] Repo : GJ-Camp-Website
+- [ ] Configuration :
+  - Name: gj-camp-frontend
+  - Branch: main
+  - Root Directory: frontend
+  - Build Command: npm install && npm run build
+  - Publish Directory: build
+- [ ] Environment Variables : Copier depuis render-frontend-env.txt
+- [ ] Create Static Site
+- [ ] Attendre build (~3 minutes)
+- [ ] Tester : https://gj-camp-frontend.onrender.com
+
+## ETAPE 5 : Mise a jour CORS
+- [ ] Retourner Backend > Environment
+- [ ] Modifier FRONTEND_URL avec URL reelle du frontend
+- [ ] Sauvegarder (redeploy auto)
+
+## ETAPE 6 : Verification finale
+- [ ] Backend health check OK
+- [ ] Frontend page accueil OK
+- [ ] Login avec compte existant
+- [ ] Toutes les donnees presentes
+
+## NOTES IMPORTANTES
+
+### URLs attendues :
+- Backend : https://gj-camp-backend.onrender.com
+- Frontend : https://gj-camp-frontend.onrender.com
+
+### Temps de build :
+- Backend : ~5 minutes (premiere fois)
+- Frontend : ~3 minutes (premiere fois)
+- Redeploiement : ~2 minutes
+
+### Limitations Free :
+- Backend s'arrete apres 15 min inactivite
+- Redemarrage ~30 secondes
+- Parfait pour test et demo
+
+### Redéploiement automatique :
+Tout push Git sur main = redeploy auto
+
+### Domaine personnalise (plus tard) :
+Frontend > Settings > Custom Domain > Ajouter domaine

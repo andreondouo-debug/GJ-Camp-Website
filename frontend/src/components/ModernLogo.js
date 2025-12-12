@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getApiUrl } from '../config/api';
 import '../styles/ModernLogo.css';
 
 const ModernLogo = ({ variant = 1, size = 'medium' }) => {
@@ -25,7 +26,9 @@ const ModernLogo = ({ variant = 1, size = 'medium' }) => {
       try {
         const response = await axios.get('/api/settings');
         if (response.data.success && response.data.settings.logoUrl) {
-          setCustomLogo(response.data.settings.logoUrl);
+          // Utiliser getApiUrl pour les uploads
+          const logoUrl = getApiUrl(response.data.settings.logoUrl);
+          setCustomLogo(logoUrl);
           setLogoSize({
             width: response.data.settings.logoWidth || '120px',
             height: response.data.settings.logoHeight || 'auto'
@@ -44,7 +47,7 @@ const ModernLogo = ({ variant = 1, size = 'medium' }) => {
           });
         }
       } catch (error) {
-        console.log('⚠️ Logo personnalisé non disponible, utilisation du logo par défaut');
+        // Silencieux - utilise le logo SVG par défaut
       }
     };
     fetchLogo();

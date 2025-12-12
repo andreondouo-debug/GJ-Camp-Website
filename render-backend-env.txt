@@ -1,0 +1,21 @@
+# VARIABLES ENVIRONNEMENT RENDER - BACKEND
+
+## A copier dans Render.com > Backend > Environment
+
+NODE_ENV=production
+PORT=10000
+MONGODB_URI=mongodb+srv://GJ-Camp_Website:JeunesseCrptGj@cluster0.juxp1sw.mongodb.net/gj-camp?retryWrites=true&w=majority
+JWT_SECRET=4a2ec1fef92c89656214efb594e10e7bb4b0ae307993a3ea75db5b0c682c7b41153664026fcebe5ee7027ba8cc9617b95518b21466222b9f84c87131ba66bea7
+FRONTEND_URL=https://gj-camp-frontend.onrender.com
+EMAIL_SERVICE=gmail
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_SECURE=false
+EMAIL_USER=gjcontactgj0@gmail.com
+EMAIL_PASSWORD=eofu vfga tjxe xibi
+EMAIL_FROM=gjcontactgj0@gmail.com
+PAYPAL_CLIENT_ID=AdT-LwZtwJCWWY-mQxdypz0Ael6KiDY4Puw2QOrgppkh7379iy-cpwsC1a4u9RfSrQC9pqFX-FOFqWTb
+PAYPAL_CLIENT_SECRET=EBGL8OQ0k2EvtVS1CVXvuJ99Lv42EN61bSkOgh3nStxB4f0Yx7Z-ScRzoYTSLEfb_M_OK9qnKPWm3WjV
+PAYPAL_MODE=sandbox
+DPO_EMAIL=dpo@gj-camp.fr
+CONTACT_EMAIL=contact@gj-camp.fr

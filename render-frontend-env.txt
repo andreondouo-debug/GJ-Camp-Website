@@ -1,0 +1,6 @@
+# VARIABLES ENVIRONNEMENT RENDER - FRONTEND
+
+## A copier dans Render.com > Frontend > Environment
+
+REACT_APP_API_URL=https://gj-camp-backend.onrender.com
+REACT_APP_PAYPAL_CLIENT_ID=AdT-LwZtwJCWWY-mQxdypz0Ael6KiDY4Puw2QOrgppkh7379iy-cpwsC1a4u9RfSrQC9pqFX-FOFqWTb
