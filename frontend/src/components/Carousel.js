@@ -20,7 +20,7 @@ const Carousel = () => {
       const isSmall = window.innerWidth <= 480;
       setSettings(prev => ({
         ...prev,
-        carouselHeight: isSmall ? '280px' : (prev.carouselHeight || '500px'),
+        carouselHeight: isSmall ? '420px' : (prev.carouselHeight || '500px'),
       }));
     };
     applyResponsive();
@@ -275,9 +275,9 @@ const Carousel = () => {
           <div
             className="carousel-headline"
             style={{
-              fontSize: isMobile ? '1.05rem' : undefined,
-              lineHeight: isMobile ? '1.2' : undefined,
-              gap: isMobile ? '2px' : undefined,
+              fontSize: isMobile ? '1.25rem' : undefined,
+              lineHeight: isMobile ? '1.3' : undefined,
+              gap: isMobile ? '3px' : undefined,
               wordBreak: 'break-word',
             }}
           >
@@ -297,7 +297,7 @@ const Carousel = () => {
 
           <p
             className="carousel-description"
-            style={{ fontSize: isMobile ? '0.95rem' : undefined }}
+            style={{ fontSize: isMobile ? '1.05rem' : undefined }}
           >
             {currentSlideData?.description || 'Rejoignez-nous pour une expérience unique'}
           </p>
@@ -334,7 +334,7 @@ const Carousel = () => {
       <div
         className="carousel-right"
         style={{
-          height: isMobile ? '180px' : undefined,
+          height: isMobile ? '220px' : undefined,
           overflow: 'hidden',
           borderRadius: isMobile ? '12px' : undefined,
           position: 'relative',
@@ -373,7 +373,7 @@ const Carousel = () => {
                 style={{
                   objectFit: 'cover',
                   width: '100%',
-                  height: isMobile ? '180px' : '100%',
+                  height: isMobile ? '220px' : '100%',
                 }}
               />
             </div>
