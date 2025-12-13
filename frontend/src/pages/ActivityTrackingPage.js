@@ -77,11 +77,13 @@ const ActivityTrackingPage = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      setStatistiques(response.data);
-      console.log('📊 Statistiques chargées:', response.data.length, 'activités');
+      const data = Array.isArray(response.data) ? response.data : (response.data.statistics || []);
+      setStatistiques(data);
+      console.log('📊 Statistiques chargées:', data.length, 'activités');
     } catch (err) {
       console.error('❌ Erreur lors du chargement des statistiques:', err);
       setError(err.response?.data?.message || 'Erreur lors du chargement des statistiques');
+      setStatistiques([]);
     } finally {
       setLoading(false);
     }

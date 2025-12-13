@@ -97,14 +97,16 @@ function ActivitiesManagement() {
     try {
       setLoading(true);
       const response = await axios.get('/api/activities');
-      setActivities(response.data);
+      const data = Array.isArray(response.data) ? response.data : (response.data.activities || []);
+      setActivities(data);
       if (detailActivity) {
-        const refreshed = response.data.find(item => item._id === detailActivity._id);
+        const refreshed = data.find(item => item._id === detailActivity._id);
         setDetailActivity(refreshed || null);
       }
-      console.log(`📋 ${response.data.length} activités chargées`);
+      console.log(`📋 ${data.length} activités chargées`);
     } catch (error) {
       console.error('❌ Erreur lors du chargement des activités:', error);
+      setActivities([]);
     } finally {
       setLoading(false);
     }

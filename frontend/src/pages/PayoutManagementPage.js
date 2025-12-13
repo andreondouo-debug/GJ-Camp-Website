@@ -97,10 +97,18 @@ function PayoutManagementPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setStatistics(response.data);
+      const data = response.data || {};
+      setStatistics({
+        byStatus: data.byStatus || [],
+        byCampus: data.byCampus || []
+      });
     } catch (error) {
       console.error('❌ Erreur récupération statistiques:', error);
       setFeedback({ type: 'error', message: 'Impossible de charger les statistiques' });
+      setStatistics({
+        byStatus: [],
+        byCampus: []
+      });
     }
   };
 
