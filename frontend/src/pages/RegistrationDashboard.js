@@ -87,11 +87,13 @@ const RegistrationDashboard = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      setRegistrations(response.data.registrations);
+      const data = response.data.registrations || response.data || [];
+      setRegistrations(Array.isArray(data) ? data : []);
       setLoading(false);
     } catch (err) {
       console.error('Erreur lors de la récupération des inscriptions:', err);
       setError('Impossible de charger les inscriptions');
+      setRegistrations([]);
       setLoading(false);
     }
   };

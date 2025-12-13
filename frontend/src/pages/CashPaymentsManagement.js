@@ -24,10 +24,29 @@ const CashPaymentsManagement = () => {
       const response = await axios.get('/api/registration/cash/stats', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setStats(response.data);
+      const data = response.data || {};
+      // Vérifier la structure et ajouter les valeurs par défaut si nécessaire
+      const stats = {
+        pendingPayments: data.pendingPayments || data.pending || [],
+        validatedPayments: data.validatedPayments || data.validated || [],
+        rejectedPayments: data.rejectedPayments || data.rejected || [],
+        totalPending: data.totalPending || 0,
+        totalValidated: data.totalValidated || 0,
+        totalRejected: data.totalRejected || 0
+      };
+      setStats(stats);
     } catch (err) {
       setError('Erreur lors du chargement des statistiques');
       console.error(err);
+      // Initialiser avec des valeurs par défaut en cas d'erreur
+      setStats({
+        pendingPayments: [],
+        validatedPayments: [],
+        rejectedPayments: [],
+        totalPending: 0,
+        totalValidated: 0,
+        totalRejected: 0
+      });
     } finally {
       setLoading(false);
     }
