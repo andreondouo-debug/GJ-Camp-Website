@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { getApiUrl } from '../config/api';
+import { getApiUrl, API_URL } from '../config/api';
 import '../styles/ModernLogo.css';
 
 const ModernLogo = ({ variant = 1, size = 'medium' }) => {
@@ -24,7 +24,7 @@ const ModernLogo = ({ variant = 1, size = 'medium' }) => {
   useEffect(() => {
     const fetchLogo = async () => {
       try {
-        const response = await axios.get('/api/settings');
+        const response = await axios.get(`${API_URL}/api/settings`);
         if (response.data.success && response.data.settings.logoUrl) {
           // Utiliser getApiUrl pour les uploads
           const logoUrl = getApiUrl(response.data.settings.logoUrl);
