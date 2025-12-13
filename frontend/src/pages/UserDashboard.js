@@ -149,11 +149,12 @@ const UserDashboard = () => {
   const fetchActivities = async () => {
     try {
       const response = await axios.get('/api/activities');
-      console.log(`📋 ${response.data.length} activités chargées`);
+      const data = Array.isArray(response.data) ? response.data : (response.data.activities || []);
+      console.log(`📋 ${data.length} activités chargées`);
       
       // Filtrer pour n'afficher que les activités obligatoires + les optionnelles sélectionnées
       const userSelectedIds = user?.selectedActivities || [];
-      const filteredActivities = response.data.filter(activity => 
+      const filteredActivities = data.filter(activity => 
         activity.type === 'obligatoire' || userSelectedIds.includes(activity._id)
       );
       
