@@ -67,9 +67,12 @@ function ProgrammePage() {
   async function fetchActivities() {
     try {
       const response = await axios.get('/api/activities');
-      setActivities(response.data);
+      // Gérer les deux formats : array direct ou objet avec propriété activities
+      const data = Array.isArray(response.data) ? response.data : (response.data.activities || []);
+      setActivities(data);
     } catch (error) {
       console.error('Erreur lors du chargement des activités', error);
+      setActivities([]);
     }
   }
 

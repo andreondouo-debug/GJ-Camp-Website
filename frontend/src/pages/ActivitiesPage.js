@@ -74,11 +74,13 @@ function ActivitiesPage() {
       setLoading(true);
       const response = await axios.get('/api/activities');
       console.log('📋 Activités reçues:', response.data);
-      setActivities(response.data);
+      const data = Array.isArray(response.data) ? response.data : (response.data.activities || []);
+      setActivities(data);
       setError('');
     } catch (err) {
       setError('Erreur lors du chargement des activités');
       console.error('❌ Erreur:', err);
+      setActivities([]);
     } finally {
       setLoading(false);
     }
