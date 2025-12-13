@@ -6,12 +6,24 @@ import SectionICCOnline from '../components/SectionICCOnline';
 import '../styles/App.css';
 
 const HomePage = () => {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 480;
+
   return (
     <div className="container">
-      <div className="hero" style={{position: 'relative'}}>
-        <div className="timer-camp-floating">
+      {/* Timer affiché en haut sur mobile */}
+      {isMobile && (
+        <div className="timer-camp-mobile-top">
           <TimerCamp />
         </div>
+      )}
+      
+      <div className="hero" style={{position: 'relative'}}>
+        {/* Timer flotant sur desktop */}
+        {!isMobile && (
+          <div className="timer-camp-floating">
+            <TimerCamp />
+          </div>
+        )}
         <Carousel />
       </div>
       {/* Section Pourquoi rejoindre le Camp GJ déplacée ici */}

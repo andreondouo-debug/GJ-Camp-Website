@@ -546,6 +546,26 @@
   animation: slideInRight 0.8s ease-out;
 }
 
+/* Timer en haut de la page sur mobile */
+.timer-camp-mobile-top {
+  display: none;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+/* Afficher le timer mobile sur petits écrans */
+@media (max-width: 480px) {
+  .timer-camp-floating {
+    display: none;
+  }
+  .timer-camp-mobile-top {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
 @keyframes slideInRight {
   from {
     opacity: 0;
