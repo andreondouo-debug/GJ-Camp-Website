@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { API_URL } from '../config/api';
 
 export const AuthContext = createContext();
 
@@ -20,7 +21,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = useCallback(async () => {
     try {
-      const response = await axios.get('/api/auth/me', {
+      const response = await axios.get(`${API_URL}/api/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(response.data);
@@ -41,7 +42,7 @@ export const AuthProvider = ({ children }) => {
   const signup = async (firstName, lastName, email, password, churchWebsite) => {
     setLoading(true);
     try {
-      const response = await axios.post('/api/auth/signup', {
+      const response = await axios.post(`${API_URL}/api/auth/signup`, {
         firstName,
         lastName,
         email,
@@ -69,7 +70,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
+      const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
       const { token: newToken, user: newUser } = response.data;
       setToken(newToken);
       setUser(newUser);
@@ -92,7 +93,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await axios.put(
-        '/api/auth/profile',
+        `${API_URL}/api/auth/profile`,
         profileData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -113,7 +114,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkEmailAvailability = async (email) => {
     try {
-      const response = await axios.post('/api/auth/check-email', { email });
+      const response = await axios.post(`${API_URL}/api/auth/check-email`, { email });
       return response.data;
     } catch (error) {
       return { available: false, message: 'Erreur lors de la vérification' };
