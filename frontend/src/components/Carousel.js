@@ -253,6 +253,10 @@ const Carousel = () => {
         height: settings.carouselHeight,
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
+        position: 'relative',
+        overflow: 'hidden',
+        paddingTop: isMobile ? '8px' : undefined,
+        paddingBottom: isMobile ? '16px' : undefined,
       }}
     >
       {/* Partie gauche - Texte */}
@@ -260,6 +264,7 @@ const Carousel = () => {
         className="carousel-left"
         style={{
           padding: isMobile ? '12px 16px' : undefined,
+          zIndex: 2,
         }}
       >
         <div className={`carousel-text-content anim-${textAnimation}`} key={`content-${currentSlide}`}>
@@ -270,9 +275,10 @@ const Carousel = () => {
           <div
             className="carousel-headline"
             style={{
-              fontSize: isMobile ? '1.2rem' : undefined,
-              lineHeight: isMobile ? '1.25' : undefined,
-              gap: isMobile ? '4px' : undefined,
+              fontSize: isMobile ? '1.05rem' : undefined,
+              lineHeight: isMobile ? '1.2' : undefined,
+              gap: isMobile ? '2px' : undefined,
+              wordBreak: 'break-word',
             }}
           >
             <div className="headline-line headline-line-1">
@@ -301,7 +307,7 @@ const Carousel = () => {
             {currentSlideData?.date || 'Du 08/08/2026 au 11/08/2026'}
           </div>
 
-          <div className="carousel-cta" style={{ marginTop: isMobile ? '8px' : undefined }}>
+          <div className="carousel-cta" style={{ marginTop: isMobile ? '10px' : undefined }}>
             <a href="/inscription" className="btn-carousel-primary">
               S'inscrire maintenant
               <span className="btn-arrow">→</span>
@@ -328,11 +334,24 @@ const Carousel = () => {
       <div
         className="carousel-right"
         style={{
-          height: isMobile ? '200px' : undefined,
+          height: isMobile ? '220px' : undefined,
           overflow: 'hidden',
           borderRadius: isMobile ? '12px' : undefined,
+          position: 'relative',
         }}
       >
+        {/* Overlay dégradé pour améliorer la lisibilité du texte */}
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: isMobile
+              ? 'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0) 100%)'
+              : 'none',
+            zIndex: 1,
+          }}
+        />
         {slides.map((slide, index) => {
           console.log(`🖼️ Rendu slide ${index}:`, slide.image, 'active:', index === currentSlide);
           // Pas d'animation pour la première slide (index 0)
@@ -354,7 +373,7 @@ const Carousel = () => {
                 style={{
                   objectFit: 'cover',
                   width: '100%',
-                  height: isMobile ? '200px' : '100%',
+                  height: isMobile ? '220px' : '100%',
                 }}
               />
             </div>
