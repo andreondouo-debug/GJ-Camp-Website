@@ -14,6 +14,20 @@ const Carousel = () => {
     carouselTransitionDuration: 1000,
   });
 
+  // Adapter la hauteur et la mise en page sur mobile
+  useEffect(() => {
+    const applyResponsive = () => {
+      const isSmall = window.innerWidth <= 480;
+      setSettings(prev => ({
+        ...prev,
+        carouselHeight: isSmall ? '360px' : (prev.carouselHeight || '500px'),
+      }));
+    };
+    applyResponsive();
+    window.addEventListener('resize', applyResponsive);
+    return () => window.removeEventListener('resize', applyResponsive);
+  }, []);
+
   // Slides par défaut si l'API ne répond pas
   const defaultSlides = [
     {
@@ -230,16 +244,37 @@ const Carousel = () => {
     return null;
   }
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 480;
+
   return (
-    <div className="carousel-split" style={{ height: settings.carouselHeight }}>
+    <div
+      className="carousel-split"
+      style={{
+        height: settings.carouselHeight,
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+      }}
+    >
       {/* Partie gauche - Texte */}
-      <div className="carousel-left">
+      <div
+        className="carousel-left"
+        style={{
+          padding: isMobile ? '12px 16px' : undefined,
+        }}
+      >
         <div className={`carousel-text-content anim-${textAnimation}`} key={`content-${currentSlide}`}>
           <div className="carousel-tag">
             {currentSlideData?.title || 'À LA UNE'}
           </div>
           
-          <div className="carousel-headline">
+          <div
+            className="carousel-headline"
+            style={{
+              fontSize: isMobile ? '1.2rem' : undefined,
+              lineHeight: isMobile ? '1.25' : undefined,
+              gap: isMobile ? '4px' : undefined,
+            }}
+          >
             <div className="headline-line headline-line-1">
               <span className="headline-text">{currentSlideData?.subtitle || 'PLUS DE'}</span>
               {currentSlideData?.highlight && (
@@ -254,7 +289,10 @@ const Carousel = () => {
             </div>
           </div>
 
-          <p className="carousel-description">
+          <p
+            className="carousel-description"
+            style={{ fontSize: isMobile ? '0.95rem' : undefined }}
+          >
             {currentSlideData?.description || 'Rejoignez-nous pour une expérience unique'}
           </p>
 
@@ -263,7 +301,7 @@ const Carousel = () => {
             {currentSlideData?.date || 'Du 08/08/2026 au 11/08/2026'}
           </div>
 
-          <div className="carousel-cta">
+          <div className="carousel-cta" style={{ marginTop: isMobile ? '8px' : undefined }}>
             <a href="/inscription" className="btn-carousel-primary">
               S'inscrire maintenant
               <span className="btn-arrow">→</span>
@@ -287,7 +325,14 @@ const Carousel = () => {
       </div>
 
       {/* Partie droite - Image */}
-      <div className="carousel-right">
+      <div
+        className="carousel-right"
+        style={{
+          height: isMobile ? '200px' : undefined,
+          overflow: 'hidden',
+          borderRadius: isMobile ? '12px' : undefined,
+        }}
+      >
         {slides.map((slide, index) => {
           console.log(`🖼️ Rendu slide ${index}:`, slide.image, 'active:', index === currentSlide);
           // Pas d'animation pour la première slide (index 0)
@@ -306,6 +351,11 @@ const Carousel = () => {
                   e.target.src = '/images/placeholder.jpg';
                 }}
                 onLoad={() => console.log('✅ Image chargée:', slide.image)}
+                style={{
+                  objectFit: 'cover',
+                  width: '100%',
+                  height: isMobile ? '200px' : '100%',
+                }}
               />
             </div>
           );
