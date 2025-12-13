@@ -31,11 +31,14 @@ const PasswordResetManagementPage = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      setRequests(response.data.requests);
-      console.log(`📋 ${response.data.count} demandes de réinitialisation en attente`);
+      const data = response.data || {};
+      const requests = Array.isArray(data) ? data : (data.requests || []);
+      setRequests(requests);
+      console.log(`📋 ${data.count || requests.length} demandes de réinitialisation en attente`);
     } catch (err) {
       console.error('Erreur lors du chargement des demandes:', err);
       setError(err.response?.data?.message || 'Erreur lors du chargement');
+      setRequests([]);
     } finally {
       setLoading(false);
     }
