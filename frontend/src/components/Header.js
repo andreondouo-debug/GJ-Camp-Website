@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { MailIcon, UserIcon } from './Icons';
 import SettingsIcon from './SettingsIcon';
 import ModernLogo from './ModernLogo';
+import LogoGJ from './LogoGJ';
 // import logoGJ from '../assets/images/logo-gj.png';
 import '../styles/App.css';
 
@@ -69,7 +70,7 @@ const Header = () => {
     <header className="header">
       <div className="header-content">
         <Link to="/" className="logo">
-          <ModernLogo />
+          <LogoGJ size="medium" />
         </Link>
         <nav className="nav-menu">
           <li><Link to="/">ACCUEIL</Link></li>
