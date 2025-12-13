@@ -20,7 +20,7 @@ const Carousel = () => {
       const isSmall = window.innerWidth <= 480;
       setSettings(prev => ({
         ...prev,
-        carouselHeight: isSmall ? '360px' : (prev.carouselHeight || '500px'),
+        carouselHeight: isSmall ? '280px' : (prev.carouselHeight || '500px'),
       }));
     };
     applyResponsive();
@@ -334,7 +334,7 @@ const Carousel = () => {
       <div
         className="carousel-right"
         style={{
-          height: isMobile ? '220px' : undefined,
+          height: isMobile ? '180px' : undefined,
           overflow: 'hidden',
           borderRadius: isMobile ? '12px' : undefined,
           position: 'relative',
@@ -373,7 +373,7 @@ const Carousel = () => {
                 style={{
                   objectFit: 'cover',
                   width: '100%',
-                  height: isMobile ? '220px' : '100%',
+                  height: isMobile ? '180px' : '100%',
                 }}
               />
             </div>
