@@ -79,11 +79,13 @@ function ActivitiesManagement() {
   const fetchResponsables = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('/api/users', {
+      const response = await axios.get(getApiUrl('/api/users'), {
         headers: { Authorization: `Bearer ${token}` }
       });
+      // Adapter selon structure: tableau direct ou { users: [] }
+      const users = Array.isArray(response.data) ? response.data : (response.data.users || []);
       // Filtrer seulement les admins et responsables
-      const respList = response.data.filter(u => 
+      const respList = users.filter(u => 
         u.role === 'responsable' || u.role === 'admin'
       );
       setResponsables(respList);
@@ -96,7 +98,7 @@ function ActivitiesManagement() {
   const fetchActivities = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/activities');
+      const response = await axios.get(getApiUrl('/api/activities'));
       const data = Array.isArray(response.data) ? response.data : (response.data.activities || []);
       setActivities(data);
       if (detailActivity) {
@@ -219,7 +221,7 @@ function ActivitiesManagement() {
       if (editingActivity) {
         // Modification
         await axios.put(
-          `/api/activities/${editingActivity._id}`,
+          getApiUrl(`/api/activities/${editingActivity._id}`),
           formDataToSend,
           {
             headers: {
@@ -232,7 +234,7 @@ function ActivitiesManagement() {
       } else {
         // Création
         await axios.post(
-          '/api/activities',
+          getApiUrl('/api/activities'),
           formDataToSend,
           {
             headers: {
@@ -267,7 +269,7 @@ function ActivitiesManagement() {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`/api/activities/${activityId}`, {
+      await axios.delete(getApiUrl(`/api/activities/${activityId}`), {
         headers: {
           'Authorization': `Bearer ${token}`
         }

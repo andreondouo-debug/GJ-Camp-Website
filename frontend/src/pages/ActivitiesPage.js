@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
+import { getApiUrl } from '../config/api';
 import PlanningCarousel from '../components/PlanningCarousel';
 import DynamicCarousel from '../components/DynamicCarousel';
 
@@ -27,7 +28,7 @@ function ActivitiesPage() {
       }
 
       try {
-        const response = await axios.get('/api/registration/my-registration', {
+        const response = await axios.get(getApiUrl('/api/registration/my-registration'), {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -72,7 +73,7 @@ function ActivitiesPage() {
   const fetchActivities = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/activities');
+      const response = await axios.get(getApiUrl('/api/activities'));
       console.log('📋 Activités reçues:', response.data);
       const data = Array.isArray(response.data) ? response.data : (response.data.activities || []);
       setActivities(data);
@@ -101,7 +102,7 @@ function ActivitiesPage() {
       setLoading(true);
       // On envoie le mapping creneau -> activitéId au backend
       const response = await axios.patch(
-        '/api/auth/update-selected-creneaux',
+        getApiUrl('/api/auth/update-selected-creneaux'),
         { selectedCreneaux: creneauxToSave },
         {
           headers: {

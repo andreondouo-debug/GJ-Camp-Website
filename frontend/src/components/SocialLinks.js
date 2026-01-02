@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getApiUrl } from '../config/api';
 import '../styles/SocialLinks.css';
 
 const SocialLinks = () => {
@@ -14,15 +15,15 @@ const SocialLinks = () => {
   useEffect(() => {
     const fetchSocialLinks = async () => {
       try {
-        const response = await axios.get('/api/settings');
-        const { settings } = response.data;
-        setSocialLinks({
-          instagramUrl: settings.instagramUrl || '',
-          facebookUrl: settings.facebookUrl || '',
-          youtubeUrl: settings.youtubeUrl || '',
-          twitterUrl: settings.twitterUrl || '',
-          linkedinUrl: settings.linkedinUrl || ''
-        });
+        const response = await axios.get(getApiUrl('/api/settings'));
+        const settings = response?.data?.settings || {};
+        setSocialLinks(prev => ({
+          instagramUrl: settings.instagramUrl || prev.instagramUrl || '',
+          facebookUrl: settings.facebookUrl || prev.facebookUrl || '',
+          youtubeUrl: settings.youtubeUrl || prev.youtubeUrl || '',
+          twitterUrl: settings.twitterUrl || prev.twitterUrl || '',
+          linkedinUrl: settings.linkedinUrl || prev.linkedinUrl || ''
+        }));
       } catch (error) {
         console.error('❌ Erreur lors du chargement des réseaux sociaux:', error);
       }

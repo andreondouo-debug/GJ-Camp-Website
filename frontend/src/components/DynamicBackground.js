@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { getApiUrl } from '../config/api';
 import '../styles/DynamicBackground.css';
 
 const DynamicBackground = ({ page }) => {
@@ -16,17 +17,17 @@ const DynamicBackground = ({ page }) => {
   useEffect(() => {
     const fetchBackgroundSettings = async () => {
       try {
-        const response = await axios.get('/api/settings');
-        const { settings } = response.data;
-        setBackgroundSettings({
-          backgroundType: settings.backgroundType || 'gradient',
-          backgroundColorStart: settings.backgroundColorStart || '#667eea',
-          backgroundColorEnd: settings.backgroundColorEnd || '#764ba2',
-          backgroundSolidColor: settings.backgroundSolidColor || '#ffffff',
-          homeBackground: settings.homeBackground || 'default',
-          aboutBackground: settings.aboutBackground || 'default',
-          activitiesBackground: settings.activitiesBackground || 'default'
-        });
+        const response = await axios.get(getApiUrl('/api/settings'));
+        const settings = response?.data?.settings || {};
+        setBackgroundSettings(prev => ({
+          backgroundType: settings.backgroundType || prev.backgroundType || 'gradient',
+          backgroundColorStart: settings.backgroundColorStart || prev.backgroundColorStart || '#667eea',
+          backgroundColorEnd: settings.backgroundColorEnd || prev.backgroundColorEnd || '#764ba2',
+          backgroundSolidColor: settings.backgroundSolidColor || prev.backgroundSolidColor || '#ffffff',
+          homeBackground: settings.homeBackground || prev.homeBackground || 'default',
+          aboutBackground: settings.aboutBackground || prev.aboutBackground || 'default',
+          activitiesBackground: settings.activitiesBackground || prev.activitiesBackground || 'default'
+        }));
       } catch (error) {
         console.error('❌ Erreur lors du chargement des paramètres d\'arrière-plan:', error);
       }
