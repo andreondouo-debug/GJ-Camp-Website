@@ -235,7 +235,8 @@ exports.uploadLogo = async (req, res) => {
       });
     }
     
-    const logoUrl = `/uploads/${req.file.filename}`;
+    // Utiliser l'URL Cloudinary si disponible, sinon URL locale
+    const logoUrl = req.file.cloudinaryUrl || `/uploads/${req.file.filename}`;
     
     console.log(`✅ Logo uploadé avec succès: ${logoUrl}`);
     
