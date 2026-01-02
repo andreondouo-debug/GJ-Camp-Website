@@ -8,6 +8,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getApiUrl } from '../config/api';
 import '../styles/SettingsPage.css';
 
 const SettingsPage = () => {
@@ -166,7 +167,7 @@ const SettingsPage = () => {
 
     const checkLockStatus = async () => {
       try {
-        const response = await axios.get('/api/settings/lock/status', {
+        const response = await axios.get(getApiUrl('/api/settings/lock/status'), {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -193,7 +194,7 @@ const SettingsPage = () => {
 
     const acquireLock = async () => {
       try {
-        await axios.post('/api/settings/lock/acquire', {}, {
+        await axios.post(getApiUrl('/api/settings/lock/acquire'), {}, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setHasLock(true);
@@ -218,7 +219,7 @@ const SettingsPage = () => {
     return () => {
       clearInterval(lockCheckInterval);
       if (currentHasLock) {
-        axios.post('/api/settings/lock/release', {}, {
+        axios.post(getApiUrl('/api/settings/lock/release'), {}, {
           headers: { Authorization: `Bearer ${token}` }
         }).catch(err => console.error('Erreur libération verrou:', err));
       }
@@ -229,7 +230,7 @@ const SettingsPage = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await axios.get('/api/settings', {
+        const response = await axios.get(getApiUrl('/api/settings'), {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.data.settings) {
@@ -303,7 +304,7 @@ const SettingsPage = () => {
         const formData = new FormData();
         formData.append('logo', logoFile);
         
-        const uploadResponse = await axios.post('/api/settings/upload-logo', formData, {
+        const uploadResponse = await axios.post(getApiUrl('/api/settings/upload-logo'), formData, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'multipart/form-data'
@@ -320,7 +321,7 @@ const SettingsPage = () => {
       }
       
       console.log('💾 Sauvegarde des paramètres...');
-      await axios.put('/api/settings', { settings: updatedSettings }, {
+      await axios.put(getApiUrl('/api/settings'), { settings: updatedSettings }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -484,7 +485,7 @@ const SettingsPage = () => {
   useEffect(() => {
     const fetchCarouselSlides = async () => {
       try {
-        const response = await axios.get('/api/carousel', {
+        const response = await axios.get(getApiUrl('/api/carousel'), {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCarouselSlides(response.data.slides || []);
@@ -715,7 +716,7 @@ const SettingsPage = () => {
 
     try {
       console.log('🚀 Envoi POST /api/carousel...');
-      const response = await axios.post('/api/carousel', formData, {
+      const response = await axios.post(getApiUrl('/api/carousel'), formData, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -792,7 +793,7 @@ const SettingsPage = () => {
       formData.append('description', editingSlide.description);
       formData.append('order', editingSlide.order);
 
-      const response = await axios.put(`/api/carousel/${editingSlide._id}`, formData, {
+      const response = await axios.put(getApiUrl(`/api/carousel/${editingSlide._id}`), formData, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -847,12 +848,12 @@ const SettingsPage = () => {
   // Réorganiser les slides
   const handleReorderSlide = async (slideId, newOrder) => {
     try {
-      await axios.put(`/api/carousel/${slideId}/order`, { order: newOrder }, {
+      await axios.put(getApiUrl(`/api/carousel/${slideId}/order`), { order: newOrder }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
       // Recharger les slides
-      const response = await axios.get('/api/carousel', {
+      const response = await axios.get(getApiUrl('/api/carousel'), {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCarouselSlides(response.data.slides || []);
