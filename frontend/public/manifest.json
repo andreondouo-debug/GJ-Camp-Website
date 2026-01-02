@@ -4,13 +4,13 @@
   "description": "Application du camp d'été Génération Josué - Inscription, programme et activités",
   "icons": [
     {
-      "src": "/images/logo-192.png",
+      "src": "/images/crpt-logo.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "/images/logo-512.png",
+      "src": "/images/crpt-logo.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
@@ -23,19 +23,5 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "fr",
-  "categories": ["education", "lifestyle", "social"],
-  "screenshots": [
-    {
-      "src": "/images/screenshot-mobile.png",
-      "type": "image/png",
-      "sizes": "540x720",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/images/screenshot-desktop.png",
-      "type": "image/png",
-      "sizes": "1280x720",
-      "form_factor": "wide"
-    }
-  ]
+  "categories": ["education", "lifestyle", "social"]
 }
