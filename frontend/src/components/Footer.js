@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import ModernLogo from './ModernLogo';
 import SocialLinks from './SocialLinks';
 import '../styles/App.css';
 
@@ -9,9 +8,6 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-content">
         <div className="footer-left">
-          <div className="footer-logo">
-            <ModernLogo size="small" />
-          </div>
           <p className="footer-text">© {new Date().getFullYear()} Génération Josué — Tous droits réservés</p>
         </div>
         <div className="footer-right">

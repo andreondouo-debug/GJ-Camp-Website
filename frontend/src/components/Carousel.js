@@ -12,6 +12,8 @@ const Carousel = () => {
     carouselHeight: '500px',
     carouselAutoplayInterval: 6000,
     carouselTransitionDuration: 1000,
+    carouselFontSize: 'medium',
+    carouselImageTextRatio: '50-50',
   });
 
   // Adapter la hauteur et la mise en page sur mobile
@@ -106,6 +108,8 @@ const Carousel = () => {
             carouselHeight: settingsResponse.data.settings.carouselHeight || '500px',
             carouselAutoplayInterval: settingsResponse.data.settings.carouselAutoplayInterval || 6000,
             carouselTransitionDuration: settingsResponse.data.settings.carouselTransitionDuration || 1000,
+            carouselFontSize: settingsResponse.data.settings.carouselFontSize || 'medium',
+            carouselImageTextRatio: settingsResponse.data.settings.carouselImageTextRatio || '50-50',
           });
         }
 
@@ -116,7 +120,22 @@ const Carousel = () => {
         if (slidesResponse.data.slides && slidesResponse.data.slides.length > 0) {
           // Formater les slides de l'API
           const formattedSlides = slidesResponse.data.slides.map(slide => {
-            const imagePath = slide.image ? `http://localhost:5000/uploads/${slide.image}` : '/images/placeholder.jpg';
+            // Gérer les URLs Cloudinary (complètes) ou locales (relatives)
+            let imagePath;
+            if (slide.image) {
+              if (slide.image.startsWith('http://') || slide.image.startsWith('https://')) {
+                // URL Cloudinary complète
+                imagePath = slide.image;
+              } else if (slide.image.startsWith('/uploads/')) {
+                // Déjà formaté avec /uploads/
+                imagePath = slide.image;
+              } else {
+                // Ajouter /uploads/ si nécessaire
+                imagePath = `/uploads/${slide.image}`;
+              }
+            } else {
+              imagePath = '/images/placeholder.jpg';
+            }
             console.log('🖼️ Image slide:', slide.title, '→', imagePath);
             return {
               image: imagePath,
@@ -246,9 +265,13 @@ const Carousel = () => {
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 480;
 
+  // Générer les classes CSS dynamiques
+  const fontSizeClass = `font-${settings.carouselFontSize || 'medium'}`;
+  const ratioClass = `ratio-${(settings.carouselImageTextRatio || '50-50').replace('/', '-')}`;
+
   return (
     <div
-      className="carousel-split"
+      className={`carousel-split ${fontSizeClass} ${ratioClass}`}
       style={{
         height: settings.carouselHeight,
         display: 'flex',

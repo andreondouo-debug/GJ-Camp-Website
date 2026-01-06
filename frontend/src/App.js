@@ -40,7 +40,6 @@ import PasswordResetManagementPage from './pages/PasswordResetManagementPage';
 import GuardedRoute from './components/GuardedRoute';
 import CookieConsent from './components/CookieConsent';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
-import FixedLogo from './components/FixedLogo';
 import './styles/App.css';
 
 function App() {
@@ -48,7 +47,6 @@ function App() {
     <Router>
       <AuthProvider>
         <DynamicBackground page="global" />
-        <FixedLogo />
         <div className="container">
           <Header />
           <PWAInstallPrompt />

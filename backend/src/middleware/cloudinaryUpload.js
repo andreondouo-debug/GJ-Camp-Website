@@ -53,8 +53,37 @@ const uploadToCloudinary = async (req, res, next) => {
   // Si Cloudinary n'est pas configuré, utiliser le stockage local
   if (!process.env.CLOUDINARY_CLOUD_NAME) {
     console.warn('⚠️ Cloudinary non configuré, utilisation du stockage local');
-    req.file.cloudinaryUrl = `/uploads/${Date.now()}-${req.file.originalname}`;
-    return next();
+    
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      
+      // Créer le dossier uploads s'il n'existe pas
+      const uploadsDir = path.join(__dirname, '../../uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      
+      // Nettoyer le nom du fichier (remplacer espaces par tirets)
+      const cleanFilename = req.file.originalname.replace(/\s+/g, '-');
+      const filename = `${Date.now()}-${cleanFilename}`;
+      const filepath = path.join(uploadsDir, filename);
+      
+      // Sauvegarder le fichier sur le disque
+      fs.writeFileSync(filepath, req.file.buffer);
+      
+      // Définir l'URL locale
+      req.file.cloudinaryUrl = `/uploads/${filename}`;
+      console.log(`✅ Fichier sauvegardé localement: ${req.file.cloudinaryUrl}`);
+      
+      return next();
+    } catch (error) {
+      console.error('❌ Erreur sauvegarde locale:', error);
+      return res.status(500).json({ 
+        message: 'Erreur lors de la sauvegarde du fichier',
+        error: error.message 
+      });
+    }
   }
 
   try {
@@ -103,8 +132,27 @@ const uploadActivityImageToCloudinary = async (req, res, next) => {
 
   if (!process.env.CLOUDINARY_CLOUD_NAME) {
     console.warn('⚠️ Cloudinary non configuré, utilisation du stockage local');
-    req.file.cloudinaryUrl = `/uploads/${Date.now()}-${req.file.originalname}`;
-    return next();
+    
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const uploadsDir = path.join(__dirname, '../../uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      
+      const cleanFilename = req.file.originalname.replace(/\s+/g, '-');
+      const filename = `activity-${Date.now()}-${Math.floor(Math.random() * 1000000000)}.${cleanFilename.split('.').pop()}`;
+      const filepath = path.join(uploadsDir, filename);
+      fs.writeFileSync(filepath, req.file.buffer);
+      
+      req.file.cloudinaryUrl = `/uploads/${filename}`;
+      console.log(`✅ Image d'activité sauvegardée: ${req.file.cloudinaryUrl}`);
+      return next();
+    } catch (error) {
+      console.error('❌ Erreur sauvegarde locale activité:', error);
+      return res.status(500).json({ message: 'Erreur lors de la sauvegarde', error: error.message });
+    }
   }
 
   try {
@@ -143,8 +191,27 @@ const uploadCarouselImageToCloudinary = async (req, res, next) => {
 
   if (!process.env.CLOUDINARY_CLOUD_NAME) {
     console.warn('⚠️ Cloudinary non configuré, utilisation du stockage local');
-    req.file.cloudinaryUrl = `/uploads/${Date.now()}-${req.file.originalname}`;
-    return next();
+    
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const uploadsDir = path.join(__dirname, '../../uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      
+      const cleanFilename = req.file.originalname.replace(/\s+/g, '-');
+      const filename = `carousel-${Date.now()}-${Math.floor(Math.random() * 1000000000)}.${cleanFilename.split('.').pop()}`;
+      const filepath = path.join(uploadsDir, filename);
+      fs.writeFileSync(filepath, req.file.buffer);
+      
+      req.file.cloudinaryUrl = `/uploads/${filename}`;
+      console.log(`✅ Image de carousel sauvegardée: ${req.file.cloudinaryUrl}`);
+      return next();
+    } catch (error) {
+      console.error('❌ Erreur sauvegarde locale carousel:', error);
+      return res.status(500).json({ message: 'Erreur lors de la sauvegarde', error: error.message });
+    }
   }
 
   try {

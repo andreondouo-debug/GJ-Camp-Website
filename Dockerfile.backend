@@ -1,23 +1,33 @@
 # Dockerfile pour le backend Node.js
 FROM node:18-alpine
 
+# Installer wget pour les health checks
+RUN apk add --no-cache wget
+
 # Créer le répertoire de l'application
 WORKDIR /app
 
 # Copier les fichiers package.json et package-lock.json
 COPY backend/package*.json ./
 
-# Installer les dépendances
+# Installer les dépendances de production
 RUN npm ci --only=production
 
 # Copier le reste des fichiers du backend
 COPY backend/ .
+
+# Créer les répertoires de logs et uploads
+RUN mkdir -p logs uploads
 
 # Exposer le port 5000
 EXPOSE 5000
 
 # Variable d'environnement par défaut
 ENV NODE_ENV=production
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=10s \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:5000/api/health || exit 1
 
 # Commande pour démarrer l'application
 CMD ["node", "src/server.js"]

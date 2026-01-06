@@ -17,6 +17,8 @@ const CarouselManagement = () => {
     carouselHeight: '500px',
     carouselAutoplayInterval: 6000,
     carouselTransitionDuration: 1000,
+    carouselFontSize: 'medium',
+    carouselImageTextRatio: '50-50',
   });
   
   const [formData, setFormData] = useState({
@@ -74,6 +76,8 @@ const CarouselManagement = () => {
           carouselHeight: response.data.settings.carouselHeight || '500px',
           carouselAutoplayInterval: response.data.settings.carouselAutoplayInterval || 6000,
           carouselTransitionDuration: response.data.settings.carouselTransitionDuration || 1000,
+          carouselFontSize: response.data.settings.carouselFontSize || 'medium',
+          carouselImageTextRatio: response.data.settings.carouselImageTextRatio || '50-50',
         });
       }
     } catch (error) {
@@ -109,7 +113,21 @@ const CarouselManagement = () => {
         imageAnimation: slide.imageAnimation || 'ken-burns',
         order: slide.order || 0,
       });
-      setImagePreview(slide.image ? `/uploads/carousel/${slide.image}` : '');
+      // Gérer les URLs Cloudinary (complètes) ou locales (relatives)
+      let imagePreviewPath = '';
+      if (slide.image) {
+        if (slide.image.startsWith('http://') || slide.image.startsWith('https://')) {
+          // URL Cloudinary complète
+          imagePreviewPath = slide.image;
+        } else if (slide.image.startsWith('/uploads/')) {
+          // Déjà formaté avec /uploads/
+          imagePreviewPath = slide.image;
+        } else {
+          // Ajouter /uploads/ si nécessaire
+          imagePreviewPath = `/uploads/${slide.image}`;
+        }
+      }
+      setImagePreview(imagePreviewPath);
     } else {
       setEditingSlide(null);
       setFormData({
@@ -423,6 +441,48 @@ const CarouselManagement = () => {
               <small>Durée de l'animation entre les slides</small>
             </div>
 
+            <div className="setting-group">
+              <label>
+                <span className="label-icon">🔤</span>
+                Taille de police
+              </label>
+              <select
+                value={globalSettings.carouselFontSize}
+                onChange={(e) => setGlobalSettings({
+                  ...globalSettings,
+                  carouselFontSize: e.target.value
+                })}
+                className="setting-input"
+              >
+                <option value="small">Petite</option>
+                <option value="medium">Moyenne (recommandé)</option>
+                <option value="large">Grande</option>
+                <option value="xlarge">Très grande</option>
+              </select>
+              <small>Taille du texte dans le carrousel</small>
+            </div>
+
+            <div className="setting-group">
+              <label>
+                <span className="label-icon">📐</span>
+                Ratio Image / Texte
+              </label>
+              <select
+                value={globalSettings.carouselImageTextRatio}
+                onChange={(e) => setGlobalSettings({
+                  ...globalSettings,
+                  carouselImageTextRatio: e.target.value
+                })}
+                className="setting-input"
+              >
+                <option value="40-60">40% Image / 60% Texte</option>
+                <option value="50-50">50% Image / 50% Texte (recommandé)</option>
+                <option value="60-40">60% Image / 40% Texte</option>
+                <option value="70-30">70% Image / 30% Texte</option>
+              </select>
+              <small>Répartition de l'espace entre l'image et le texte</small>
+            </div>
+
             <div className="settings-preview">
               <h3>👁️ Aperçu des paramètres</h3>
               <div className="preview-grid">
@@ -437,6 +497,12 @@ const CarouselManagement = () => {
                 </div>
                 <div className="preview-item">
                   <strong>Transition :</strong> {globalSettings.carouselTransitionDuration / 1000}s
+                </div>
+                <div className="preview-item">
+                  <strong>Taille police :</strong> {globalSettings.carouselFontSize}
+                </div>
+                <div className="preview-item">
+                  <strong>Ratio :</strong> {globalSettings.carouselImageTextRatio}
                 </div>
               </div>
             </div>

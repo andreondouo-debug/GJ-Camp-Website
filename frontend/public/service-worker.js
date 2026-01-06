@@ -2,8 +2,6 @@
 const CACHE_NAME = 'gj-camp-v1';
 const urlsToCache = [
   '/',
-  '/static/css/main.css',
-  '/static/js/main.js',
   '/manifest.json',
   '/images/logo-192.png',
   '/images/logo-512.png'
@@ -16,7 +14,10 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('✅ Cache ouvert');
-        return cache.addAll(urlsToCache);
+        // Essayer d'ajouter les URLs au cache, mais ne pas échouer si certaines ne se trouvent pas
+        return cache.addAll(urlsToCache).catch((error) => {
+          console.log('⚠️ Certaines ressources ne peuvent pas être mises en cache:', error);
+        });
       })
   );
 });

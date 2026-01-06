@@ -4,15 +4,21 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { MailIcon, UserIcon } from './Icons';
 import SettingsIcon from './SettingsIcon';
-import ModernLogo from './ModernLogo';
-import LogoGJ from './LogoGJ';
-// import logoGJ from '../assets/images/logo-gj.png';
 import '../styles/App.css';
 
 const Header = () => {
   const { isAuthenticated, user, logout, token } = useContext(AuthContext);
   const [isGestionOpen, setIsGestionOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
 
   const openGestionMenu = useCallback(() => setIsGestionOpen(true), []);
   const closeGestionMenu = useCallback(() => setIsGestionOpen(false), []);
@@ -58,6 +64,18 @@ const Header = () => {
     };
   }, [isAuthenticated, token]);
 
+  // Fermer le dropdown GESTION quand on clique ailleurs
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isGestionOpen && !event.target.closest('.dropdown')) {
+        setIsGestionOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isGestionOpen]);
+
   const normalizedRole = user?.role === 'user' ? 'utilisateur' : user?.role || 'utilisateur';
   const canAccessGestion = ['referent', 'responsable', 'admin'].includes(normalizedRole);
   const canAccessInscriptions = ['referent', 'responsable', 'admin'].includes(normalizedRole);
@@ -68,88 +86,118 @@ const Header = () => {
 
   return (
     <header className="header">
+      {/* Overlay pour le menu mobile */}
+      {isMobileMenuOpen && <div className="mobile-menu-overlay" onClick={closeMobileMenu}></div>}
+      
       <div className="header-content">
-        <Link to="/" className="logo">
-          <LogoGJ size="medium" />
-        </Link>
-        <nav className="nav-menu">
-          <li><Link to="/">ACCUEIL</Link></li>
-          <li><Link to="/programme">PROGRAMME</Link></li>
-          <li><Link to="/activites">ACTIVITES</Link></li>
-          <li><Link to="/newsletter">GJ NEWS</Link></li>
-          {isAuthenticated && (
-            <li className="messages-menu-item">
-              <Link to="/messages" className="messages-link">
-                <MailIcon size={24} color="#ffffff" />
-                {unreadCount > 0 && (
-                  <span className="message-badge">{unreadCount}</span>
-                )}
-              </Link>
-            </li>
-          )}
-          <li><Link to="/gj-crpt">GJ CRPT</Link></li>
-          {isAuthenticated && <li><Link to="/tableau-de-bord">TABLEAU DE BORD</Link></li>}
-          {isAuthenticated && canAccessGestion && (
-            <li
-              className={`dropdown ${isGestionOpen ? 'dropdown-open' : ''}`}
-              onMouseEnter={openGestionMenu}
-              onMouseLeave={closeGestionMenu}
-              onFocus={openGestionMenu}
-              onBlur={handleGestionBlur}
-            >
-              <button
-                type="button"
-                className="dropdown-toggle"
-                onClick={toggleGestionMenu}
-                aria-expanded={isGestionOpen}
-                aria-haspopup="true"
+        {/* Bouton Hamburger */}
+        <button 
+          className={`hamburger ${isMobileMenuOpen ? 'active' : ''}`} 
+          onClick={toggleMobileMenu}
+          aria-label="Menu"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        {/* Menu Navigation */}
+        <nav className={`nav-menu ${isMobileMenuOpen ? 'mobile-active' : ''}`}>
+          <ul>
+            <li><Link to="/" onClick={closeMobileMenu}>ACCUEIL</Link></li>
+            <li><Link to="/programme" onClick={closeMobileMenu}>PROGRAMME</Link></li>
+            <li><Link to="/activites" onClick={closeMobileMenu}>ACTIVITES</Link></li>
+            <li><Link to="/newsletter" onClick={closeMobileMenu}>GJ NEWS</Link></li>
+            {isAuthenticated && (
+              <li className="messages-menu-item">
+                <Link to="/messages" className="messages-link" onClick={closeMobileMenu}>
+                  <MailIcon size={24} color="#ffffff" />
+                  {unreadCount > 0 && (
+                    <span className="message-badge">{unreadCount}</span>
+                  )}
+                  <span className="mobile-menu-label">Messages</span>
+                </Link>
+              </li>
+            )}
+            <li><Link to="/gj-crpt" onClick={closeMobileMenu}>GJ CRPT</Link></li>
+            {isAuthenticated && <li><Link to="/tableau-de-bord" onClick={closeMobileMenu}>TABLEAU DE BORD</Link></li>}
+            {isAuthenticated && canAccessGestion && (
+              <li
+                className={`dropdown ${isGestionOpen ? 'dropdown-open' : ''}`}
               >
-                GESTION
-                <svg className="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-              </button>
-              <ul className={`dropdown-menu ${isGestionOpen ? 'dropdown-menu-open' : ''}`}>
-                <li><Link to="/profil">Mon Profil</Link></li>
-                {canAccessInscriptions && (
-                  <li><Link to="/suivi-inscriptions">Inscriptions</Link></li>
-                )}
-                {canAccessActivities && (
-                  <li><Link to="/gestion-activites">Activités</Link></li>
-                )}
-                {canAccessUserAdmin && (
-                  <li><Link to="/gestion-carrousel">🎨 Carrousel</Link></li>
-                )}
-                {canAccessPayouts && (
-                  <li><Link to="/suivi-activites">Suivi Activités</Link></li>
-                )}
-                {canAccessUserAdmin && (
-                  <li><Link to="/gestion/utilisateurs">Utilisateurs</Link></li>
-                )}
-                {canAccessUserAdmin && (
-                  <li className="dropdown-messages-item">
-                    <Link to="/gestion/messages">
-                      Messages
-                      {unreadCount > 0 && (
-                        <span className="dropdown-message-badge">{unreadCount}</span>
-                      )}
-                    </Link>
-                  </li>
-                )}
-                {canAccessPayouts && (
-                  <>
-                    <li><Link to="/gestion/redistributions">Redistributions</Link></li>
-                    <li><Link to="/gestion/paiements-especes">Paiements espèces</Link></li>
-                  </>
-                )}
-                {canAccessUserAdmin && (
-                  <li><Link to="/gestion/reinitialisations">Mots de passe</Link></li>
-                )}
-              </ul>
-            </li>
-          )}
+                <button
+                  type="button"
+                  className="dropdown-toggle"
+                  onClick={toggleGestionMenu}
+                  aria-expanded={isGestionOpen}
+                  aria-haspopup="true"
+                >
+                  GESTION
+                  <svg className="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+                <ul className={`dropdown-menu ${isGestionOpen ? 'dropdown-menu-open' : ''}`}>
+                  <li><Link to="/profil" onClick={closeMobileMenu}>Mon Profil</Link></li>
+                  {canAccessInscriptions && (
+                    <li><Link to="/suivi-inscriptions" onClick={closeMobileMenu}>Inscriptions</Link></li>
+                  )}
+                  {canAccessActivities && (
+                    <li><Link to="/gestion-activites" onClick={closeMobileMenu}>Activités</Link></li>
+                  )}
+                  {canAccessUserAdmin && (
+                    <li><Link to="/gestion-carrousel" onClick={closeMobileMenu}>🎨 Carrousel</Link></li>
+                  )}
+                  {canAccessPayouts && (
+                    <li><Link to="/suivi-activites" onClick={closeMobileMenu}>Suivi Activités</Link></li>
+                  )}
+                  {canAccessUserAdmin && (
+                    <li><Link to="/gestion/utilisateurs" onClick={closeMobileMenu}>Utilisateurs</Link></li>
+                  )}
+                  {canAccessUserAdmin && (
+                    <li className="dropdown-messages-item">
+                      <Link to="/gestion/messages" onClick={closeMobileMenu}>
+                        Messages
+                        {unreadCount > 0 && (
+                          <span className="dropdown-message-badge">{unreadCount}</span>
+                        )}
+                      </Link>
+                    </li>
+                  )}
+                  {canAccessPayouts && (
+                    <>
+                      <li><Link to="/gestion/redistributions" onClick={closeMobileMenu}>Redistributions</Link></li>
+                      <li><Link to="/gestion/paiements-especes" onClick={closeMobileMenu}>Paiements espèces</Link></li>
+                    </>
+                  )}
+                  {canAccessUserAdmin && (
+                    <li><Link to="/gestion/reinitialisations" onClick={closeMobileMenu}>Mots de passe</Link></li>
+                  )}
+                </ul>
+              </li>
+            )}
+            {/* Menu Utilisateur dans la navigation mobile */}
+            <div className="mobile-user-section">
+              {isAuthenticated ? (
+                <>
+                  {isAdmin && (
+                    <li><Link to="/parametres" onClick={closeMobileMenu}>⚙️ Paramètres</Link></li>
+                  )}
+                  <li><Link to="/profil" onClick={closeMobileMenu}>👤 {user?.firstName}</Link></li>
+                  <li><button className="mobile-logout-btn" onClick={() => { logout(); closeMobileMenu(); }}>🚪 Déconnexion</button></li>
+                </>
+              ) : (
+                <>
+                  <li><Link to="/login" onClick={closeMobileMenu}>🔑 Connexion</Link></li>
+                  <li><Link to="/signup" onClick={closeMobileMenu}><button className="btn-signup">S'INSCRIRE</button></Link></li>
+                </>
+              )}
+            </div>
+          </ul>
         </nav>
-        <div className="user-menu">
+
+        {/* Menu Utilisateur Desktop */}
+        <div className="user-menu desktop-only">
           {isAuthenticated ? (
             <>
               {isAdmin && (
