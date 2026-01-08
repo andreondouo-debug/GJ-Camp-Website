@@ -20,6 +20,7 @@ try {
 // Configurer axios pour utiliser l'API backend en production
 axios.defaults.baseURL = API_URL;
 axios.defaults.withCredentials = true;
+console.log('🔗 API URL configurée:', API_URL);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
