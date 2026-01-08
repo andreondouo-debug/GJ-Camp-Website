@@ -844,6 +844,24 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   gap: 24px;
 }
 
+.logo-link {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-right: auto;
+}
+
+.header-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.header-logo:hover {
+  transform: scale(1.05);
+}
+
 .logo {
   width: 70px;
   height: 70px;

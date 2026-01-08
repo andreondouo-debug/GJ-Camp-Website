@@ -8,6 +8,7 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-content">
         <div className="footer-left">
+          <img src="/images/logo-gj.png" alt="Génération Josué" className="footer-logo" />
           <p className="footer-text">© {new Date().getFullYear()} Génération Josué — Tous droits réservés</p>
         </div>
         <div className="footer-right">

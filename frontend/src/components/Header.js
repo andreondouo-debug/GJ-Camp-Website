@@ -90,6 +90,11 @@ const Header = () => {
       {isMobileMenuOpen && <div className="mobile-menu-overlay" onClick={closeMobileMenu}></div>}
       
       <div className="header-content">
+        {/* Logo */}
+        <Link to="/" className="logo-link">
+          <img src="/images/logo-gj.png" alt="Génération Josué" className="header-logo" />
+        </Link>
+
         {/* Bouton Hamburger */}
         <button 
           className={`hamburger ${isMobileMenuOpen ? 'active' : ''}`} 
