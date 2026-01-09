@@ -821,7 +821,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   box-sizing: border-box !important;
 }
 
-/* Contenu principal sans marges latérales */
+/* Contenu principal sans marges latérales (HomePage uniquement) */
 .main-content,
 .home-container {
   width: 100vw !important;
@@ -829,14 +829,20 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   margin: 0 !important;
   padding: 0 !important;
   box-sizing: border-box !important;
+  flex: 1;
 }
 
-/* Contenu des pages internes - garder le padding naturel */
-.page-container {
+/* Contenu des pages internes - flex-grow pour occuper l'espace */
+.page-container,
+.messages-page,
+.newsletter-container,
+.gjcrpt-page {
   width: 100% !important;
   max-width: 100% !important;
   margin: 0 auto !important;
   box-sizing: border-box !important;
+  flex: 1 0 auto;
+  min-height: calc(100vh - 80px); /* Hauteur minimale moins le header */
 }
 
 /* Header */

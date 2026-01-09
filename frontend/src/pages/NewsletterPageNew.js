@@ -746,22 +746,22 @@ function NewsletterPage() {
               <div className="post-header">
                 <div className="post-author">
                   <div className="author-avatar">
-                    {post.author.profilePhoto ? (
+                    {post.author?.profilePhoto ? (
                       <img src={post.author.profilePhoto} alt={post.author.firstName} />
                     ) : (
                       <div className="avatar-placeholder">
-                        {post.author.firstName[0]}{post.author.lastName[0]}
+                        {post.author ? `${post.author.firstName[0]}${post.author.lastName[0]}` : '?'}
                       </div>
                     )}
                   </div>
                   <div className="author-info">
                     <div className="author-name">
-                      {post.author.firstName} {post.author.lastName}
+                      {post.author ? `${post.author.firstName} ${post.author.lastName}` : 'Utilisateur inconnu'}
                     </div>
                     <div className="post-date">{formatDate(post.createdAt)}</div>
                   </div>
                 </div>
-                {user && (user.role === 'responsable' || user.role === 'admin' || post.author._id === user._id) && (
+                {user && post.author && (user.role === 'responsable' || user.role === 'admin' || post.author._id === user._id) && (
                   <div className="post-actions-menu">
                     {(post.author._id === user._id || user.role === 'responsable' || user.role === 'admin') && (
                       <button className="btn-edit-post" onClick={() => handleEditPost(post)} title="Modifier">
