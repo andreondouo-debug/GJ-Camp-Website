@@ -171,12 +171,16 @@ function NewsletterPage() {
       if (selectedFiles.video) formData.append('video', selectedFiles.video);
       if (selectedFiles.document) formData.append('document', selectedFiles.document);
 
+      console.log('📤 Envoi de la requête POST /api/posts...');
+      
       const response = await axios.post('/api/posts', formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         }
       });
+
+      console.log('✅ Réponse reçue:', response.data);
 
       setPosts([response.data.post, ...posts]);
       setNewPost({ text: '', linkUrl: '', linkText: '', videoUrl: '' });
@@ -187,8 +191,9 @@ function NewsletterPage() {
       setShowPostForm(false);
       alert('✅ Post publié avec succès !');
     } catch (error) {
-      console.error('Erreur création post:', error);
-      alert('❌ Erreur lors de la publication');
+      console.error('❌ Erreur création post:', error);
+      console.error('❌ Détails erreur:', error.response?.data || error.message);
+      alert('❌ Erreur lors de la publication: ' + (error.response?.data?.message || error.message));
     }
   };
 
