@@ -854,8 +854,12 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
 .header-logo {
   width: 60px;
   height: 60px;
-  object-fit: contain;
+  object-fit: cover;
   transition: transform 0.3s ease;
+  border-radius: 50%;
+  border: 2px solid #d4af37;
+  background: white;
+  padding: 3px;
 }
 
 .header-logo:hover {
