@@ -1012,7 +1012,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
 }
 
 .dropdown-menu {
-  display: none;
+  display: none !important;
   position: absolute;
   top: 100%;
   left: 0;
@@ -1027,11 +1027,12 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   animation: fadeIn 0.2s ease;
   border: 2px solid #d4af37;
   flex-direction: column;
+  gap: 0;
 }
 
 .dropdown.dropdown-open .dropdown-menu,
 .dropdown-menu.dropdown-menu-open {
-  display: flex;
+  display: flex !important;
 }
 
 .dropdown-menu li {
