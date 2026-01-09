@@ -44,6 +44,7 @@ const uploadToCloudinary = async (req, res, next) => {
   }
 
   console.log(`📤 Upload de ${Object.keys(req.files).length} fichier(s) vers Cloudinary...`);
+  console.log(`🕒 Timestamp: ${new Date().toISOString()}`);
 
   try {
     // Traiter chaque type de fichier
@@ -53,6 +54,12 @@ const uploadToCloudinary = async (req, res, next) => {
 
       const file = fileArray[0];
       console.log(`🔄 Upload ${fieldname}: ${file.originalname} (${(file.size / 1024).toFixed(2)}KB)`);
+
+      // Vérifier que le buffer existe
+      if (!file.buffer || file.buffer.length === 0) {
+        console.error(`❌ Buffer vide pour ${fieldname}`);
+        continue;
+      }
 
       // Déterminer le dossier Cloudinary
       let folder = 'gj-camp/posts';
@@ -69,16 +76,22 @@ const uploadToCloudinary = async (req, res, next) => {
         resourceType = 'image';
       }
 
-      // Upload via stream
+      // Upload via stream avec timeout
       const uploadPromise = new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error(`Timeout upload ${fieldname} après 90 secondes`));
+        }, 90000); // 90 secondes max par fichier
+
         const uploadStream = cloudinary.uploader.upload_stream(
           {
             folder: folder,
             resource_type: resourceType,
             quality: 'auto',
-            fetch_format: 'auto'
+            fetch_format: 'auto',
+            timeout: 60000 // 60 secondes pour Cloudinary
           },
           (error, result) => {
+            clearTimeout(timeout);
             if (error) {
               console.error(`❌ Erreur upload ${fieldname}:`, error.message);
               reject(error);
@@ -89,8 +102,19 @@ const uploadToCloudinary = async (req, res, next) => {
           }
         );
         
-        // Créer un stream depuis le buffer
-        streamifier.createReadStream(file.buffer).pipe(uploadStream);
+        try {
+          // Créer un stream depuis le buffer
+          const readStream = streamifier.createReadStream(file.buffer);
+          readStream.on('error', (streamError) => {
+            clearTimeout(timeout);
+            console.error(`❌ Erreur stream ${fieldname}:`, streamError);
+            reject(streamError);
+          });
+          readStream.pipe(uploadStream);
+        } catch (streamErr) {
+          clearTimeout(timeout);
+          reject(streamErr);
+        }
       });
 
       const result = await uploadPromise;

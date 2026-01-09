@@ -4,6 +4,19 @@ import axios from 'axios';
 import EmojiPicker from 'emoji-picker-react';
 import '../styles/Newsletter.css';
 
+// Ajouter l'animation de rotation
+const spinnerStyle = document.createElement('style');
+spinnerStyle.innerHTML = `
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+`;
+if (!document.querySelector('style[data-spinner]')) {
+  spinnerStyle.setAttribute('data-spinner', 'true');
+  document.head.appendChild(spinnerStyle);
+}
+
 function NewsletterPage() {
   const { user, token } = useContext(AuthContext);
   const [posts, setPosts] = useState([]);
@@ -11,6 +24,7 @@ function NewsletterPage() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [showPostForm, setShowPostForm] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const observer = useRef();
 
   // Formulaire de création de post
@@ -130,6 +144,11 @@ function NewsletterPage() {
       return;
     }
 
+    if (isPublishing) {
+      console.log('⏳ Publication déjà en cours...');
+      return;
+    }
+
     // Validation sondage
     if (showPollForm) {
       if (!pollData.question.trim()) {
@@ -142,6 +161,8 @@ function NewsletterPage() {
         return;
       }
     }
+
+    setIsPublishing(true);
 
     try {
       const formData = new FormData();
@@ -178,7 +199,7 @@ function NewsletterPage() {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         },
-        timeout: 30000 // 30 secondes timeout
+        timeout: 120000 // 2 minutes timeout pour Cloudinary
       });
 
       console.log('✅ Réponse reçue:', response.data);
@@ -194,7 +215,12 @@ function NewsletterPage() {
     } catch (error) {
       console.error('❌ Erreur création post:', error);
       console.error('❌ Détails erreur:', error.response?.data || error.message);
-      alert('❌ Erreur lors de la publication: ' + (error.response?.data?.message || error.message));
+      const errorMsg = error.code === 'ECONNABORTED' 
+        ? 'Délai d\'attente dépassé. Vérifiez votre connexion et réessayez.'
+        : (error.response?.data?.message || error.message);
+      alert('❌ Erreur lors de la publication: ' + errorMsg);
+    } finally {
+      setIsPublishing(false);
     }
   };
 
@@ -729,12 +755,39 @@ function NewsletterPage() {
                 )}
               </div>
 
-              <button className="btn-publish" onClick={handleCreatePost}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'middle', marginRight: '8px'}}>
-                  <line x1="22" y1="2" x2="11" y2="13"></line>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                </svg>
-                Publier
+              <button 
+                className="btn-publish" 
+                onClick={handleCreatePost}
+                disabled={isPublishing}
+                style={{ opacity: isPublishing ? 0.6 : 1, cursor: isPublishing ? 'wait' : 'pointer' }}
+              >
+                {isPublishing ? (
+                  <>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="20" 
+                      height="20" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      style={{verticalAlign: 'middle', marginRight: '8px', animation: 'spin 1s linear infinite'}}
+                    >
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+                    </svg>
+                    Publication en cours...
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'middle', marginRight: '8px'}}>
+                      <line x1="22" y1="2" x2="11" y2="13"></line>
+                      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                    Publier
+                  </>
+                )}
               </button>
             </div>
           )}
