@@ -38,7 +38,15 @@ router.get('/', async (req, res) => {
 });
 
 // Créer un post (avec médias)
-router.post('/', auth, canCreatePost, upload, uploadToCloudinary, async (req, res) => {
+router.post('/', auth, canCreatePost, (req, res, next) => {
+  upload(req, res, (err) => {
+    if (err) {
+      console.error('❌ Erreur multer:', err);
+      return res.status(400).json({ message: `Erreur upload: ${err.message}` });
+    }
+    next();
+  });
+}, uploadToCloudinary, async (req, res) => {
   try {
     const { text, linkUrl, linkText, videoUrl, pollQuestion, pollOptions, pollType, pollEndsAt } = req.body;
 
