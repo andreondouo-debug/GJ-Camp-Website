@@ -821,11 +821,6 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   box-sizing: border-box !important;
 }
 
-/* Permettre aux pages internes d'avoir du padding */
-.container > * {
-  padding: inherit;
-}
-
 /* Contenu principal sans marges latérales */
 .main-content,
 .home-container {
