@@ -852,7 +852,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
 
 .header-content {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   max-width: 100%;
   margin: 0;
@@ -867,7 +867,8 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  margin-right: auto;
+  position: absolute;
+  left: 10px;
 }
 
 .header-logo {
