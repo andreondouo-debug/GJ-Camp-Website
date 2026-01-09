@@ -338,6 +338,8 @@
   background: linear-gradient(90deg, #d4af37 0%, #ef5b87 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-align: center;
+  width: 100%;
   background-clip: text;
 }
 .carousel-why-list {
@@ -2892,23 +2894,23 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
 /* Responsive */
 @media (max-width: 768px) {
   .header {
-    padding: 8px 10px;
+    padding: 10px 12px;
     margin: 0;
     border-radius: 0;
   }
 
   .header-content {
-    padding: 0 50px !important;
+    padding: 0 70px !important;
   }
 
   .logo {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
   }
 
   .header-logo {
-    width: 45px;
-    height: 45px;
+    width: 55px;
+    height: 55px;
     border-width: 1.5px;
   }
 
@@ -3109,25 +3111,25 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
 
 @media (max-width: 480px) {
   .header {
-    padding: 6px 8px;
+    padding: 8px 10px;
     margin: 0;
     border-radius: 0;
   }
 
   .header-content {
-    padding: 0 40px !important;
+    padding: 0 60px !important;
     gap: 12px;
   }
 
   .logo {
-    width: 40px;
-    height: 40px;
+    width: 55px;
+    height: 55px;
   }
 
   .header-logo {
-    width: 38px;
-    height: 38px;
-    border-width: 1px;
+    width: 50px;
+    height: 50px;
+    border-width: 1.5px;
   }
 
   .logo-link-left {

@@ -41,6 +41,8 @@
   opacity: 0;
   transition: opacity 0.8s ease-in-out;
   pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
 }
 
 .dynamic-carousel-item.active {
@@ -52,6 +54,8 @@
   width: 100%;
   height: 100%;
   position: relative;
+  border-radius: inherit;
+  overflow: hidden;
 }
 
 .dynamic-carousel-overlay {
