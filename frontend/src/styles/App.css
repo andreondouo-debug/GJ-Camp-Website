@@ -3135,10 +3135,12 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
 
   .logo-link-left {
     left: 5px;
+    top: 10px;
   }
 
   .logo-link-right {
     right: 5px;
+    top: 10px;
   }
 
   .nav-menu {
