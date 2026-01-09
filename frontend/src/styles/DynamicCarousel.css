@@ -5,8 +5,10 @@
 .dynamic-carousel {
   position: relative;
   width: 100%;
+  min-height: 500px;
+  max-height: 600px;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 20px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
@@ -164,9 +166,9 @@
 /* Responsive */
 @media (max-width: 768px) {
   .dynamic-carousel {
-    min-height: 350px;
-    max-height: 450px;
-    border-radius: 8px;
+    min-height: 400px;
+    max-height: 500px;
+    border-radius: 16px;
   }
 
   .dynamic-carousel-overlay {
@@ -210,9 +212,9 @@
 
 @media (max-width: 480px) {
   .dynamic-carousel {
-    min-height: 280px;
-    max-height: 380px;
-    border-radius: 6px;
+    min-height: 350px;
+    max-height: 450px;
+    border-radius: 12px;
   }
 
   .dynamic-carousel-overlay {

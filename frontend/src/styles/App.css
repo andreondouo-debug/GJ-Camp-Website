@@ -252,12 +252,15 @@
   }
 }
 .carousel-why-cards {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 260px));
   justify-content: center;
   gap: 28px;
   margin-top: 18px;
-  flex-wrap: wrap;
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Cartes modernes avec effet glassmorphism et bordure dorée */
