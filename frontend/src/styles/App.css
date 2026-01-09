@@ -764,8 +764,9 @@ body {
   border: none;
   margin: 0 !important;
   padding: 0 !important;
-  overflow-x: hidden;
-  width: 100vw;
+  overflow-x: hidden !important;
+  width: 100% !important;
+  max-width: 100vw !important;
 }
 
 html {
@@ -854,10 +855,10 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   display: flex;
   justify-content: center;
   align-items: center;
-  max-width: 100%;
-  margin: 0;
-  padding: 0 10px;
-  width: 100%;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 70px !important;
+  width: 100% !important;
   position: relative;
   z-index: 1;
   gap: 24px;
@@ -3425,6 +3426,8 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   padding: 0;
   z-index: 1002;
   transition: transform 0.3s ease;
+  position: absolute;
+  right: 20px;
 }
 
 .hamburger span {
