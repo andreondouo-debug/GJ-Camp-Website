@@ -759,12 +759,23 @@ body {
   border: none;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
 
 html {
   scroll-behavior: smooth;
   margin: 0;
   padding: 0;
+  background: #ffffff;
+  overflow-x: hidden;
+}
+
+#root {
+  background: #ffffff;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* Échelle typographique inspirée */
