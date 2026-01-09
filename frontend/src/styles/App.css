@@ -3113,14 +3113,16 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
 
 @media (max-width: 480px) {
   .header {
-    padding: 12px 15px;
+    padding: 18px 15px;
     margin: 0;
     border-radius: 0;
+    min-height: 100px;
   }
 
   .header-content {
     padding: 0 90px !important;
     gap: 15px;
+    min-height: 80px;
   }
 
   .logo {
@@ -3621,7 +3623,9 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
     width: 80%;
     max-width: 300px;
     height: 100vh;
-    background: linear-gradient(180deg, #001a4d 0%, #102347 100%);
+    background: linear-gradient(180deg, #001a4d 0%, #0a1c3d 50%, #102347 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     flex-direction: column;
     align-items: flex-start;
     gap: 0;
@@ -3629,7 +3633,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
     transition: right 0.4s ease;
     overflow-y: auto;
     z-index: 9999;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.8);
   }
 
   .nav-menu ul {
