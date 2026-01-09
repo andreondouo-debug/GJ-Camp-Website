@@ -121,6 +121,10 @@ function NewsletterPage() {
 
   // Créer un post
   const handleCreatePost = async () => {
+    console.log('🚀 handleCreatePost appelé');
+    console.log('Token:', token ? 'Présent' : 'Absent');
+    console.log('Text:', newPost.text);
+    
     if (!newPost.text.trim()) {
       alert('Veuillez entrer un message');
       return;
