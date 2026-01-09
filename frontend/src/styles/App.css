@@ -821,14 +821,26 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   box-sizing: border-box !important;
 }
 
+/* Permettre aux pages internes d'avoir du padding */
+.container > * {
+  padding: inherit;
+}
+
 /* Contenu principal sans marges latérales */
 .main-content,
-.home-container,
-.page-container {
+.home-container {
   width: 100vw !important;
   max-width: 100vw !important;
   margin: 0 !important;
   padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Contenu des pages internes - garder le padding naturel */
+.page-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
   box-sizing: border-box !important;
 }
 
