@@ -11,6 +11,7 @@ const Header = () => {
   const [isGestionOpen, setIsGestionOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState('/images/logo-gj.png');
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -64,6 +65,24 @@ const Header = () => {
     };
   }, [isAuthenticated, token]);
 
+  // Récupérer le logo depuis les settings
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const response = await axios.get('/api/settings');
+        if (response.data.settings && response.data.settings.logoUrl) {
+          setLogoUrl(response.data.settings.logoUrl);
+          console.log('🎨 Logo chargé:', response.data.settings.logoUrl);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement du logo:', error);
+        // Garder le logo par défaut
+      }
+    };
+
+    fetchLogo();
+  }, []);
+
   // Fermer le dropdown GESTION quand on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -92,7 +111,7 @@ const Header = () => {
       <div className="header-content">
         {/* Logo */}
         <Link to="/" className="logo-link">
-          <img src="/images/logo-gj.png" alt="Génération Josué" className="header-logo" />
+          <img src={logoUrl} alt="Génération Josué" className="header-logo" />
         </Link>
 
         {/* Bouton Hamburger */}
