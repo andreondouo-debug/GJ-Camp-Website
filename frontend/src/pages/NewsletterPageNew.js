@@ -931,31 +931,48 @@ function NewsletterPage() {
                   let thumbnailUrl = '';
                   const url = post.videoUrl;
                   
+                  console.log('🎬 Video URL détectée:', url);
+                  
                   // YouTube
                   if (url.includes('youtube.com') || url.includes('youtu.be')) {
                     const videoId = url.includes('youtu.be') 
                       ? url.split('youtu.be/')[1]?.split('?')[0]
                       : url.split('v=')[1]?.split('&')[0];
-                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&rel=0`;
-                    thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                    
+                    if (videoId) {
+                      embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&rel=0`;
+                      thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                      console.log('▶️ YouTube détecté - ID:', videoId);
+                    }
                   }
                   // Vimeo
                   else if (url.includes('vimeo.com')) {
                     const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
-                    embedUrl = `https://player.vimeo.com/video/${videoId}`;
-                    // Vimeo thumbnails nécessitent l'API, on utilisera l'iframe directement
-                    thumbnailUrl = null;
+                    if (videoId) {
+                      embedUrl = `https://player.vimeo.com/video/${videoId}`;
+                      // Vimeo thumbnails nécessitent l'API, on utilisera l'iframe directement
+                      thumbnailUrl = null;
+                      console.log('▶️ Vimeo détecté - ID:', videoId);
+                    }
                   }
                   // Dailymotion
-                  else if (url.includes('dailymotion.com')) {
-                    const videoId = url.split('video/')[1]?.split('?')[0];
-                    embedUrl = `https://www.dailymotion.com/embed/video/${videoId}`;
-                    thumbnailUrl = `https://www.dailymotion.com/thumbnail/video/${videoId}`;
+                  else if (url.includes('dailymotion.com') || url.includes('dai.ly')) {
+                    const videoId = url.includes('dai.ly') 
+                      ? url.split('dai.ly/')[1]?.split('?')[0]
+                      : url.split('video/')[1]?.split('?')[0];
+                    
+                    if (videoId) {
+                      embedUrl = `https://www.dailymotion.com/embed/video/${videoId}`;
+                      thumbnailUrl = `https://www.dailymotion.com/thumbnail/video/${videoId}`;
+                      console.log('▶️ Dailymotion détecté - ID:', videoId);
+                    }
                   }
+
+                  console.log('📺 Embed URL:', embedUrl || 'Non généré');
 
                   return embedUrl ? (
                     <div className="post-video-embed" data-video-url={embedUrl}>
-                      {thumbnailUrl && (
+                      {thumbnailUrl ? (
                         <div className="video-thumbnail-wrapper" onClick={handlePlayVideo}>
                           <img src={thumbnailUrl} alt="Aperçu vidéo" className="video-thumbnail" />
                           <div className="play-button-overlay">
@@ -965,7 +982,7 @@ function NewsletterPage() {
                             </svg>
                           </div>
                         </div>
-                      )}
+                      ) : null}
                       <iframe
                         src={embedUrl}
                         frameBorder="0"
@@ -977,16 +994,21 @@ function NewsletterPage() {
                       ></iframe>
                     </div>
                   ) : (
-                    <a href={post.videoUrl} target="_blank" rel="noopener noreferrer" className="post-link">
-                      <div className="link-card">
-                        <div className="link-icon">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                          </svg>
+                    <div className="unsupported-video-link">
+                      <a href={post.videoUrl} target="_blank" rel="noopener noreferrer" className="post-link">
+                        <div className="link-card">
+                          <div className="link-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                          </div>
+                          <div className="link-text">
+                            <div>Voir la vidéo</div>
+                            <small style={{color: '#888', fontSize: '12px'}}>{post.videoUrl}</small>
+                          </div>
                         </div>
-                        <div className="link-text">Voir la vidéo</div>
-                      </div>
-                    </a>
+                      </a>
+                    </div>
                   );
                 })()}
 
