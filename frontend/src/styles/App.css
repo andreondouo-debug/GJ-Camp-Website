@@ -548,7 +548,7 @@
   position: absolute;
   top: 20px;
   right: 20px;
-  z-index: 100;
+  z-index: 10;
   animation: slideInRight 0.8s ease-out;
 }
 
@@ -891,7 +891,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   align-items: center;
   flex-shrink: 0;
   position: absolute;
-  z-index: 100;
+  z-index: 10;
 }
 
 .logo-link-left {
@@ -1074,7 +1074,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   padding: 0.6rem 0;
   margin-top: 0;
   min-width: 220px;
-  z-index: 1000;
+  z-index: 10;
   animation: fadeIn 0.2s ease;
   border: 2px solid #d4af37;
   flex-direction: column;
@@ -3631,8 +3631,9 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
     padding: 0;
     transition: right 0.4s ease;
     overflow-y: auto;
-    z-index: 9999;
+    z-index: 99999;
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.8);
+    isolation: isolate;
   }
 
   .nav-menu ul {
@@ -3718,7 +3719,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
     overflow: hidden;
     transition: max-height 0.4s ease, padding 0.4s ease;
     padding: 0;
-    z-index: 1002;
+    z-index: 10;
   }
 
   .dropdown-menu-open {
