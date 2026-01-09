@@ -1026,11 +1026,12 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   z-index: 1000;
   animation: fadeIn 0.2s ease;
   border: 2px solid #d4af37;
+  flex-direction: column;
 }
 
 .dropdown.dropdown-open .dropdown-menu,
 .dropdown-menu.dropdown-menu-open {
-  display: block;
+  display: flex;
 }
 
 .dropdown-menu li {
