@@ -253,3 +253,33 @@ exports.uploadLogo = async (req, res) => {
     });
   }
 };
+
+/**
+ * Upload du logo CRPT sur Cloudinary
+ */
+exports.uploadCrptLogo = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ 
+        message: 'Aucun fichier logo CRPT fourni' 
+      });
+    }
+    
+    // Utiliser l'URL Cloudinary si disponible, sinon URL locale
+    const crptLogoUrl = req.file.cloudinaryUrl || `/uploads/${req.file.filename}`;
+    
+    console.log(`✅ Logo CRPT uploadé avec succès: ${crptLogoUrl}`);
+    
+    res.json({ 
+      success: true,
+      message: 'Logo CRPT uploadé avec succès',
+      crptLogoUrl: crptLogoUrl
+    });
+  } catch (error) {
+    console.error('❌ Erreur upload logo CRPT:', error);
+    res.status(500).json({ 
+      message: 'Erreur lors de l\'upload du logo CRPT',
+      error: error.message 
+    });
+  }
+};

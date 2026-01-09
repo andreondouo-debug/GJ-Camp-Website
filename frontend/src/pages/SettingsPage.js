@@ -70,10 +70,13 @@ const SettingsPage = () => {
     countdownDate: '2026-08-19T00:00:00',
     countdownTitle: 'Camp GJ dans',
     
-    // Logo
+    // Logo GJ
     logoUrl: '',
     logoWidth: '120px',
     logoHeight: 'auto',
+    
+    // Logo CRPT
+    crptLogoUrl: '',
     logoShape: 'none', // 'none', 'circle', 'rounded', 'square', 'hexagon'
     logoEffect: 'none', // 'none', 'shadow', 'glow', 'border', 'gradient-border', '3d'
     logoAnimation: 'none', // 'none', 'pulse', 'rotate', 'bounce', 'scale'
@@ -118,6 +121,8 @@ const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('colors');
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState('');
+  const [crptLogoFile, setCrptLogoFile] = useState(null);
+  const [crptLogoPreview, setCrptLogoPreview] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   
@@ -298,9 +303,9 @@ const SettingsPage = () => {
     try {
       let updatedSettings = { ...settings };
       
-      // Si un nouveau logo a été uploadé, l'envoyer d'abord
+      // Si un nouveau logo GJ a été uploadé, l'envoyer d'abord
       if (logoFile) {
-        console.log('📤 Upload du logo en cours...');
+        console.log('📤 Upload du logo GJ en cours...');
         const formData = new FormData();
         formData.append('logo', logoFile);
         
@@ -311,13 +316,35 @@ const SettingsPage = () => {
           }
         });
         
-        console.log('✅ Logo uploadé:', uploadResponse.data.logoUrl);
+        console.log('✅ Logo GJ uploadé:', uploadResponse.data.logoUrl);
         
         // Mettre à jour l'URL du logo dans les settings
         updatedSettings.logoUrl = uploadResponse.data.logoUrl;
         setSettings(updatedSettings);
         setLogoFile(null);
         setLogoPreview('');
+      }
+
+      // Si un nouveau logo CRPT a été uploadé, l'envoyer
+      if (crptLogoFile) {
+        console.log('📤 Upload du logo CRPT en cours...');
+        const formData = new FormData();
+        formData.append('crptLogo', crptLogoFile);
+        
+        const uploadResponse = await axios.post(getApiUrl('/api/settings/upload-crpt-logo'), formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        console.log('✅ Logo CRPT uploadé:', uploadResponse.data.crptLogoUrl);
+        
+        // Mettre à jour l'URL du logo CRPT dans les settings
+        updatedSettings.crptLogoUrl = uploadResponse.data.crptLogoUrl;
+        setSettings(updatedSettings);
+        setCrptLogoFile(null);
+        setCrptLogoPreview('');
       }
       
       console.log('💾 Sauvegarde des paramètres...');
@@ -329,7 +356,7 @@ const SettingsPage = () => {
       applySettingsToCSS(updatedSettings);
       
       // Déclencher l'événement pour rafraîchir le logo partout
-      console.log('🔄 Rafraîchissement du logo...');
+      console.log('🔄 Rafraîchissement des logos...');
       window.dispatchEvent(new Event('logoUpdated'));
       
       setMessage('✅ Paramètres sauvegardés avec succès !');
@@ -2672,6 +2699,65 @@ const SettingsPage = () => {
 
           <button className="btn-save" onClick={handleSave}>
             💾 Enregistrer le logo
+          </button>
+        </div>
+      )}
+
+      {/* Gestion du Logo CRPT */}
+      {activeTab === 'logo' && (
+        <div className="settings-section" style={{ marginTop: '2rem' }}>
+          <h2>🏛️ Logo CRPT (Header droite)</h2>
+          
+          <div className="settings-grid">
+            <div className="setting-item full-width">
+              <label>📤 Upload du logo CRPT</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setCrptLogoFile(file);
+                    setCrptLogoPreview(URL.createObjectURL(file));
+                  }
+                }}
+                className="setting-input"
+              />
+              <small style={{ marginTop: '10px', display: 'block', color: '#666' }}>
+                Logo CRPT affiché à droite du header • Formats : PNG, JPG, SVG
+              </small>
+            </div>
+
+            {(crptLogoPreview || settings.crptLogoUrl) && (
+              <div className="setting-item full-width">
+                <label>👁️ Aperçu du logo CRPT</label>
+                <div style={{
+                  padding: '2rem',
+                  background: 'linear-gradient(135deg, #f0f4ff, #fef5ff)',
+                  borderRadius: '12px',
+                  border: '2px solid #e0e0e0',
+                  textAlign: 'center'
+                }}>
+                  <img 
+                    src={crptLogoPreview || settings.crptLogoUrl} 
+                    alt="Logo CRPT" 
+                    style={{
+                      maxWidth: '100%',
+                      height: 'auto',
+                      maxHeight: '200px',
+                      borderRadius: '50%',
+                      border: '2px solid #d4af37',
+                      background: 'white',
+                      padding: '3px'
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button className="btn-save" onClick={handleSave}>
+            💾 Enregistrer le logo CRPT
           </button>
         </div>
       )}

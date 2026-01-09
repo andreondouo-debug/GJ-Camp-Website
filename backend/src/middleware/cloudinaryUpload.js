@@ -41,6 +41,15 @@ const cloudinaryUpload = multer({
   fileFilter: fileFilter
 }).single('logo');
 
+// Configuration de Multer pour logo CRPT
+const cloudinaryUploadCrpt = multer({
+  storage: storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB max
+  },
+  fileFilter: fileFilter
+}).single('crptLogo');
+
 /**
  * Middleware pour uploader le fichier vers Cloudinary
  */
@@ -244,6 +253,7 @@ const uploadCarouselImageToCloudinary = async (req, res, next) => {
 
 module.exports = {
   cloudinaryUpload,
+  cloudinaryUploadCrpt,
   uploadToCloudinary,
   uploadActivityImageToCloudinary,
   uploadCarouselImageToCloudinary

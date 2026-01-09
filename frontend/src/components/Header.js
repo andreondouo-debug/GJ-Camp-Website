@@ -13,6 +13,7 @@ const Header = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState('/images/logo-gj.png');
+  const [crptLogoUrl, setCrptLogoUrl] = useState('/images/crpt-logo.png');
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -66,22 +67,28 @@ const Header = () => {
     };
   }, [isAuthenticated, token]);
 
-  // Récupérer le logo depuis les settings
+  // Récupérer les logos depuis les settings
   useEffect(() => {
-    const fetchLogo = async () => {
+    const fetchLogos = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/settings`);
-        if (response.data.settings && response.data.settings.logoUrl) {
-          setLogoUrl(response.data.settings.logoUrl);
-          console.log('🎨 Logo chargé:', response.data.settings.logoUrl);
+        if (response.data.settings) {
+          if (response.data.settings.logoUrl) {
+            setLogoUrl(response.data.settings.logoUrl);
+            console.log('🎨 Logo GJ chargé:', response.data.settings.logoUrl);
+          }
+          if (response.data.settings.crptLogoUrl) {
+            setCrptLogoUrl(response.data.settings.crptLogoUrl);
+            console.log('🏛️ Logo CRPT chargé:', response.data.settings.crptLogoUrl);
+          }
         }
       } catch (error) {
-        console.error('Erreur lors du chargement du logo:', error);
-        // Garder le logo par défaut
+        console.error('Erreur lors du chargement des logos:', error);
+        // Garder les logos par défaut
       }
     };
 
-    fetchLogo();
+    fetchLogos();
   }, []);
 
   // Fermer le dropdown GESTION quand on clique ailleurs
@@ -117,7 +124,7 @@ const Header = () => {
 
         {/* Logo CRPT à droite */}
         <Link to="/gj-crpt" className="logo-link logo-link-right">
-          <img src="/images/crpt-logo.png" alt="CRPT" className="header-logo" />
+          <img src={crptLogoUrl} alt="CRPT" className="header-logo" />
         </Link>
 
         {/* Bouton Hamburger */}
