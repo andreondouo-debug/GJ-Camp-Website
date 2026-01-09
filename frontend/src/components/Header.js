@@ -110,9 +110,14 @@ const Header = () => {
       {isMobileMenuOpen && <div className="mobile-menu-overlay" onClick={closeMobileMenu}></div>}
       
       <div className="header-content">
-        {/* Logo */}
-        <Link to="/" className="logo-link">
+        {/* Logo GJ à gauche */}
+        <Link to="/" className="logo-link logo-link-left">
           <img src={logoUrl} alt="Génération Josué" className="header-logo" />
+        </Link>
+
+        {/* Logo CRPT à droite */}
+        <Link to="/gj-crpt" className="logo-link logo-link-right">
+          <img src="/images/crpt-logo.png" alt="CRPT" className="header-logo" />
         </Link>
 
         {/* Bouton Hamburger */}

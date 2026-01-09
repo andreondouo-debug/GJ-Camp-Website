@@ -873,7 +873,15 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   align-items: center;
   flex-shrink: 0;
   position: absolute;
+  z-index: 100;
+}
+
+.logo-link-left {
   left: 10px;
+}
+
+.logo-link-right {
+  right: 10px;
 }
 
 .header-logo {
@@ -3515,6 +3523,11 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   .custom-logo {
     max-height: 60px;
     width: auto;
+  }
+
+  /* Cacher le logo CRPT sur mobile pour éviter chevauchement avec hamburger */
+  .logo-link-right {
+    display: none !important;
   }
 
   /* Afficher le bouton hamburger */
