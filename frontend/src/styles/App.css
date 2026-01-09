@@ -3602,16 +3602,9 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
     display: none !important;
   }
 
-  /* Overlay mobile menu */
+  /* Overlay mobile menu (désactivé) */
   .mobile-menu-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 998;
-    animation: fadeIn 0.3s ease;
+    display: none;
   }
 
   @keyframes fadeIn {
@@ -3662,6 +3655,8 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
     padding: 16px 24px;
     font-size: 1rem;
     text-align: left;
+    pointer-events: auto;
+    cursor: pointer;
   }
 
   .nav-menu > ul > li > a:hover {

@@ -113,9 +113,6 @@ const Header = () => {
 
   return (
     <header className="header">
-      {/* Overlay pour le menu mobile */}
-      {isMobileMenuOpen && <div className="mobile-menu-overlay" onClick={closeMobileMenu}></div>}
-      
       <div className="header-content">
         {/* Logo GJ à gauche */}
         <Link to="/" className="logo-link logo-link-left">
