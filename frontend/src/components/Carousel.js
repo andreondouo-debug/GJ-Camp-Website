@@ -397,6 +397,7 @@ const Carousel = () => {
                   objectFit: 'cover',
                   width: '100%',
                   height: isMobile ? '220px' : '100%',
+                  borderRadius: isMobile ? '12px' : '20px',
                 }}
               />
             </div>
