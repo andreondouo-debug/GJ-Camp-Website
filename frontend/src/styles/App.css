@@ -1399,7 +1399,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   height: 500px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border-radius: 0;
+  border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   background: #000;
@@ -1907,6 +1907,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   object-fit: cover;
   object-position: center;
   display: block;
+  border-radius: inherit;
 }
 
 /* ========== ANIMATIONS IMAGE (4 variations) ========== */
@@ -3111,25 +3112,25 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
 
 @media (max-width: 480px) {
   .header {
-    padding: 10px 12px;
+    padding: 12px 15px;
     margin: 0;
     border-radius: 0;
   }
 
   .header-content {
-    padding: 0 80px !important;
-    gap: 12px;
+    padding: 0 90px !important;
+    gap: 15px;
   }
 
   .logo {
-    width: 70px;
-    height: 70px;
+    width: 80px;
+    height: 80px;
   }
 
   .header-logo {
-    width: 65px;
-    height: 65px;
-    border-width: 2px;
+    width: 75px;
+    height: 75px;
+    border-width: 2.5px;
   }
 
   .logo-link-left {
