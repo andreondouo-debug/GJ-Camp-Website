@@ -115,5 +115,3 @@ module.exports = {
   uploadFields,
   uploadToCloudinary
 };
-  uploadToCloudinary
-};
