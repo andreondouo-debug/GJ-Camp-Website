@@ -834,12 +834,13 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   position: relative;
   background: linear-gradient(135deg, rgba(9, 23, 50, 0.95) 0%, rgba(16, 35, 71, 0.92) 60%, rgba(16, 35, 71, 0.88) 100%);
   padding: 20px 0;
-  margin: 0;
+  margin: 0 !important;
   border-radius: 0;
   box-shadow: var(--shadow-lg);
   overflow: visible;
   color: #ffffff;
-  width: 100%;
+  width: 100vw !important;
+  max-width: 100vw !important;
 }
 
 .header::after {
@@ -856,8 +857,8 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   justify-content: center;
   align-items: center;
   max-width: 100% !important;
-  margin: 0 !important;
-  padding: 0 70px !important;
+  margin: 0 auto !important;
+  padding: 0 100px !important;
   width: 100% !important;
   position: relative;
   z-index: 1;
