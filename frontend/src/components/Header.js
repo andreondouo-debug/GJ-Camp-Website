@@ -147,7 +147,7 @@ const Header = () => {
             <li><Link to="/newsletter" onClick={closeMobileMenu}>GJ NEWS</Link></li>
             {isAuthenticated && (
               <li className="messages-menu-item">
-                <Link to="/messages" className="messages-link" onClick={closeMobileMenu}>
+                <Link to="/gestion/messages" className="messages-link" onClick={closeMobileMenu}>
                   <MailIcon size={24} color="#ffffff" />
                   {unreadCount > 0 && (
                     <span className="message-badge">{unreadCount}</span>
