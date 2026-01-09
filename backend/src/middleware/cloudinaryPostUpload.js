@@ -18,13 +18,16 @@ if (process.env.CLOUDINARY_CLOUD_NAME) {
 // Stockage en mémoire
 const storage = multer.memoryStorage();
 
-// Configuration multer pour posts
+// Configuration multer pour posts (retourne le middleware complet)
 const upload = multer({
   storage: storage,
   limits: {
     fileSize: 50 * 1024 * 1024 // 50MB max
   }
-}).fields([
+});
+
+// Middleware multer avec .fields()
+const uploadFields = upload.fields([
   { name: 'image', maxCount: 1 },
   { name: 'video', maxCount: 1 },
   { name: 'document', maxCount: 1 }
@@ -109,6 +112,8 @@ const uploadToCloudinary = async (req, res, next) => {
 };
 
 module.exports = {
-  upload,
+  uploadFields,
+  uploadToCloudinary
+};
   uploadToCloudinary
 };

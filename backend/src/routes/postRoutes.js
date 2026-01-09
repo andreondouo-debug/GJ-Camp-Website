@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const { requireAdminRole, canCreatePost } = require('../middleware/roleCheck');
 const Post = require('../models/Post');
-const { upload, uploadToCloudinary } = require('../middleware/cloudinaryPostUpload');
+const { uploadFields, uploadToCloudinary } = require('../middleware/cloudinaryPostUpload');
 const { notifyNewPost } = require('../services/notificationService');
 
 // Récupérer tous les posts (avec pagination)
@@ -38,15 +38,7 @@ router.get('/', async (req, res) => {
 });
 
 // Créer un post (avec médias)
-router.post('/', auth, canCreatePost, (req, res, next) => {
-  upload(req, res, (err) => {
-    if (err) {
-      console.error('❌ Erreur multer:', err);
-      return res.status(400).json({ message: `Erreur upload: ${err.message}` });
-    }
-    next();
-  });
-}, uploadToCloudinary, async (req, res) => {
+router.post('/', auth, canCreatePost, uploadFields, uploadToCloudinary, async (req, res) => {
   try {
     const { text, linkUrl, linkText, videoUrl, pollQuestion, pollOptions, pollType, pollEndsAt } = req.body;
 
