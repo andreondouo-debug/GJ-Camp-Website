@@ -1335,6 +1335,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   width: 100%;
+  z-index: 1;
 }
 
 .footer::after {
