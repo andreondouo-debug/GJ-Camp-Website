@@ -765,8 +765,9 @@ body {
   margin: 0 !important;
   padding: 0 !important;
   overflow-x: hidden !important;
-  width: 100% !important;
+  width: 100vw !important;
   max-width: 100vw !important;
+  box-sizing: border-box !important;
 }
 
 html {
@@ -808,24 +809,26 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
 .btn-primary:active, .btn-secondary:active { transform: translateY(0); }
 
 .container {
-  width: 100% !important;
+  width: 100vw !important;
   max-width: 100vw !important;
   min-height: 100vh;
   background: #ffffff !important;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  overflow-x: hidden !important;
   margin: 0 !important;
   padding: 0 !important;
+  box-sizing: border-box !important;
 }
 
 /* Contenu principal sans marges latérales */
 .main-content,
 .home-container,
-.page-container {
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
+.page-contaivw !important;
+  max-width: 100vw !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important
   padding: 0;
 }
 
