@@ -1345,17 +1345,55 @@
   background: linear-gradient(to right, transparent, #dee2e6, transparent);
 }
 
-/* Liked state */
+/* Liked state avec animation rose */
 .btn-action.liked {
-  color: #dc3545;
+  color: #ff69b4; /* Rose vif */
   font-weight: 700;
-  background: rgba(220, 53, 69, 0.1);
-  transform: scale(1.1);
+  background: rgba(255, 105, 180, 0.15);
+  animation: heartPulse 0.5s ease-out;
 }
 
 .btn-action.liked:hover {
-  background: rgba(220, 53, 69, 0.15);
-  color: #c82333;
+  background: rgba(255, 105, 180, 0.25);
+  color: #ff1493; /* Rose plus foncé au hover */
+  transform: scale(1.1);
+}
+
+.btn-action.liked svg {
+  animation: heartBeat 0.8s ease-in-out;
+  filter: drop-shadow(0 0 8px rgba(255, 105, 180, 0.6));
+}
+
+/* Animation de pulsation du cœur */
+@keyframes heartPulse {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.25);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+/* Animation de battement */
+@keyframes heartBeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  10%, 30% {
+    transform: scale(0.9);
+  }
+  20%, 40%, 60%, 80% {
+    transform: scale(1.1);
+  }
+  50%, 70% {
+    transform: scale(1.05);
+  }
 }
 
 /* Avatar avec image */

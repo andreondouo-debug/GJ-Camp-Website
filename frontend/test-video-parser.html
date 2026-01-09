@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Parseur Vidéo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #a01e1e;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+            margin-top: 10px;
+        }
+        .thumbnail {
+            width: 100%;
+            max-width: 600px;
+            cursor: pointer;
+            position: relative;
+        }
+        .thumbnail img {
+            width: 100%;
+            border-radius: 8px;
+        }
+        .play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎬 Test Parseur Vidéo</h1>
+    <p>Entrez une URL YouTube, Vimeo ou Dailymotion</p>
+    
+    <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=..." 
+           value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+    <button onclick="testVideo()">Tester</button>
+    
+    <div id="result" class="result"></div>
+    
+    <script>
+        function testVideo() {
+            const url = document.getElementById('videoUrl').value;
+            const resultDiv = document.getElementById('result');
+            
+            let embedUrl = '';
+            let thumbnailUrl = '';
+            
+            console.log('🎬 Video URL détectée:', url);
+            
+            // YouTube
+            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                const videoId = url.includes('youtu.be') 
+                    ? url.split('youtu.be/')[1]?.split('?')[0]
+                    : url.split('v=')[1]?.split('&')[0];
+                
+                if (videoId) {
+                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&rel=0`;
+                    thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                    console.log('▶️ YouTube détecté - ID:', videoId);
+                }
+            }
+            // Vimeo
+            else if (url.includes('vimeo.com')) {
+                const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
+                if (videoId) {
+                    embedUrl = `https://player.vimeo.com/video/${videoId}`;
+                    thumbnailUrl = null;
+                    console.log('▶️ Vimeo détecté - ID:', videoId);
+                }
+            }
+            // Dailymotion
+            else if (url.includes('dailymotion.com') || url.includes('dai.ly')) {
+                const videoId = url.includes('dai.ly') 
+                    ? url.split('dai.ly/')[1]?.split('?')[0]
+                    : url.split('video/')[1]?.split('?')[0];
+                
+                if (videoId) {
+                    embedUrl = `https://www.dailymotion.com/embed/video/${videoId}`;
+                    thumbnailUrl = `https://www.dailymotion.com/thumbnail/video/${videoId}`;
+                    console.log('▶️ Dailymotion détecté - ID:', videoId);
+                }
+            }
+            
+            console.log('📺 Embed URL:', embedUrl || 'Non généré');
+            
+            if (embedUrl) {
+                let html = '<h3>✅ Vidéo détectée</h3>';
+                html += `<p><strong>URL Embed:</strong> ${embedUrl}</p>`;
+                
+                if (thumbnailUrl) {
+                    html += `<p><strong>Miniature:</strong> ${thumbnailUrl}</p>`;
+                    html += `<div class="thumbnail" onclick="loadVideo()">
+                                <img src="${thumbnailUrl}" alt="Miniature" id="thumb">
+                                <div class="play-overlay">▶</div>
+                             </div>`;
+                    html += `<iframe id="videoFrame" src="${embedUrl}" style="display:none"></iframe>`;
+                } else {
+                    html += `<iframe src="${embedUrl}"></iframe>`;
+                }
+                
+                resultDiv.innerHTML = html;
+            } else {
+                resultDiv.innerHTML = '<h3>❌ Format non supporté</h3><p>URL: ' + url + '</p>';
+            }
+        }
+        
+        function loadVideo() {
+            document.getElementById('thumb').parentElement.style.display = 'none';
+            document.getElementById('videoFrame').style.display = 'block';
+            const frame = document.getElementById('videoFrame');
+            frame.src = frame.src.replace('autoplay=0', 'autoplay=1');
+        }
+        
+        // Test automatique au chargement
+        window.onload = () => testVideo();
+    </script>
+</body>
+</html>
