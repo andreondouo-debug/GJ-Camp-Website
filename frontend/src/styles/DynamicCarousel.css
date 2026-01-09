@@ -163,11 +163,98 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .dynamic-carousel {
+    min-height: 350px;
+    max-height: 450px;
+    border-radius: 8px;
+  }
+
+  .dynamic-carousel-overlay {
+    padding: 1.5rem 1rem;
+  }
+
   .dynamic-carousel-overlay h2 {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
   }
   
   .dynamic-carousel-description {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    max-width: 100%;
+  }
+
+  .dynamic-carousel-description h3 {
+    font-size: 1.3rem;
+  }
+
+  .dynamic-carousel-description li {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .dynamic-carousel-indicators {
+    bottom: 12px;
+    gap: 8px;
+  }
+
+  .dynamic-carousel-indicators .indicator {
+    width: 10px;
+    height: 10px;
+  }
+
+  .dynamic-carousel-indicators .indicator.active {
+    width: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dynamic-carousel {
+    min-height: 280px;
+    max-height: 380px;
+    border-radius: 6px;
+  }
+
+  .dynamic-carousel-overlay {
+    padding: 1rem 0.75rem;
+  }
+
+  .dynamic-carousel-overlay h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .dynamic-carousel-description {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  .dynamic-carousel-description h3 {
+    font-size: 1.1rem;
+    margin: 0.75rem 0 0.35rem 0;
+  }
+
+  .dynamic-carousel-description li {
+    margin: 0.35rem 0;
+    padding-left: 1.25rem;
+    font-size: 0.75rem;
+  }
+
+  .dynamic-carousel-description li::before {
     font-size: 1rem;
+  }
+
+  .dynamic-carousel-indicators {
+    bottom: 10px;
+    gap: 6px;
+  }
+
+  .dynamic-carousel-indicators .indicator {
+    width: 8px;
+    height: 8px;
+  }
+
+  .dynamic-carousel-indicators .indicator.active {
+    width: 20px;
   }
 }
