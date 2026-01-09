@@ -4,6 +4,7 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { MailIcon, UserIcon } from './Icons';
 import SettingsIcon from './SettingsIcon';
+import { API_URL } from '../config/api';
 import '../styles/App.css';
 
 const Header = () => {
@@ -69,7 +70,7 @@ const Header = () => {
   useEffect(() => {
     const fetchLogo = async () => {
       try {
-        const response = await axios.get('/api/settings');
+        const response = await axios.get(`${API_URL}/api/settings`);
         if (response.data.settings && response.data.settings.logoUrl) {
           setLogoUrl(response.data.settings.logoUrl);
           console.log('🎨 Logo chargé:', response.data.settings.logoUrl);

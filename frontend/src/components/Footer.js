@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_URL } from '../config/api';
 import SocialLinks from './SocialLinks';
 import '../styles/App.css';
 
@@ -11,7 +12,7 @@ const Footer = () => {
   useEffect(() => {
     const fetchLogo = async () => {
       try {
-        const response = await axios.get('/api/settings');
+        const response = await axios.get(`${API_URL}/api/settings`);
         if (response.data.settings && response.data.settings.logoUrl) {
           setLogoUrl(response.data.settings.logoUrl);
         }
