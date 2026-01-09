@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const { requireAdminRole, canCreatePost } = require('../middleware/roleCheck');
 const Post = require('../models/Post');
-const upload = require('../middleware/upload');
+const { upload, uploadToCloudinary } = require('../middleware/cloudinaryPostUpload');
 const { notifyNewPost } = require('../services/notificationService');
 
 // Récupérer tous les posts (avec pagination)
@@ -38,11 +38,7 @@ router.get('/', async (req, res) => {
 });
 
 // Créer un post (avec médias)
-router.post('/', auth, canCreatePost, upload.fields([
-  { name: 'image', maxCount: 1 },
-  { name: 'video', maxCount: 1 },
-  { name: 'document', maxCount: 1 }
-]), async (req, res) => {
+router.post('/', auth, canCreatePost, upload, uploadToCloudinary, async (req, res) => {
   try {
     const { text, linkUrl, linkText, videoUrl, pollQuestion, pollOptions, pollType, pollEndsAt } = req.body;
 
@@ -53,10 +49,10 @@ router.post('/', auth, canCreatePost, upload.fields([
     const postData = {
       author: req.user.userId,
       text: text.trim(),
-      image: req.files?.image ? `/uploads/${req.files.image[0].filename}` : null,
-      video: req.files?.video ? `/uploads/${req.files.video[0].filename}` : null,
+      image: req.files?.image?.[0]?.cloudinaryUrl || null,
+      video: req.files?.video?.[0]?.cloudinaryUrl || null,
       videoUrl: videoUrl || null,
-      document: req.files?.document ? `/uploads/${req.files.document[0].filename}` : null,
+      document: req.files?.document?.[0]?.cloudinaryUrl || null,
       link: linkUrl ? { url: linkUrl, text: linkText || linkUrl } : null
     };
 
