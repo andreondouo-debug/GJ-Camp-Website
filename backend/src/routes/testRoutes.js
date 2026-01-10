@@ -1,63 +1,64 @@
 const express = require('express');
 const router = express.Router();
-const nodemailer = require('nodemailer');
+const { sendEmailViaBrevoAPI } = require('../config/email');
 
 // @route   GET /api/test/email-config
-// @desc    Tester la configuration email
+// @desc    Tester la configuration email (API Brevo)
 router.get('/email-config', async (req, res) => {
   try {
-    console.log('🧪 Test de configuration email demandé');
+    console.log('🧪 Test de configuration email avec API Brevo');
     
-    // Créer le transporteur Gmail
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
+    // Vérifier que BREVO_API_KEY est configurée
+    if (!process.env.BREVO_API_KEY) {
+      return res.status(500).json({
+        success: false,
+        message: '❌ BREVO_API_KEY non configurée',
+        details: {
+          hint: 'Ajoutez BREVO_API_KEY dans les variables d\'environnement Render'
+        }
+      });
+    }
 
-    // Tester la connexion
-    console.log('🔌 Test de connexion SMTP...');
-    await transporter.verify();
-    console.log('✅ Connexion SMTP réussie!');
-
-    // Envoyer un email de test
-    console.log('📨 Envoi email de test...');
-    const info = await transporter.sendMail({
-      from: `"GJ Camp Test" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER, // S'envoyer à soi-même
-      subject: '✅ Test Email GJ Camp',
-      html: `
-        <h2>✅ Configuration Email Fonctionnelle!</h2>
-        <p>Si vous recevez cet email, la configuration fonctionne.</p>
+    // Email de test
+    const testEmail = process.env.EMAIL_FROM || 'gjcontactgj0@gmail.com';
+    
+    console.log('📨 Envoi email de test via API Brevo...');
+    const result = await sendEmailViaBrevoAPI(
+      testEmail,
+      '✅ Test API Brevo - GJ Camp',
+      `
+        <h2>✅ Configuration API Brevo Fonctionnelle!</h2>
+        <p>Si vous recevez cet email, l'API Brevo fonctionne correctement sur Render.</p>
         <p><strong>Détails:</strong></p>
         <ul>
-          <li>Service: Gmail</li>
-          <li>Utilisateur: ${process.env.EMAIL_USER}</li>
+          <li>Méthode: API HTTP Brevo (port 443)</li>
+          <li>Email: ${testEmail}</li>
           <li>Date: ${new Date().toLocaleString('fr-FR')}</li>
+          <li>Environnement: ${process.env.NODE_ENV || 'production'}</li>
         </ul>
+        <p><em>✅ Le blocage SMTP de Render a été contourné avec succès!</em></p>
       `,
-    });
+      'Test de configuration API Brevo - Si vous recevez cet email, tout fonctionne!'
+    );
 
-    console.log('✅ Email de test envoyé!');
-    console.log('  - Message ID:', info.messageId);
-    console.log('  - Réponse:', info.response);
+    console.log('✅ Email de test envoyé via API Brevo!');
+    console.log('  - Message ID:', result.messageId);
 
     res.json({
       success: true,
-      message: 'Configuration email fonctionnelle',
+      message: '✅ Configuration API Brevo fonctionnelle',
       details: {
-        user: process.env.EMAIL_USER,
-        messageId: info.messageId,
-        response: info.response,
+        method: 'Brevo HTTP API (port 443)',
+        email: testEmail,
+        messageId: result.messageId,
+        timestamp: new Date().toISOString()
       },
     });
   } catch (error) {
-    console.error('❌ Erreur test email:', error);
+    console.error('❌ Erreur test API Brevo:', error);
     res.status(500).json({
       success: false,
-      message: 'Erreur lors du test email',
+      message: 'Erreur lors du test API Brevo',
       error: {
         message: error.message,
         code: error.code,
