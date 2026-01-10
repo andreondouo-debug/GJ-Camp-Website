@@ -66,9 +66,11 @@ const SignupPage = () => {
       formData.churchWebsite
     );
     if (result.success) {
-      setSuccess('✅ Inscription réussie ! Un email de vérification a été envoyé à ' + formData.email + '. Veuillez vérifier votre boîte de réception.');
-      // Ne pas rediriger automatiquement
-      // L'utilisateur doit d'abord vérifier son email
+      setSuccess('✅ Inscription réussie ! Un email de vérification a été envoyé à ' + formData.email + '.');
+      // Rediriger vers la page d'accueil après 2 secondes
+      setTimeout(() => {
+        navigate('/', { state: { signupSuccess: true, email: formData.email } });
+      }, 2000);
     } else {
       setError(result.error);
     }

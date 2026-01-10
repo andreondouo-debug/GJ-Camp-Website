@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import Carousel from '../components/Carousel';
 import TimerCamp from '../components/TimerCamp';
 import SectionICCOnline from '../components/SectionICCOnline';
@@ -7,9 +7,51 @@ import '../styles/App.css';
 
 const HomePage = () => {
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 480;
+  const location = useLocation();
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.inscriptionSuccess || location.state?.signupSuccess) {
+      setShowSuccessMessage(true);
+      
+      // Masquer le message après 5 secondes
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
+      
+      // Nettoyer l'état
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   return (
     <div className="container">
+      {/* Message de succès inscription */}
+      {showSuccessMessage && (
+        <div style={{
+          position: 'fixed',
+          top: '80px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#28a745',
+          color: 'white',
+          padding: '15px 30px',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 9999,
+          fontSize: '16px',
+          fontWeight: '500',
+          animation: 'slideDown 0.3s ease-out',
+          textAlign: 'center',
+          maxWidth: '90%'
+        }}>
+          {location.state?.signupSuccess 
+            ? `✅ Inscription réussie ! Vérifiez votre email ${location.state?.email || ''} pour activer votre compte ! 📧`
+            : '✅ Inscription réussie ! Bienvenue au Camp GJ 2026 ! 🎉'
+          }
+        </div>
+      )}
+      
       {/* Timer affiché en haut sur mobile */}
       {isMobile && (
         <div className="timer-camp-mobile-top">
