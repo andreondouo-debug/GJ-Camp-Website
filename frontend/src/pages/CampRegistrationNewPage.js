@@ -109,9 +109,10 @@ const CampRegistrationNewPage = () => {
 
         setMessage('✅ Inscription enregistrée ! Votre paiement en espèces est en attente de validation par un responsable.');
         
+        // Redirection vers l'accueil avec message de succès
         setTimeout(() => {
-          navigate('/tableau-de-bord');
-        }, 3000);
+          navigate('/', { state: { inscriptionSuccess: true } });
+        }, 2000);
         
         setLoading(false);
         return;
@@ -151,9 +152,10 @@ const CampRegistrationNewPage = () => {
       setMessage('🎉 Paiement réussi ! Inscription enregistrée. Redirection...');
       setShowPayPal(false);
       
+      // Redirection immédiate vers l'accueil avec message de succès
       setTimeout(() => {
-        navigate('/tableau-de-bord');
-      }, 2000);
+        navigate('/', { state: { inscriptionSuccess: true } });
+      }, 1500);
       
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de l\'enregistrement de l\'inscription');

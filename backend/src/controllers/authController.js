@@ -65,14 +65,10 @@ exports.signup = async (req, res) => {
 
     await user.save();
 
-    // Envoyer l'email de vérification
-    try {
-      await sendVerificationEmail(email, firstName, verificationToken);
-      console.log(`✉️ Email de vérification envoyé à ${email}`);
-    } catch (emailError) {
-      console.error('❌ Erreur lors de l\'envoi de l\'email:', emailError);
-      // On continue quand même l'inscription
-    }
+    // Envoyer l'email de vérification en arrière-plan (non-bloquant)
+    sendVerificationEmail(email, firstName, verificationToken)
+      .then(() => console.log(`✉️ Email de vérification envoyé à ${email}`))
+      .catch((emailError) => console.error('❌ Erreur lors de l\'envoi de l\'email:', emailError));
 
     const sanitizedUser = await User.findById(user._id);
     const token = generateToken(sanitizedUser);
