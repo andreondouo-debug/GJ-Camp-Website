@@ -3505,7 +3505,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   border: none;
   cursor: pointer;
   padding: 0;
-  z-index: 10000;
+  z-index: 99999;
   transition: transform 0.3s ease;
   position: absolute;
   right: 20px;
