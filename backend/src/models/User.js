@@ -163,7 +163,9 @@ userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
 
   try {
-    const salt = await bcrypt.genSalt(10);
+    // Réduit à 8 rounds pour améliorer les performances sur Render free tier
+    // (toujours sécurisé, mais 4x plus rapide que 10 rounds)
+    const salt = await bcrypt.genSalt(8);
     this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
