@@ -2,8 +2,15 @@ const nodemailer = require('nodemailer');
 
 // Configuration du transporteur d'email
 const createTransporter = () => {
+  console.log('📧 Configuration email détectée:');
+  console.log('  - EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'non défini');
+  console.log('  - EMAIL_USER:', process.env.EMAIL_USER || 'non défini');
+  console.log('  - EMAIL_HOST:', process.env.EMAIL_HOST || 'non défini');
+  console.log('  - NODE_ENV:', process.env.NODE_ENV || 'development');
+  
   // En production, utiliser un service d'email configuré
   if (process.env.EMAIL_SERVICE === 'gmail') {
+    console.log('✅ Utilisation de Gmail pour l\'envoi d\'emails');
     return nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -12,6 +19,7 @@ const createTransporter = () => {
       },
     });
   } else if (process.env.EMAIL_SERVICE === 'sendgrid') {
+    console.log('✅ Utilisation de SendGrid pour l\'envoi d\'emails');
     return nodemailer.createTransport({
       host: 'smtp.sendgrid.net',
       port: 587,
@@ -40,10 +48,13 @@ const createTransporter = () => {
 
 // Envoyer un email de vérification
 const sendVerificationEmail = async (email, firstName, verificationToken) => {
+  console.log(`📨 Tentative d'envoi d'email de vérification à: ${email}`);
+  
   let transporter = createTransporter();
   
   // Si pas de transporteur configuré, créer un compte de test Ethereal
   if (!transporter) {
+    console.log('⚠️ Aucun transporteur configuré, utilisation d\'Ethereal (test)');
     const testAccount = await nodemailer.createTestAccount();
     transporter = nodemailer.createTransport({
       host: 'smtp.ethereal.email',
@@ -125,10 +136,17 @@ const sendVerificationEmail = async (email, firstName, verificationToken) => {
 
   const info = await transporter.sendMail(mailOptions);
   
+  console.log('✅ Email envoyé avec succès!');
+  console.log('  - Message ID:', info.messageId);
+  console.log('  - Destinataire:', email);
+  console.log('  - Réponse serveur:', info.response);
+  
   // Si en développement avec Ethereal, afficher le lien de prévisualisation
   if (process.env.NODE_ENV !== 'production') {
-    console.log('📨 Email de vérification envoyé');
+    console.log('📨 Email de vérification envoyé en mode test');
     console.log('🔗 Prévisualisation:', nodemailer.getTestMessageUrl(info));
+  } else {
+    console.log('📨 Email de vérification envoyé en production à:', email);
   }
   
   return info;

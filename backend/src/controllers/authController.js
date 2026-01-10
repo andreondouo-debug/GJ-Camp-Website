@@ -67,8 +67,15 @@ exports.signup = async (req, res) => {
 
     // Envoyer l'email de vérification en arrière-plan (non-bloquant)
     sendVerificationEmail(email, firstName, verificationToken)
-      .then(() => console.log(`✉️ Email de vérification envoyé à ${email}`))
-      .catch((emailError) => console.error('❌ Erreur lors de l\'envoi de l\'email:', emailError));
+      .then(() => {
+        console.log(`✅ Email de vérification envoyé avec succès à ${email}`);
+      })
+      .catch((emailError) => {
+        console.error(`❌ Erreur lors de l'envoi de l'email à ${email}:`);
+        console.error('  Message:', emailError.message);
+        console.error('  Code:', emailError.code);
+        console.error('  Stack:', emailError.stack);
+      });
 
     const sanitizedUser = await User.findById(user._id);
     const token = generateToken(sanitizedUser);
