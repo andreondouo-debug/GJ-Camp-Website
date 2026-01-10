@@ -15,6 +15,7 @@ const settingsRoutes = require('./routes/settingsRoutes');
 const carouselRoutes = require('./routes/carouselRoutes');
 const activityTrackingRoutes = require('./routes/activityTrackingRoutes');
 const passwordResetRoutes = require('./routes/passwordResetRoutes');
+const testRoutes = require('./routes/testRoutes');
 
 const app = express();
 
@@ -54,6 +55,7 @@ app.use('/api/activity-tracking', activityTrackingRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/carousel', carouselRoutes);
 app.use('/api/password-reset', passwordResetRoutes);
+app.use('/api/test', testRoutes);
 
 // Route de test
 app.get('/api/health', (req, res) => {
