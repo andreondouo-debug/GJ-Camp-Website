@@ -67,15 +67,20 @@ exports.createRegistration = async (req, res) => {
     }
 
     // ✅ Vérifier la transaction auprès de PayPal
+    console.log('🔍 Vérification PayPal pour orderID:', paymentDetails.orderID);
     const verification = await paypalService.verifyPayment(
       paymentDetails.orderID
     );
 
+    console.log('📋 Résultat vérification:', verification);
+
     if (!verification.verified) {
       console.error('❌ Paiement non vérifié:', verification.error);
+      console.error('❌ Détails complets:', JSON.stringify(verification, null, 2));
       return res.status(400).json({ 
         message: '❌ Paiement invalide ou non complété',
-        error: verification.error
+        error: verification.error,
+        details: verification
       });
     }
 

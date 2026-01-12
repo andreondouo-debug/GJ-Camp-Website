@@ -158,7 +158,11 @@ const CampRegistrationNewPage = () => {
       }, 1500);
       
     } catch (err) {
-      setError(err.response?.data?.message || 'Erreur lors de l\'enregistrement de l\'inscription');
+      console.error('❌ Erreur complète:', err);
+      console.error('❌ Réponse backend:', err.response?.data);
+      const errorMsg = err.response?.data?.message || 'Erreur lors de l\'enregistrement de l\'inscription';
+      const errorDetail = err.response?.data?.error ? ` - Détail: ${err.response.data.error}` : '';
+      setError(errorMsg + errorDetail);
     } finally {
       setLoading(false);
     }
