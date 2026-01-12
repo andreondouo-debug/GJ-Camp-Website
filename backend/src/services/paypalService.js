@@ -4,9 +4,19 @@ class PayPalService {
   constructor() {
     this.clientId = process.env.PAYPAL_CLIENT_ID;
     this.clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-    this.baseURL = process.env.NODE_ENV === 'production' 
+    // Utiliser PAYPAL_MODE pour déterminer l'environnement (sandbox ou live)
+    // Par défaut: sandbox pour éviter les erreurs avec credentials de test
+    const mode = process.env.PAYPAL_MODE || 'sandbox';
+    this.baseURL = mode === 'live' 
       ? 'https://api.paypal.com'
       : 'https://api-m.sandbox.paypal.com';
+    
+    console.log('🔧 PayPal Service configuré:', {
+      mode: mode,
+      baseURL: this.baseURL,
+      hasClientId: !!this.clientId,
+      hasClientSecret: !!this.clientSecret
+    });
   }
 
   // Obtenir un token d'accès PayPal
