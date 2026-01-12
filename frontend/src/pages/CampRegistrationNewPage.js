@@ -133,6 +133,10 @@ const CampRegistrationNewPage = () => {
   const handlePaymentSuccess = async (details) => {
     setLoading(true);
     try {
+      console.log('💰 Détails paiement PayPal:', details);
+      console.log('📦 ID Order:', details.id);
+      console.log('👤 Payer:', details.payer);
+      
       // Enregistrer l'inscription avec les détails du paiement
       const registrationData = {
         ...form,
@@ -144,6 +148,8 @@ const CampRegistrationNewPage = () => {
           amountPaid: form.amountPaid
         }
       };
+
+      console.log('📤 Envoi au backend:', registrationData);
 
       const response = await axios.post('/api/registration', registrationData, {
         headers: { Authorization: `Bearer ${token}` }
