@@ -327,25 +327,41 @@ exports.resendVerification = async (req, res) => {
 };
 
 // @route   POST /api/auth/upload-photo
-// @desc    Upload photo de profil
+// @desc    Upload photo de profil (Cloudinary)
 exports.uploadPhoto = async (req, res) => {
   try {
-    if (!req.file) {
+    // Le fichier et son URL Cloudinary sont déjà traités par le middleware
+    if (!req.file || !req.file.cloudinaryUrl) {
       return res.status(400).json({ message: 'Aucun fichier fourni' });
     }
 
     const userId = req.user.userId;
-    const photoUrl = `/uploads/${req.file.filename}`;
+    const photoUrl = req.file.cloudinaryUrl;
 
-    await User.findByIdAndUpdate(userId, { profilePhoto: photoUrl });
+    // Mettre à jour l'utilisateur avec l'URL Cloudinary
+    const user = await User.findByIdAndUpdate(
+      userId, 
+      { profilePhoto: photoUrl },
+      { new: true, select: '-password' }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+
+    console.log('✅ Photo de profil mise à jour:', photoUrl);
 
     res.status(200).json({
       message: 'Photo de profil mise à jour avec succès',
-      profilePhoto: photoUrl
+      profilePhoto: photoUrl,
+      user: user
     });
   } catch (error) {
-    console.error('Erreur lors de l\'upload de la photo:', error);
-    res.status(500).json({ message: 'Erreur lors de l\'upload de la photo' });
+    console.error('❌ Erreur lors de l\'upload de la photo:', error);
+    res.status(500).json({ 
+      message: 'Erreur lors de l\'upload de la photo',
+      error: error.message 
+    });
   }
 };
 

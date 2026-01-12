@@ -3,7 +3,7 @@ const { body } = require('express-validator');
 const authController = require('../controllers/authController');
 const auth = require('../middleware/auth');
 const requireCampRegistration = require('../middleware/requireCampRegistration');
-const upload = require('../middleware/upload');
+const { profilePhotoUpload, uploadProfilePhotoToCloudinary } = require('../middleware/profilePhotoUpload');
 
 const router = express.Router();
 
@@ -34,7 +34,7 @@ router.post('/reset-password/:token', authController.resetPassword);
 // Routes protégées
 router.get('/me', auth, authController.getMe);
 router.put('/profile', auth, authController.updateProfile);
-router.post('/upload-photo', auth, upload.single('profilePhoto'), authController.uploadPhoto);
+router.post('/upload-photo', auth, profilePhotoUpload, uploadProfilePhotoToCloudinary, authController.uploadPhoto);
 router.patch('/update-selected-activities', auth, requireCampRegistration, authController.updateSelectedActivities);
 // Enregistrer les choix d'activités par créneau (nécessite inscription validée)
 router.patch('/update-selected-creneaux', auth, requireCampRegistration, authController.updateSelectedCreneaux);
