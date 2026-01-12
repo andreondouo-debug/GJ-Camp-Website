@@ -69,4 +69,48 @@ router.get('/email-config', async (req, res) => {
   }
 });
 
+// @route   GET /api/test/paypal-config
+// @desc    Vérifier la configuration PayPal
+router.get('/paypal-config', async (req, res) => {
+  try {
+    console.log('🧪 Test de configuration PayPal');
+    
+    const config = {
+      clientId: process.env.PAYPAL_CLIENT_ID ? '✅ Configuré' : '❌ Manquant',
+      clientSecret: process.env.PAYPAL_CLIENT_SECRET ? '✅ Configuré' : '❌ Manquant',
+      environment: process.env.NODE_ENV === 'production' ? 'Production (Live)' : 'Sandbox (Test)',
+      baseURL: process.env.NODE_ENV === 'production' 
+        ? 'https://api.paypal.com'
+        : 'https://api-m.sandbox.paypal.com'
+    };
+
+    // Vérifier si les credentials sont présentes
+    const hasClientId = !!process.env.PAYPAL_CLIENT_ID;
+    const hasClientSecret = !!process.env.PAYPAL_CLIENT_SECRET;
+
+    res.json({
+      success: hasClientId && hasClientSecret,
+      message: (hasClientId && hasClientSecret) 
+        ? '✅ Configuration PayPal complète' 
+        : '❌ Credentials PayPal manquants',
+      config: {
+        clientIdConfigured: !!process.env.PAYPAL_CLIENT_ID,
+        clientSecretConfigured: !!process.env.PAYPAL_CLIENT_SECRET,
+        environment: process.env.NODE_ENV || 'production',
+        baseURL: process.env.NODE_ENV === 'production' 
+          ? 'https://api.paypal.com'
+          : 'https://api-m.sandbox.paypal.com'
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors du test',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
+
+```
