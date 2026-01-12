@@ -147,6 +147,28 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  // RGPD - Consentements
+  marketingConsent: {
+    type: Boolean,
+    default: false,
+    comment: 'Consentement pour recevoir des communications marketing',
+  },
+  dataProcessingConsent: {
+    type: Boolean,
+    required: true,
+    default: true,
+    comment: 'Consentement obligatoire pour le traitement des données personnelles',
+  },
+  consentDate: {
+    type: Date,
+    default: Date.now,
+    comment: 'Date du consentement initial',
+  },
+  lastConsentUpdate: {
+    type: Date,
+    default: Date.now,
+    comment: 'Dernière mise à jour des consentements',
+  },
   // Permissions
   canCreatePost: {
     type: Boolean,

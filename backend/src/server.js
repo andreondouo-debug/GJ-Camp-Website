@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('path');
 const { connectDB } = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
@@ -18,6 +19,12 @@ const passwordResetRoutes = require('./routes/passwordResetRoutes');
 const testRoutes = require('./routes/testRoutes');
 
 const app = express();
+
+// Middleware de sécurité
+app.use(helmet({
+  contentSecurityPolicy: false, // Désactivé pour Cloudinary et React
+  crossOriginEmbedderPolicy: false,
+}));
 
 // Middleware
 const allowedOrigins = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : ['http://localhost:3000'];
