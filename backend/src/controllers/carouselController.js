@@ -5,6 +5,7 @@
 const CarouselSlide = require('../models/CarouselSlide');
 const path = require('path');
 const fs = require('fs').promises;
+const cloudinary = require('../config/cloudinary');
 
 /**
  * Récupérer toutes les slides actives (triées par ordre)
@@ -59,8 +60,11 @@ exports.addSlide = async (req, res) => {
       });
     }
     
+    // Cloudinary retourne l'URL complète dans req.file.path
+    const imageUrl = req.file.path || req.file.secure_url || `/uploads/${req.file.filename}`;
+    
     const slide = new CarouselSlide({
-      image: `/uploads/${req.file.filename}`,
+      image: imageUrl,
       title: title || '',
       subtitle: subtitle || '',
       highlight: highlight || '',
@@ -83,6 +87,7 @@ exports.addSlide = async (req, res) => {
     await slide.save();
     
     console.log(`✅ Slide ajoutée par l'utilisateur ${req.user.userId} pour la page ${page || 'home'}`);
+    console.log(`📸 Image Cloudinary: ${imageUrl}`);
     
     res.status(201).json({ 
       success: true,
@@ -184,19 +189,25 @@ exports.updateSlide = async (req, res) => {
     
     // Si une nouvelle image a été uploadée
     if (req.file) {
-      // Supprimer l'ancienne image si elle existe
-      if (slide.image && !slide.image.startsWith('http')) {
-        const oldImagePath = path.join(__dirname, '../../uploads', path.basename(slide.image));
+      // Supprimer l'ancienne image de Cloudinary si elle existe
+      if (slide.image && slide.image.includes('cloudinary.com')) {
         try {
-          await fs.unlink(oldImagePath);
-          console.log(`🗑️ Ancienne image supprimée: ${slide.image}`);
+          // Extraire le public_id de l'URL Cloudinary
+          const urlParts = slide.image.split('/');
+          const fileWithExt = urlParts[urlParts.length - 1];
+          const publicId = `gj-camp/carousel/${fileWithExt.split('.')[0]}`;
+          
+          await cloudinary.v2.uploader.destroy(publicId);
+          console.log(`🗑️ Ancienne image Cloudinary supprimée: ${publicId}`);
         } catch (err) {
-          console.log(`⚠️ Impossible de supprimer l'ancienne image: ${slide.image}`);
+          console.log(`⚠️ Impossible de supprimer l'ancienne image Cloudinary: ${err.message}`);
         }
       }
       
-      // Mettre à jour avec la nouvelle image (chemin complet)
-      slide.image = `/uploads/${req.file.filename}`;
+      // Mettre à jour avec la nouvelle image (URL Cloudinary complète)
+      const imageUrl = req.file.path || req.file.secure_url || `/uploads/${req.file.filename}`;
+      slide.image = imageUrl;
+      console.log(`📸 Nouvelle image Cloudinary: ${imageUrl}`);
     }
     
     await slide.save();
@@ -232,14 +243,18 @@ exports.deleteSlide = async (req, res) => {
       });
     }
     
-    // Supprimer le fichier image si elle existe localement
-    if (slide.image && !slide.image.startsWith('http')) {
-      const imagePath = path.join(__dirname, '../../uploads', path.basename(slide.image));
+    // Supprimer le fichier image de Cloudinary si elle existe
+    if (slide.image && slide.image.includes('cloudinary.com')) {
       try {
-        await fs.unlink(imagePath);
-        console.log(`🗑️ Image supprimée: ${slide.image}`);
+        // Extraire le public_id de l'URL Cloudinary
+        const urlParts = slide.image.split('/');
+        const fileWithExt = urlParts[urlParts.length - 1];
+        const publicId = `gj-camp/carousel/${fileWithExt.split('.')[0]}`;
+        
+        await cloudinary.v2.uploader.destroy(publicId);
+        console.log(`🗑️ Image Cloudinary supprimée: ${publicId}`);
       } catch (err) {
-        console.log(`⚠️ Impossible de supprimer l'image: ${slide.image}`);
+        console.log(`⚠️ Impossible de supprimer l'image Cloudinary: ${err.message}`);
       }
     }
     
