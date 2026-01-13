@@ -364,7 +364,7 @@ const GuestRegistrationPage = () => {
 
       {showPayPal && (
         <div className="paypal-section">
-          <h3>💳 Finaliser le Paiement avec PayPal</h3>
+          <h3>💳 Finaliser le Paiement avec PayPal / Carte bancaire</h3>
           <p className="paypal-info">
             Montant à payer : <strong>{form.amountPaid} €</strong>
           </p>

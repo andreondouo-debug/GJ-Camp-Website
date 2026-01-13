@@ -564,7 +564,7 @@ const CampRegistrationNewPage = () => {
 
           {showPayPal && form.paymentMethod === 'paypal' && (
             <div className="paypal-section">
-              <h3>💳 Paiement sécurisé via PayPal</h3>
+              <h3>💳 Paiement sécurisé via PayPal / Carte bancaire</h3>
               <p className="paypal-info">Montant à régler : <strong>{form.amountPaid}€</strong></p>
               <PayPalButton
                 amount={form.amountPaid}

@@ -493,14 +493,16 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-top: 10px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
-.new-btn-submit:hover {
+.new-btn-submit:hover:not(:disabled) {
   transform: translateY(-3px);
   box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
 }
 
-.new-btn-submit:active {
+.new-btn-submit:active:not(:disabled) {
   transform: translateY(-1px);
 }
 
@@ -508,6 +510,7 @@
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+  pointer-events: none;
 }
 
 .new-btn-login {
@@ -619,6 +622,8 @@
 
   .new-btn-submit {
     font-size: 18px;
+    padding: 18px;
+    min-height: 60px;
   }
 }
 
@@ -633,6 +638,13 @@
 
   .new-section-icon {
     font-size: 24px;
+  }
+  
+  .new-btn-submit {
+    font-size: 16px;
+    padding: 16px;
+    min-height: 56px;
+    font-weight: 700;
   }
 }
 

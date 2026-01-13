@@ -731,7 +731,7 @@ const UserDashboard = () => {
                         }}
                       />
                       <span className="method-icon">💳</span>
-                      <span className="method-text">PayPal</span>
+                      <span className="method-text">PayPal / CB</span>
                     </label>
                     
                     <label className={`payment-method-option-modal ${paymentMethod === 'cash' ? 'active' : ''}`}>
