@@ -4,6 +4,13 @@ const fetch = require('node-fetch');
 // Cette version utilise l'API HTTP de Brevo au lieu de SMTP
 // Port 443 (HTTPS) fonctionne sur Render, alors que les ports SMTP (25, 465, 587) sont bloqués
 
+// Helper pour obtenir l'URL principale du frontend (première URL de FRONTEND_URL)
+const getFrontendBaseUrl = () => {
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  // Si plusieurs URLs (séparées par virgule), prendre la première
+  return frontendUrl.split(',')[0].trim();
+};
+
 /**
  * Envoie un email via l'API Brevo (v3)
  * @param {string} to - Email du destinataire
@@ -78,7 +85,7 @@ const sendEmailViaBrevoAPI = async (to, subject, htmlContent, textContent = '') 
 const sendVerificationEmail = async (email, firstName, verificationToken) => {
   console.log('📧 Préparation email de vérification pour:', email);
   
-  const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email/${verificationToken}`;
+  const verificationUrl = `${getFrontendBaseUrl()}/verify-email/${verificationToken}`;
   
   const subject = '✉️ Vérifiez votre adresse email - GJ Camp';
   
@@ -225,7 +232,7 @@ const sendPasswordResetRequestEmail = async (email, firstName) => {
 const sendPasswordResetEmail = async (email, firstName, resetToken) => {
   console.log('📧 Préparation email de réinitialisation pour:', email);
   
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+  const resetUrl = `${getFrontendBaseUrl()}/reset-password/${resetToken}`;
   
   const subject = '✅ Réinitialisation de mot de passe approuvée - GJ Camp';
   
