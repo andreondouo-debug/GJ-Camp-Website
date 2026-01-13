@@ -415,8 +415,8 @@ function MessagesPage() {
           </div>
         ) : (
           messages.map((message) => {
-            const isUnread = activeTab === 'inbox' && 
-              message.recipients.some(r => r.user._id === user?._id && !r.read);
+            const isUnread = activeTab === 'inbox' && user && 
+              message.recipients?.some(r => r.user?._id === user._id && !r.read);
             
             return (
               <div 
