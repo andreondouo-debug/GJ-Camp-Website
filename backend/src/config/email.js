@@ -438,6 +438,7 @@ const sendCampRegistrationConfirmation = async (email, firstName, registration, 
             <div class="info-box">
               <h3>📋 Récapitulatif de votre inscription :</h3>
               <ul>
+                <li><strong>📅 Date du camp :</strong> <span style="color: #667eea; font-weight: 700;">16-25 août 2025</span></li>
                 <li><strong>Nom :</strong> ${registration.firstName} ${registration.lastName}</li>
                 <li><strong>Email :</strong> ${registration.email}</li>
                 <li><strong>Téléphone :</strong> ${registration.phone}</li>
@@ -468,11 +469,11 @@ const sendCampRegistrationConfirmation = async (email, firstName, registration, 
             
             <div style="text-align: center;">
               <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/${
-                options.cashPaymentPending ? 'profil' : 
-                (isPartialPayment ? 'profil' : 'activites')
+                options.cashPaymentPending ? 'tableau-de-bord' : 
+                (isPartialPayment ? 'tableau-de-bord' : 'programme')
               }" class="button">
                 ${options.cashPaymentPending ? 'Voir mon inscription' :
-                  (isPartialPayment ? 'Compléter mon paiement' : 'Voir les activités disponibles')}
+                  (isPartialPayment ? 'Compléter mon paiement' : 'Voir le programme')}
               </a>
             </div>
             
@@ -496,6 +497,7 @@ const sendCampRegistrationConfirmation = async (email, firstName, registration, 
     ${messageIntro.replace(/<[^>]*>/g, '')}
     
     RÉCAPITULATIF DE VOTRE INSCRIPTION :
+    - Date du camp : 16-25 août 2025
     - Nom : ${registration.firstName} ${registration.lastName}
     - Email : ${registration.email}
     - Téléphone : ${registration.phone}

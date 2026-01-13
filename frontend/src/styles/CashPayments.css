@@ -398,38 +398,112 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .cash-payments-container {
+    padding: 20px 15px;
+  }
+
   .cash-payments-header {
     flex-direction: column;
     gap: 15px;
+    padding: 20px 15px;
   }
 
   .cash-payments-header h1 {
-    font-size: 24px;
+    font-size: 22px;
+  }
+
+  .refresh-btn {
+    width: 100%;
+    padding: 14px 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .stat-card {
+    padding: 20px;
+  }
+
+  .stat-icon {
+    font-size: 40px;
+  }
+
+  .stat-content h3 {
+    font-size: 28px;
   }
 
   .tabs {
     flex-direction: column;
+    gap: 10px;
+  }
+
+  .tab {
+    width: 100%;
+    text-align: center;
   }
 
   .validation-inputs {
     grid-template-columns: 1fr;
+    gap: 15px;
   }
 
   .action-buttons {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
   }
 
   .validate-btn, .reject-btn {
     width: 100%;
+    padding: 14px 20px;
   }
 
   .payment-header {
     flex-direction: column;
     gap: 15px;
+    align-items: flex-start;
   }
 
   .payment-amount {
     text-align: left;
+    font-size: 24px;
+  }
+
+  .payment-info {
+    grid-template-columns: 1fr;
+  }
+
+  .info-item {
+    padding: 12px 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cash-payments-header h1 {
+    font-size: 20px;
+  }
+
+  .stat-card {
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .stat-icon {
+    font-size: 36px;
+  }
+
+  .stat-content h3 {
+    font-size: 24px;
+  }
+
+  .stat-amount {
+    font-size: 16px;
+  }
+
+  .validate-btn, .reject-btn {
+    font-size: 15px;
+    padding: 12px 18px;
   }
 }
