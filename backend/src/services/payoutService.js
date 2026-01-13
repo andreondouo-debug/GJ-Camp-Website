@@ -156,6 +156,28 @@ class PayoutService {
         return { success: 0, failed: 0 };
       }
 
+      // ✅ VALIDATION: Vérifier que tous les payouts ont un email
+      const payoutsWithoutEmail = payouts.filter(p => !p.recipientEmail || p.recipientEmail.trim() === '');
+      
+      if (payoutsWithoutEmail.length > 0) {
+        console.error(`❌ ${payoutsWithoutEmail.length} payout(s) sans email PayPal pour ${payouts[0].campus}`);
+        
+        // Marquer ces payouts comme échoués
+        await Payout.updateMany(
+          { _id: { $in: payoutsWithoutEmail.map(p => p._id) } },
+          { 
+            status: 'failed', 
+            errorMessage: 'Email PayPal non configuré pour ce campus. Configurez l\'email dans la gestion des campus.'
+          }
+        );
+        
+        return { 
+          success: 0, 
+          failed: payoutsWithoutEmail.length,
+          errors: [`Campus ${payouts[0].campus}: Email PayPal non configuré`]
+        };
+      }
+
       // Marquer comme "processing"
       const payoutIds = payouts.map(p => p._id);
       await Payout.updateMany(
