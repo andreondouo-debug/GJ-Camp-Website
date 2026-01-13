@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getApiUrl } from '../config/api';
 import '../styles/App.css';
 
 const Carousel = () => {
@@ -124,14 +125,13 @@ const Carousel = () => {
             let imagePath;
             if (slide.image) {
               if (slide.image.startsWith('http://') || slide.image.startsWith('https://')) {
-                // URL Cloudinary complète
-                imagePath = slide.image;
-              } else if (slide.image.startsWith('/uploads/')) {
-                // Déjà formaté avec /uploads/
+                // URL Cloudinary complète - utiliser telle quelle
                 imagePath = slide.image;
               } else {
-                // Ajouter /uploads/ si nécessaire
-                imagePath = `/uploads/${slide.image}`;
+                // Chemin relatif ou /uploads/ - construire l'URL complète via API
+                imagePath = slide.image.startsWith('/uploads/') 
+                  ? slide.image 
+                  : `/uploads/${slide.image}`;
               }
             } else {
               imagePath = '/images/placeholder.jpg';
@@ -385,7 +385,7 @@ const Carousel = () => {
               className={`carousel-image-container ${index === currentSlide ? 'active' : ''} ${index === currentSlide - 1 || (currentSlide === 0 && index === slides.length - 1) ? 'prev' : ''}`}
             >
               <img
-                src={slide.image}
+                src={getApiUrl(slide.image)}
                 alt={slide.title}
                 className={`carousel-image ${imageAnimationClass}`}
                 onError={(e) => {
