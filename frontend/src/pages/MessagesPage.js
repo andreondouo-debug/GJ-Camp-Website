@@ -17,17 +17,6 @@ function MessagesPage() {
   const [responsables, setResponsables] = useState([]);
   const [selectedResponsables, setSelectedResponsables] = useState([]);
   const [showResponsablesList, setShowResponsablesList] = useState(false);
-
-  // Protection: Vérifier que l'utilisateur est connecté
-  if (!token) {
-    return (
-      <div className="messages-page" style={{ padding: '40px', textAlign: 'center' }}>
-        <h2>⚠️ Accès refusé</h2>
-        <p>Vous devez être connecté pour accéder à la messagerie.</p>
-        <a href="/login" style={{ color: '#667eea', textDecoration: 'underline' }}>Se connecter</a>
-      </div>
-    );
-  }
   
   // Formulaire nouveau message
   const [newMessage, setNewMessage] = useState({
@@ -40,6 +29,7 @@ function MessagesPage() {
   });
 
   useEffect(() => {
+    if (!token) return;
     fetchMessages();
     fetchResponsables();
   }, [activeTab, token]);
@@ -179,6 +169,17 @@ function MessagesPage() {
       minute: '2-digit'
     });
   };
+
+  // Protection: Vérifier que l'utilisateur est connecté
+  if (!token) {
+    return (
+      <div className="messages-page" style={{ padding: '40px', textAlign: 'center' }}>
+        <h2>⚠️ Accès refusé</h2>
+        <p>Vous devez être connecté pour accéder à la messagerie.</p>
+        <a href="/login" style={{ color: '#667eea', textDecoration: 'underline' }}>Se connecter</a>
+      </div>
+    );
+  }
 
   return (
     <div className="messages-page">
@@ -415,8 +416,19 @@ function MessagesPage() {
           </div>
         ) : (
           messages.map((message) => {
-            const isUnread = activeTab === 'inbox' && user && 
-              message.recipients?.some(r => r.user?._id === user._id && !r.read);
+            // Protection complète contre les valeurs null
+            const isUnread = activeTab === 'inbox' && 
+              user && 
+              user._id &&
+              Array.isArray(message.recipients) &&
+              message.recipients.some(r => {
+                try {
+                  return r && r.user && r.user._id === user._id && !r.read;
+                } catch (err) {
+                  console.error('Erreur vérification read status:', err);
+                  return false;
+                }
+              });
             
             return (
               <div 
