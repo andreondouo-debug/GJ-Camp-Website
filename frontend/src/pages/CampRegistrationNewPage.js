@@ -252,6 +252,9 @@ const CampRegistrationNewPage = () => {
           <div className="new-header-text">
             <h1>Camp GJ 2025</h1>
             <p>Formulaire d'inscription</p>
+            <div className="camp-date-reminder" title="Date du camp">
+              📅 <strong>16-25 août 2025</strong>
+            </div>
           </div>
         </div>
 

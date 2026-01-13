@@ -13,7 +13,37 @@
   align-items: center;
   justify-content: center;
   margin-top: 32px;
+  position: relative;
 }
+
+.planning-recap-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  color: #a01e1e;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 10;
+}
+
+.planning-recap-close:hover {
+  background: #a01e1e;
+  color: white;
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 4px 12px rgba(160,30,30,0.3);
+}
+
 .planning-recap h2 {
   text-align: center;
   font-size: 1.5rem;
@@ -853,7 +883,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
 /* Header */
 .header {
   position: relative;
-  background: linear-gradient(135deg, rgba(9, 23, 50, 0.95) 0%, rgba(16, 35, 71, 0.92) 60%, rgba(16, 35, 71, 0.88) 100%);
+  background: rgba(16, 35, 71, 0.95);
   padding: 20px 0;
   margin: 0 !important;
   border-radius: 0;
@@ -869,9 +899,9 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 15% 20%, rgba(212, 175, 55, 0.35), transparent 55%),
-              radial-gradient(circle at 85% 15%, rgba(239, 91, 135, 0.25), transparent 60%);
+  background: transparent;
   z-index: 0;
+  display: none;
 }
 
 .header-content {

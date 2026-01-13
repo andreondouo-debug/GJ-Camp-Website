@@ -263,6 +263,13 @@ function ActivitiesPage() {
       {/* Récapitulatif après validation + bouton pour recommencer */}
       {!showCarousel && (
         <div className="planning-recap">
+          <button 
+            className="planning-recap-close" 
+            onClick={() => setShowCarousel(true)}
+            title="Fermer le récapitulatif"
+          >
+            ✕
+          </button>
           <h2>✅ Récapitulatif de mes choix pour le jour {selectedDay}</h2>
           <button
             className="planning-btn-valider"
