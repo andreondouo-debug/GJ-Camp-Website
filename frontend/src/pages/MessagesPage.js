@@ -17,6 +17,17 @@ function MessagesPage() {
   const [responsables, setResponsables] = useState([]);
   const [selectedResponsables, setSelectedResponsables] = useState([]);
   const [showResponsablesList, setShowResponsablesList] = useState(false);
+
+  // Protection: Vérifier que l'utilisateur est connecté
+  if (!token) {
+    return (
+      <div className="messages-page" style={{ padding: '40px', textAlign: 'center' }}>
+        <h2>⚠️ Accès refusé</h2>
+        <p>Vous devez être connecté pour accéder à la messagerie.</p>
+        <a href="/login" style={{ color: '#667eea', textDecoration: 'underline' }}>Se connecter</a>
+      </div>
+    );
+  }
   
   // Formulaire nouveau message
   const [newMessage, setNewMessage] = useState({
