@@ -28,7 +28,7 @@ app.use(helmet({
 
 // Middleware
 const allowedOrigins = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : ['http://localhost:3000'];
-app.use(cors({
+const corsOptions = {
   origin: (origin, callback) => {
     // Autoriser les requêtes sans origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
@@ -40,11 +40,13 @@ app.use(cors({
     }
   },
   credentials: true,
-}));
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
-// Servir les fichiers statiques (uploads)
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Servir les fichiers statiques (uploads) avec CORS
+app.use('/uploads', cors(corsOptions), express.static(path.join(__dirname, '../uploads')));
 
 // Connexion à la base de données
 connectDB();
