@@ -24,6 +24,7 @@ const app = express();
 app.use(helmet({
   contentSecurityPolicy: false, // Désactivé pour Cloudinary et React
   crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Permet le chargement cross-origin des images
 }));
 
 // Middleware
