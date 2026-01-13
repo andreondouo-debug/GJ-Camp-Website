@@ -6,24 +6,24 @@ export const getApiUrl = (path) => {
   // Si pas de path, retourner vide
   if (!path) return '';
   
-  // Si le path commence déjà par http://, le retourner tel quel
+  // Si le path commence déjà par http://, le retourner tel quel (Cloudinary ou autre CDN)
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
   
-  // En développement (avec proxy), retourner le path relatif
-  // En production, ajouter l'API_URL
+  // Si le path commence par /images/, c'est un fichier statique local
+  if (path.startsWith('/images/')) {
+    return path;
+  }
+  
+  // En développement (avec proxy), retourner le path relatif pour /uploads/ et /api/
   if (process.env.NODE_ENV === 'development') {
     return path;
   }
   
-  // Pour les chemins d'upload en production, ajouter l'API_URL
-  if (path.startsWith('/uploads/') || path.startsWith('/api/')) {
-    return `${API_URL}${path}`;
-  }
-  
-  // Pour les autres chemins, les retourner tels quels
-  return path;
+  // En production, ajouter l'API_URL pour tous les autres chemins
+  // (uploads, api, ou chemins relatifs sans /)
+  return `${API_URL}${path.startsWith('/') ? path : `/${path}`}`;
 };
 
 export default { API_URL, getApiUrl };

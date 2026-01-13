@@ -1,0 +1,31 @@
+🚨 CORRECTION URGENTE CORS - Render
+=====================================
+
+Le backend fonctionne MAIS bloque toutes les requêtes du frontend !
+
+📋 SOLUTION (2 MINUTES) :
+
+1. Va sur https://dashboard.render.com
+2. Clique sur "gj-camp-website-1"
+3. Menu de gauche → "Environment"
+
+4. SI LA VARIABLE "FRONTEND_URL" EXISTE DÉJÀ :
+   → Clique sur "Edit"
+   → Remplace par cette valeur exacte :
+   
+   https://gjsdecrpt.fr,https://www.gjsdecrpt.fr,https://gj-camp-website-3ltuu.vercel.app,http://localhost:3000
+
+5. SI LA VARIABLE N'EXISTE PAS :
+   → Clique sur "Add Environment Variable"
+   → Key: FRONTEND_URL
+   → Value: https://gjsdecrpt.fr,https://www.gjsdecrpt.fr,https://gj-camp-website-3ltuu.vercel.app,http://localhost:3000
+
+6. Clique sur "Save Changes"
+
+7. ATTENDS 2 MINUTES que le backend redémarre
+
+✅ Après redémarrage, les erreurs CORS disparaîtront !
+
+🔍 Pour vérifier que ça fonctionne après 2 min :
+   Va sur https://www.gjsdecrpt.fr
+   F12 → Console → Plus d'erreurs CORS

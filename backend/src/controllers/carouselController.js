@@ -60,7 +60,7 @@ exports.addSlide = async (req, res) => {
     }
     
     const slide = new CarouselSlide({
-      image: req.file.filename,
+      image: `/uploads/${req.file.filename}`,
       title: title || '',
       subtitle: subtitle || '',
       highlight: highlight || '',
@@ -184,17 +184,19 @@ exports.updateSlide = async (req, res) => {
     
     // Si une nouvelle image a été uploadée
     if (req.file) {
-      // Supprimer l'ancienne image
-      const oldImagePath = path.join(__dirname, '../../uploads', slide.image);
-      try {
-        await fs.unlink(oldImagePath);
-        console.log(`🗑️ Ancienne image supprimée: ${slide.image}`);
-      } catch (err) {
-        console.log(`⚠️ Impossible de supprimer l'ancienne image: ${slide.image}`);
+      // Supprimer l'ancienne image si elle existe
+      if (slide.image && !slide.image.startsWith('http')) {
+        const oldImagePath = path.join(__dirname, '../../uploads', path.basename(slide.image));
+        try {
+          await fs.unlink(oldImagePath);
+          console.log(`🗑️ Ancienne image supprimée: ${slide.image}`);
+        } catch (err) {
+          console.log(`⚠️ Impossible de supprimer l'ancienne image: ${slide.image}`);
+        }
       }
       
-      // Mettre à jour avec la nouvelle image
-      slide.image = req.file.filename;
+      // Mettre à jour avec la nouvelle image (chemin complet)
+      slide.image = `/uploads/${req.file.filename}`;
     }
     
     await slide.save();
@@ -230,13 +232,15 @@ exports.deleteSlide = async (req, res) => {
       });
     }
     
-    // Supprimer le fichier image
-    const imagePath = path.join(__dirname, '../../uploads', slide.image);
-    try {
-      await fs.unlink(imagePath);
-      console.log(`🗑️ Image supprimée: ${slide.image}`);
-    } catch (err) {
-      console.log(`⚠️ Impossible de supprimer l'image: ${slide.image}`);
+    // Supprimer le fichier image si elle existe localement
+    if (slide.image && !slide.image.startsWith('http')) {
+      const imagePath = path.join(__dirname, '../../uploads', path.basename(slide.image));
+      try {
+        await fs.unlink(imagePath);
+        console.log(`🗑️ Image supprimée: ${slide.image}`);
+      } catch (err) {
+        console.log(`⚠️ Impossible de supprimer l'image: ${slide.image}`);
+      }
     }
     
     // Supprimer la slide de la base de données
