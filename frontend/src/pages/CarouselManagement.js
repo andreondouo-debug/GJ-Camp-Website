@@ -7,6 +7,7 @@ const CarouselManagement = () => {
   const navigate = useNavigate();
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingSlide, setEditingSlide] = useState(null);
   const [activeTab, setActiveTab] = useState('slides'); // 'slides' ou 'settings'
@@ -158,6 +159,8 @@ const CarouselManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    setSubmitting(true);
+    
     try {
       const token = localStorage.getItem('token');
       const formDataToSend = new FormData();
@@ -185,6 +188,7 @@ const CarouselManagement = () => {
         // Création
         if (!imageFile) {
           alert('❌ Veuillez sélectionner une image');
+          setSubmitting(false);
           return;
         }
         await axios.post('/api/carousel', formDataToSend, {
@@ -201,6 +205,8 @@ const CarouselManagement = () => {
     } catch (error) {
       console.error('❌ Erreur sauvegarde slide:', error);
       alert(error.response?.data?.message || 'Erreur lors de la sauvegarde');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -673,8 +679,12 @@ const CarouselManagement = () => {
                 <button type="button" className="btn-cancel" onClick={closeModal}>
                   Annuler
                 </button>
-                <button type="submit" className="btn-save">
-                  {editingSlide ? '💾 Enregistrer' : '➕ Ajouter'}
+                <button type="submit" className="btn-save" disabled={submitting}>
+                  {submitting ? (
+                    editingSlide ? '⏳ Enregistrement...' : '⏳ Ajout en cours...'
+                  ) : (
+                    editingSlide ? '💾 Enregistrer' : '➕ Ajouter'
+                  )}
                 </button>
               </div>
             </form>
