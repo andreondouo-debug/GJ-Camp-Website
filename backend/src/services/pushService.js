@@ -290,6 +290,47 @@ const notifyAdmins = async (payload) => {
   }
 };
 
+/**
+ * Notifier demande de réinitialisation mot de passe
+ */
+const notifyPasswordResetRequest = async (adminIds, user) => {
+  const payload = {
+    title: '🔐 Demande de réinitialisation',
+    body: `${user.firstName} ${user.lastName} a demandé à réinitialiser son mot de passe`,
+    icon: '/images/logo-192.png',
+    data: {
+      url: '/gestion/utilisateurs',
+      userId: user._id.toString(),
+      type: 'password_reset_request'
+    },
+    tag: 'password-reset',
+    requireInteraction: true
+  };
+
+  return await sendBulkPush(adminIds, payload);
+};
+
+/**
+ * Notifier paiement en espèces en attente
+ */
+const notifyCashPaymentPending = async (adminIds, user, amount) => {
+  const payload = {
+    title: '💵 Paiement espèces à valider',
+    body: `${user.firstName} ${user.lastName} a déclaré un paiement de ${amount}€ en espèces`,
+    icon: '/images/logo-192.png',
+    data: {
+      url: '/gestion/inscriptions',
+      userId: user._id.toString(),
+      type: 'cash_payment_pending',
+      amount
+    },
+    tag: 'cash-payment',
+    requireInteraction: true
+  };
+
+  return await sendBulkPush(adminIds, payload);
+};
+
 module.exports = {
   sendPushToUser,
   sendBulkPush,
@@ -299,5 +340,7 @@ module.exports = {
   notifyNewActivity,
   notifyRegistrationUpdate,
   notifyPaymentConfirmed,
-  notifyAdmins
+  notifyAdmins,
+  notifyPasswordResetRequest,
+  notifyCashPaymentPending
 };

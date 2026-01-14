@@ -1,10 +1,10 @@
 // Service Worker pour PWA - GJ Camp
-const CACHE_NAME = 'gj-camp-v1';
+const CACHE_VERSION = '1.0.2'; // Incrémenter pour forcer mise à jour
+const CACHE_NAME = `gj-camp-v${CACHE_VERSION}`;
 const urlsToCache = [
   '/',
   '/manifest.json',
-  '/images/logo-192.png',
-  '/images/logo-512.png'
+  '/images/logo-gj.png'
 ];
 
 // Installation du Service Worker
@@ -39,37 +39,32 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Interception des requêtes réseau
+// Interception des requêtes réseau - Network First Strategy
 self.addEventListener('fetch', (event) => {
+  // Toujours récupérer depuis le réseau pour éviter cache excessif
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then((response) => {
-        // Cache hit - retourner la réponse depuis le cache
-        if (response) {
+        // Vérifier si réponse valide
+        if (!response || response.status !== 200) {
           return response;
         }
 
-        // Clone de la requête
-        const fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest).then((response) => {
-          // Vérifier si réponse valide
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-
-          // Clone de la réponse
+        // Ne mettre en cache que les ressources statiques importantes
+        const urlsToCache = ['/', '/manifest.json', '/images/logo-gj.png'];
+        if (urlsToCache.includes(new URL(event.request.url).pathname)) {
           const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
 
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-
-          return response;
-        }).catch(() => {
-          // En cas d'échec, retourner une page offline personnalisée
-          return caches.match('/');
+        return response;
+      })
+      .catch(() => {
+        // En cas d'échec réseau, essayer le cache
+        return caches.match(event.request).then((cachedResponse) => {
+          return cachedResponse || caches.match('/');
         });
       })
   );
@@ -87,6 +82,11 @@ self.addEventListener('push', (event) => {
     vibrate: [200, 100, 200],
     data: { url: '/' }
   };
+gj.png',
+    badge: '/images/logo-gj.png',
+    vibrate: [200, 100, 200],
+    data: { url: '/' }
+  };
 
   if (event.data) {
     try {
@@ -94,13 +94,8 @@ self.addEventListener('push', (event) => {
       notificationData = {
         title: data.title || 'GJ Camp',
         body: data.body || 'Nouvelle notification',
-        icon: data.icon || '/images/logo-192.png',
-        badge: data.badge || '/images/logo-192.png',
-        vibrate: [200, 100, 200],
-        data: data.data || { url: data.url || '/' },
-        tag: data.tag || 'gj-camp-notification',
-        requireInteraction: data.requireInteraction || false
-      };
+        icon: data.icon || '/images/logo-gj.png',
+        badge: data.badge || '/images/logo-gj
     } catch (error) {
       console.error('❌ Erreur parsing notification:', error);
       notificationData.body = event.data.text();
@@ -133,10 +128,5 @@ self.addEventListener('notificationclick', (event) => {
           return clients.openWindow(urlToOpen);
         }
       })
-  );
-});
-
-  event.waitUntil(
-    clients.openWindow('/')
   );
 });

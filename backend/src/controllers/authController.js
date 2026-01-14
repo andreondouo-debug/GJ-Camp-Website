@@ -560,6 +560,15 @@ exports.forgotPassword = async (req, res) => {
 
     // Envoyer l'email de demande (pas encore le lien de réinitialisation)
     await sendPasswordResetRequestEmail(user.email, user.firstName);
+    
+    // Notifier les admins de la demande de réinitialisation
+    const pushService = require('../services/pushService');
+    const admins = await User.find({ role: { $in: ['admin', 'responsable'] } }).select('_id');
+    if (admins.length > 0) {
+      pushService.notifyPasswordResetRequest(admins.map(a => a._id), user).catch(err => 
+        console.error('Erreur notification push reset:', err)
+      );
+    }
 
     console.log(`🔐 Demande de réinitialisation créée pour ${user.email}, en attente d'approbation admin`);
     

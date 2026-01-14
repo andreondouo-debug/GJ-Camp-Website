@@ -642,9 +642,27 @@
   
   .new-btn-submit {
     font-size: 16px;
-    padding: 16px;
-    min-height: 56px;
+    padding: 18px;
+    min-height: 60px;
     font-weight: 700;
+    touch-action: manipulation;
+  }
+  
+  .new-input,
+  .new-select,
+  .new-textarea {
+    min-height: 48px;
+    font-size: 16px;
+    padding: 14px;
+  }
+  
+  .payment-method-option {
+    min-height: 60px;
+    padding: 18px;
+  }
+  
+  .new-form {
+    padding: 20px 15px;
   }
 }
 
