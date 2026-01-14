@@ -4,6 +4,7 @@ const TransactionLog = require('../models/TransactionLog');
 const paypalService = require('../services/paypalService');
 const payoutService = require('../services/payoutService');
 const { sendCampRegistrationConfirmation } = require('../config/email');
+const pushService = require('../services/pushService');
 
 // Créer une inscription au camp
 exports.createRegistration = async (req, res) => {
@@ -182,6 +183,11 @@ exports.createRegistration = async (req, res) => {
       // Ne pas bloquer l'inscription si la création du payout échoue
     }
 
+    // Envoyer notification push de confirmation d'inscription
+    pushService.notifyRegistrationUpdate(user._id, 'confirmed').catch(err => {
+      console.error('❌ Erreur notification push inscription:', err);
+    });
+    
     res.status(201).json({
       message: '✅ Inscription au camp enregistrée avec succès !',
       registration
@@ -816,6 +822,14 @@ exports.validateCashPayment = async (req, res) => {
     } catch (emailError) {
       console.error('⚠️ Erreur email:', emailError.message);
     }
+    
+    // Envoyer notification push de confirmation de paiement
+    pushService.notifyPaymentConfirmed(
+      registration.user, 
+      payment.amount
+    ).catch(err => {
+      console.error('❌ Erreur notification push paiement:', err);
+    });
 
     res.status(200).json({
       message: `✅ Paiement de ${payment.amount}€ validé avec succès`,

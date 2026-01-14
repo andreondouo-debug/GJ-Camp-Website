@@ -1,6 +1,7 @@
 const Activity = require('../models/Activity');
 const path = require('path');
 const fs = require('fs').promises;
+const pushService = require('../services/pushService');
 
 // 📋 Récupérer toutes les activités
 exports.getAllActivities = async (req, res) => {
@@ -68,6 +69,12 @@ exports.createActivity = async (req, res) => {
     await activity.save();
     
     console.log(`✅ Nouvelle activité créée: ${titre}`);
+    
+    // Envoyer notification push à tous les utilisateurs
+    pushService.notifyNewActivity(activity).catch(err => {
+      console.error('❌ Erreur notification push activité:', err);
+    });
+    
     res.status(201).json({ 
       message: 'Activité créée avec succès',
       activity 
