@@ -1,5 +1,5 @@
 // Service Worker pour PWA - GJ Camp
-const CACHE_VERSION = '1.0.2'; // Incrémenter pour forcer mise à jour
+const CACHE_VERSION = '1.0.3'; // Incrémenter pour forcer mise à jour
 const CACHE_NAME = `gj-camp-v${CACHE_VERSION}`;
 const urlsToCache = [
   '/',
