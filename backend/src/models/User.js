@@ -147,6 +147,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  pushSubscription: {
+    type: Object,
+    default: null,
+    comment: 'Abonnement Web Push (endpoint, keys)'
+  },
   // RGPD - Consentements
   marketingConsent: {
     type: Boolean,

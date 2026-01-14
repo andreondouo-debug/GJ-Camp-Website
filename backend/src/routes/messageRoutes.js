@@ -4,6 +4,7 @@ const auth = require('../middleware/auth');
 const { requireAdminRole } = require('../middleware/roleCheck');
 const Message = require('../models/Message');
 const User = require('../models/User');
+const pushService = require('../services/pushService');
 
 // Récupérer la liste des responsables pour la sélection
 router.get('/responsables', auth, async (req, res) => {
@@ -103,6 +104,18 @@ router.post('/', auth, async (req, res) => {
     });
 
     await message.save();
+
+    // Envoyer notifications push aux destinataires
+    const sender = await User.findById(req.user.userId).select('firstName lastName');
+    recipients.forEach(recipient => {
+      pushService.notifyNewMessage({
+        _id: message._id,
+        content: content.substring(0, 100),
+        sender: sender
+      }, recipient.user).catch(err => {
+        console.error('❌ Erreur notification push message:', err);
+      });
+    });
 
     res.status(201).json({ 
       message: 'Message envoyé avec succès', 

@@ -75,28 +75,66 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Gestion des notifications push (optionnel)
+// Gestion des notifications push
 self.addEventListener('push', (event) => {
-  const options = {
-    body: event.data ? event.data.text() : 'Nouvelle notification GJ Camp',
+  console.log('📩 Push notification reçue');
+  
+  let notificationData = {
+    title: 'GJ Camp',
+    body: 'Nouvelle notification',
     icon: '/images/logo-192.png',
     badge: '/images/logo-192.png',
     vibrate: [200, 100, 200],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1
-    }
+    data: { url: '/' }
   };
 
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      notificationData = {
+        title: data.title || 'GJ Camp',
+        body: data.body || 'Nouvelle notification',
+        icon: data.icon || '/images/logo-192.png',
+        badge: data.badge || '/images/logo-192.png',
+        vibrate: [200, 100, 200],
+        data: data.data || { url: data.url || '/' },
+        tag: data.tag || 'gj-camp-notification',
+        requireInteraction: data.requireInteraction || false
+      };
+    } catch (error) {
+      console.error('❌ Erreur parsing notification:', error);
+      notificationData.body = event.data.text();
+    }
+  }
+
   event.waitUntil(
-    self.registration.showNotification('GJ Camp', options)
+    self.registration.showNotification(notificationData.title, notificationData)
   );
 });
 
 // Gestion des clics sur notifications
 self.addEventListener('notificationclick', (event) => {
-  console.log('🔔 Notification cliquée:', event.notification.tag);
+  console.log('🔔 Notification cliquée');
   event.notification.close();
+
+  const urlToOpen = event.notification.data?.url || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((windowClients) => {
+        // Chercher si une fenêtre est déjà ouverte
+        for (let client of windowClients) {
+          if (client.url.includes(urlToOpen) && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        // Sinon, ouvrir une nouvelle fenêtre
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
+  );
+});
 
   event.waitUntil(
     clients.openWindow('/')

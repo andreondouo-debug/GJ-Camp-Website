@@ -5,6 +5,7 @@ const { requireAdminRole, canCreatePost } = require('../middleware/roleCheck');
 const Post = require('../models/Post');
 const { uploadFields, uploadToCloudinary } = require('../middleware/cloudinaryPostUpload');
 const { notifyNewPost } = require('../services/notificationService');
+const pushService = require('../services/pushService');
 
 // Récupérer tous les posts (avec pagination)
 router.get('/', async (req, res) => {
@@ -83,7 +84,12 @@ router.post('/', auth, canCreatePost, uploadFields, uploadToCloudinary, async (r
     
     // Envoyer les notifications en arrière-plan (ne bloque pas la réponse)
     notifyNewPost(post).catch(err => {
-      console.error('❌ Erreur notifications:', err);
+      console.error('❌ Erreur notifications email:', err);
+    });
+    
+    // Envoyer les notifications push
+    pushService.notifyNewPost(post).catch(err => {
+      console.error('❌ Erreur notifications push:', err);
     });
 
     res.status(201).json({ message: 'Post publié avec succès', post });
