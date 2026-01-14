@@ -9,8 +9,12 @@ const User = require('../models/User');
 // Configuration VAPID
 const initializeWebPush = () => {
   if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+    const vapidEmail = process.env.VAPID_EMAIL || 'mailto:contact@gjsdecrpt.fr';
+    // S'assurer que l'email a le préfixe mailto:
+    const formattedEmail = vapidEmail.startsWith('mailto:') ? vapidEmail : `mailto:${vapidEmail}`;
+    
     webpush.setVapidDetails(
-      process.env.VAPID_EMAIL || 'contact@gjsdecrpt.fr',
+      formattedEmail,
       process.env.VAPID_PUBLIC_KEY,
       process.env.VAPID_PRIVATE_KEY
     );

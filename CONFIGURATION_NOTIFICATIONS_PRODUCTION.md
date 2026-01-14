@@ -19,8 +19,10 @@ Cliquer sur **"Add Environment Variable"** et ajouter:
 
 ```
 Nom: VAPID_EMAIL
-Valeur: contact@gjsdecrpt.fr
+Valeur: mailto:contact@gjsdecrpt.fr
 ```
+
+⚠️ **IMPORTANT**: L'email doit commencer par `mailto:` (RFC 8292)
 
 ```
 Nom: VAPID_PUBLIC_KEY
