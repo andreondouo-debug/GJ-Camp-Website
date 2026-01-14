@@ -200,6 +200,65 @@ textarea {
   justify-content: flex-end;
 }
 
+/* Section Notifications */
+.notifications-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.notifications-section .notification-settings {
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.notifications-section .settings-header {
+  margin-bottom: 2rem;
+}
+
+.notifications-section .settings-header h2 {
+  color: #ffffff;
+}
+
+.notifications-section .settings-header p {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.notifications-section .settings-list {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.notifications-section .setting-item {
+  border-bottom-color: rgba(212, 175, 55, 0.15);
+}
+
+.notifications-section .setting-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.notifications-section .setting-info h3 {
+  color: #ffffff;
+}
+
+.notifications-section .setting-info p {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.notifications-section .notification-info {
+  background: rgba(255, 255, 255, 0.05);
+  border-left-color: #d4af37;
+}
+
+.notifications-section .notification-info h4 {
+  color: #ffffff;
+}
+
+.notifications-section .notification-info li {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 @media (max-width: 768px) {
   .profile-card {
     padding: 1.75rem;
@@ -225,5 +284,10 @@ textarea {
 
   .verification-alert .btn-secondary {
     width: 100%;
+  }
+  
+  .notifications-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
   }
 }

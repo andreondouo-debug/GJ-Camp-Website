@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import NotificationSettings from '../components/NotificationSettings';
 import '../styles/ProfilePage.css';
 
 const roleLabels = {
@@ -329,6 +330,11 @@ const ProfilePage = () => {
             </button>
           </div>
         </form>
+
+        {/* Section Notifications Push */}
+        <div className="notifications-section">
+          <NotificationSettings user={user} />
+        </div>
       </div>
     </div>
   );
