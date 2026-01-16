@@ -63,6 +63,24 @@ function NotificationSettingsPage() {
     }
   };
 
+  // Sauvegarde automatique lors du changement de toggle
+  const handleToggleChange = async (field, value) => {
+    const newSettings = { ...settings, [field]: value };
+    setSettings(newSettings);
+
+    try {
+      await axios.put(`${API_URL}/api/auth/notification-settings`, {
+        ...newSettings,
+        phoneNumber: phoneNumber
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log(`✅ ${field} sauvegardé automatiquement: ${value}`);
+    } catch (error) {
+      console.error(`❌ Erreur sauvegarde ${field}:`, error);
+    }
+  };
+
   const enablePushNotifications = async () => {
     try {
       // Vérifier support navigateur
@@ -143,7 +161,7 @@ function NotificationSettingsPage() {
             <input
               type="checkbox"
               checked={settings.emailNotifications}
-              onChange={(e) => setSettings({ ...settings, emailNotifications: e.target.checked })}
+              onChange={(e) => handleToggleChange('emailNotifications', e.target.checked)}
             />
             <span className="toggle-slider"></span>
           </label>
@@ -164,7 +182,7 @@ function NotificationSettingsPage() {
             <input
               type="checkbox"
               checked={settings.smsNotifications}
-              onChange={(e) => setSettings({ ...settings, smsNotifications: e.target.checked })}
+              onChange={(e) => handleToggleChange('smsNotifications', e.target.checked)}
             />
             <span className="toggle-slider"></span>
           </label>
@@ -201,7 +219,7 @@ function NotificationSettingsPage() {
               <input
                 type="checkbox"
                 checked={settings.pushNotifications}
-                onChange={(e) => setSettings({ ...settings, pushNotifications: e.target.checked })}
+                onChange={(e) => handleToggleChange('pushNotifications', e.target.checked)}
               />
               <span className="toggle-slider"></span>
             </label>

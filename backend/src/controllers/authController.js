@@ -480,7 +480,7 @@ exports.updateNotificationSettings = async (req, res) => {
     const updateData = {
       emailNotifications: emailNotifications ?? true,
       smsNotifications: smsNotifications ?? false,
-      pushNotifications: pushNotifications ?? false
+      pushNotifications: pushNotifications ?? true  // ✅ Activé par défaut
     };
 
     if (phoneNumber !== undefined) {
