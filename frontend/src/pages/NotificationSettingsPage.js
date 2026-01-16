@@ -13,7 +13,8 @@ function NotificationSettingsPage() {
   });
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState(''); // '', 'saving', 'saved', 'error'
+  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
     fetchSettings();
@@ -30,24 +31,27 @@ function NotificationSettingsPage() {
       const loadedSettings = {
         emailNotifications: response.data.emailNotifications ?? true,
         smsNotifications: response.data.smsNotifications ?? false,
-        pushNotifications: response.data.pushNotifications ?? true  // ✅ Activé par défaut
+        pushNotifications: response.data.pushNotifications ?? true
       };
       
       console.log('📊 Paramètres chargés:', loadedSettings);
       setSettings(loadedSettings);
       setPhoneNumber(response.data.phoneNumber || '');
       setLoading(false);
+      setHasChanges(false);
     } catch (error) {
-      console.error('Erreur chargement paramètres:', error);
+      console.error('❌ Erreur chargement paramètres:', error);
       setLoading(false);
     }
   };
 
-  const handleSave = async () => {
+  const handleSaveNotifications = async () => {
     try {
-      setSaving(true);
+      setSaveStatus('saving');
 
-      await axios.put(`${API_URL}/api/auth/notification-settings`, {
+      console.log('💾 Sauvegarde des paramètres:', settings);
+
+      const response = await axios.put(`${API_URL}/api/auth/notification-settings`, {
         emailNotifications: settings.emailNotifications,
         smsNotifications: settings.smsNotifications,
         pushNotifications: settings.pushNotifications,
@@ -56,39 +60,24 @@ function NotificationSettingsPage() {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      // Recharger les paramètres depuis le backend pour garantir la persistance
-      await fetchSettings();
+      console.log('✅ Réponse backend:', response.data);
+      
+      setSaveStatus('saved');
+      setHasChanges(false);
+      
+      setTimeout(() => setSaveStatus(''), 2000);
 
-      alert('✅ Paramètres de notification enregistrés !');
-      setSaving(false);
     } catch (error) {
-      console.error('Erreur sauvegarde:', error);
-      alert('❌ Erreur lors de la sauvegarde');
-      setSaving(false);
+      console.error('❌ Erreur sauvegarde:', error);
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus(''), 3000);
     }
   };
 
-  // Sauvegarde automatique lors du changement de toggle
-  const handleToggleChange = async (field, value) => {
+  const handleToggleChange = (field, value) => {
     console.log(`🔄 Changement ${field}:`, value);
-    const newSettings = { ...settings, [field]: value };
-    setSettings(newSettings);
-
-    try {
-      const response = await axios.put(`${API_URL}/api/auth/notification-settings`, {
-        emailNotifications: newSettings.emailNotifications,
-        smsNotifications: newSettings.smsNotifications,
-        pushNotifications: newSettings.pushNotifications,
-        phoneNumber: phoneNumber
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      console.log(`✅ ${field} sauvegardé automatiquement:`, value);
-      console.log('📤 Réponse backend:', response.data);
-    } catch (error) {
-      console.error(`❌ Erreur sauvegarde ${field}:`, error);
-      console.error('Détails erreur:', error.response?.data);
-    }
+    setSettings(prev => ({ ...prev, [field]: value }));
+    setHasChanges(true);
   };
 
   const enablePushNotifications = async () => {
@@ -224,22 +213,32 @@ function NotificationSettingsPage() {
               <p>Notifications instantanées sur votre appareil</p>
             </div>
           </div>
-          {settings.pushNotifications ? (
-            <label className="toggle">
-              <input
-                type="checkbox"
-                checked={settings.pushNotifications}
-                onChange={(e) => handleToggleChange('pushNotifications', e.target.checked)}
-              />
-              <span className="toggle-slider"></span>
-            </label>
-          ) : (
-            <button className="btn-enable-push" onClick={enablePushNotifications}>
-              Activer
-            </button>
-          )}
+          <label className="toggle">
+            <input
+              type="checkbox"
+              checked={settings.pushNotifications}
+              onChange={(e) => handleToggleChange('pushNotifications', e.target.checked)}
+            />
+            <span className="toggle-slider"></span>
+          </label>
         </div>
       </div>
+
+      {hasChanges && (
+        <div className="save-banner">
+          <div className="save-banner-content">
+            <span className="save-icon">⚠️</span>
+            <span>Vous avez des modifications non enregistrées</span>
+            <button 
+              className="btn-save-quick" 
+              onClick={handleSaveNotifications}
+              disabled={saveStatus === 'saving'}
+            >
+              {saveStatus === 'saving' ? '💾 Enregistrement...' : '💾 Enregistrer maintenant'}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="settings-card info-card">
         <h3>
@@ -260,11 +259,14 @@ function NotificationSettingsPage() {
 
       <div className="settings-actions">
         <button 
-          className="btn-save" 
-          onClick={handleSave}
-          disabled={saving}
+          className={`btn-save-main ${saveStatus === 'saved' ? 'saved' : ''} ${saveStatus === 'error' ? 'error' : ''}`}
+          onClick={handleSaveNotifications}
+          disabled={saveStatus === 'saving' || !hasChanges}
         >
-          {saving ? 'Enregistrement...' : 'Enregistrer les paramètres'}
+          {saveStatus === 'saving' && '⏳ Enregistrement...'}
+          {saveStatus === 'saved' && '✅ Enregistré !'}
+          {saveStatus === 'error' && '❌ Erreur'}
+          {!saveStatus && (hasChanges ? '💾 Enregistrer les modifications' : '✅ Tout est à jour')}
         </button>
       </div>
     </div>
