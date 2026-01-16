@@ -23,10 +23,13 @@ const version = packageJson.version;
 const swPath = path.join(workingDir, 'public', 'service-worker.js');
 let swContent = fs.readFileSync(swPath, 'utf8');
 
-// Date et heure du build
+// Date et heure du build en heure de Paris (CET/CEST)
 const now = new Date();
-const buildDate = now.toISOString().split('T')[0];
-const buildTime = now.toTimeString().split(' ')[0].substring(0, 5).replace(':', 'h');
+const parisTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
+const buildDate = parisTime.toISOString().split('T')[0];
+const hours = parisTime.getHours().toString().padStart(2, '0');
+const minutes = parisTime.getMinutes().toString().padStart(2, '0');
+const buildTime = `${hours}h${minutes}`;
 const buildDateTime = `${buildDate}-${buildTime}`;
 
 // Remplacer la version dans le service worker

@@ -14,10 +14,13 @@ const packageJsonPath = path.join(__dirname, 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 const version = packageJson.version;
 
-// Date et heure du build
+// Date et heure du build en heure de Paris (CET/CEST)
 const now = new Date();
-const buildDate = now.toISOString().split('T')[0];
-const buildTime = now.toTimeString().split(' ')[0].substring(0, 5).replace(':', 'h');
+const parisTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Paris' }));
+const buildDate = parisTime.toISOString().split('T')[0];
+const hours = parisTime.getHours().toString().padStart(2, '0');
+const minutes = parisTime.getMinutes().toString().padStart(2, '0');
+const buildTime = `${hours}h${minutes}`;
 const buildDateTime = `${buildDate}-${buildTime}`;
 const buildTimeISO = now.toISOString();
 
