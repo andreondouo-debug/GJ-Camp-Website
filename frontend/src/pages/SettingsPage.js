@@ -133,6 +133,16 @@ const SettingsPage = () => {
   const [lockInfo, setLockInfo] = useState(null);
   const [hasLock, setHasLock] = useState(false);
   
+  // États pour le test des notifications OneSignal
+  const [testNotification, setTestNotification] = useState({
+    testType: 'me', // 'me', 'user', 'all'
+    userId: '',
+    title: '🧪 Test OneSignal',
+    message: 'Ceci est une notification de test'
+  });
+  const [sendingNotification, setSendingNotification] = useState(false);
+  const [allUsers, setAllUsers] = useState([]);
+  
   // États pour la gestion du carrousel
   const [carouselSlides, setCarouselSlides] = useState([]);
   const [newSlide, setNewSlide] = useState({
@@ -248,6 +258,21 @@ const SettingsPage = () => {
       }
     };
     fetchSettings();
+  }, [token]);
+
+  // Charger tous les utilisateurs pour le test de notifications
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get(getApiUrl('/api/users'), {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setAllUsers(response.data.users || []);
+      } catch (error) {
+        console.error('❌ Erreur chargement utilisateurs:', error);
+      }
+    };
+    fetchUsers();
   }, [token]);
 
   // Gérer les changements de valeurs
@@ -391,6 +416,43 @@ const SettingsPage = () => {
       console.error('Détails:', error.response?.data);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Test de notification OneSignal
+  const handleTestNotification = async () => {
+    if (!testNotification.title || !testNotification.message) {
+      setMessage({ text: '⚠️ Titre et message requis', type: 'error' });
+      return;
+    }
+
+    setSendingNotification(true);
+    setMessage({ text: '', type: '' });
+
+    try {
+      const response = await axios.post(
+        getApiUrl('/api/settings/test-notification'),
+        {
+          testType: testNotification.testType,
+          userId: testNotification.userId,
+          title: testNotification.title,
+          message: testNotification.message
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setMessage({ text: response.data.message, type: 'success' });
+      console.log('✅ Notification envoyée:', response.data);
+    } catch (error) {
+      console.error('❌ Erreur test notification:', error);
+      setMessage({
+        text: error.response?.data?.message || 'Erreur lors de l\'envoi',
+        type: 'error'
+      });
+    } finally {
+      setSendingNotification(false);
     }
   };
 
@@ -3166,6 +3228,109 @@ const SettingsPage = () => {
           <button className="btn-save" onClick={handleSave}>
             💾 Enregistrer les réseaux sociaux
           </button>
+        </div>
+      )}
+
+      {/* Section Test Notifications OneSignal */}
+      <div className="section-header" onClick={() => setActiveSection(activeSection === 'notifications' ? '' : 'notifications')}>
+        <span>🔔 Test Notifications OneSignal</span>
+        <span className="toggle-icon">{activeSection === 'notifications' ? '▲' : '▼'}</span>
+      </div>
+
+      {activeSection === 'notifications' && (
+        <div className="section-content">
+          <div className="settings-grid">
+            <div className="setting-item full-width">
+              <label>🎯 Type de test</label>
+              <select
+                value={testNotification.testType}
+                onChange={(e) => setTestNotification(prev => ({ 
+                  ...prev, 
+                  testType: e.target.value,
+                  userId: e.target.value === 'user' ? prev.userId : ''
+                }))}
+                className="setting-input"
+              >
+                <option value="me">📱 Envoyer à moi-même</option>
+                <option value="user">👤 Envoyer à un utilisateur</option>
+                <option value="all">🌍 Envoyer à tous</option>
+              </select>
+            </div>
+
+            {testNotification.testType === 'user' && (
+              <div className="setting-item full-width">
+                <label>👤 Utilisateur cible</label>
+                <select
+                  value={testNotification.userId}
+                  onChange={(e) => setTestNotification(prev => ({ ...prev, userId: e.target.value }))}
+                  className="setting-input"
+                >
+                  <option value="">Sélectionner un utilisateur</option>
+                  {allUsers.map(u => (
+                    <option key={u._id} value={u._id}>
+                      {u.firstName} {u.lastName} ({u.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="setting-item full-width">
+              <label>📝 Titre de la notification</label>
+              <input
+                type="text"
+                value={testNotification.title}
+                onChange={(e) => setTestNotification(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="🧪 Test OneSignal"
+                className="setting-input"
+              />
+            </div>
+
+            <div className="setting-item full-width">
+              <label>💬 Message</label>
+              <textarea
+                value={testNotification.message}
+                onChange={(e) => setTestNotification(prev => ({ ...prev, message: e.target.value }))}
+                placeholder="Ceci est une notification de test"
+                className="setting-input"
+                rows="3"
+                style={{ resize: 'vertical', fontFamily: 'inherit' }}
+              />
+            </div>
+
+            {message.text && (
+              <div className={`setting-item full-width message ${message.type}`}>
+                <p>{message.text}</p>
+              </div>
+            )}
+          </div>
+
+          <button 
+            className="btn-save" 
+            onClick={handleTestNotification}
+            disabled={sendingNotification}
+            style={{ opacity: sendingNotification ? 0.6 : 1 }}
+          >
+            {sendingNotification ? '⏳ Envoi en cours...' : '🚀 Envoyer la notification'}
+          </button>
+
+          <div style={{ 
+            marginTop: '20px', 
+            padding: '15px', 
+            background: 'rgba(212, 175, 55, 0.1)', 
+            borderRadius: '10px',
+            borderLeft: '4px solid var(--color-secondary, #d4af37)'
+          }}>
+            <p style={{ margin: '0 0 10px 0', fontWeight: 'bold', color: 'var(--color-secondary, #d4af37)' }}>
+              ℹ️ Informations
+            </p>
+            <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: '1.8' }}>
+              <li>Les utilisateurs doivent avoir accepté les notifications</li>
+              <li>Seuls les utilisateurs connectés au moins une fois depuis l'installation de OneSignal recevront la notification</li>
+              <li>Les notifications apparaissent même si le site est fermé (navigateur ouvert)</li>
+              <li>Pour voir vos Player IDs, exécutez: <code style={{ background: 'rgba(0,0,0,0.2)', padding: '2px 6px', borderRadius: '3px' }}>node backend/check-player-ids.js</code></li>
+            </ul>
+          </div>
         </div>
       )}
       </div>
