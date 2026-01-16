@@ -123,6 +123,8 @@ const SettingsPage = () => {
   const [logoPreview, setLogoPreview] = useState('');
   const [crptLogoFile, setCrptLogoFile] = useState(null);
   const [crptLogoPreview, setCrptLogoPreview] = useState('');
+  const [pwaLogoFile, setPwaLogoFile] = useState(null);
+  const [pwaLogoPreview, setPwaLogoPreview] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   
@@ -345,6 +347,28 @@ const SettingsPage = () => {
         setSettings(updatedSettings);
         setCrptLogoFile(null);
         setCrptLogoPreview('');
+      }
+
+      // Si un nouveau logo PWA a été uploadé, l'envoyer
+      if (pwaLogoFile) {
+        console.log('📤 Upload du logo PWA en cours...');
+        const formData = new FormData();
+        formData.append('pwaLogo', pwaLogoFile);
+        
+        const uploadResponse = await axios.post(getApiUrl('/api/settings/upload-pwa-logo'), formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        console.log('✅ Logo PWA uploadé:', uploadResponse.data.pwaLogoUrl);
+        
+        // Mettre à jour l'URL du logo PWA dans les settings
+        updatedSettings.pwaLogoUrl = uploadResponse.data.pwaLogoUrl;
+        setSettings(updatedSettings);
+        setPwaLogoFile(null);
+        setPwaLogoPreview('');
       }
       
       console.log('💾 Sauvegarde des paramètres...');
@@ -2759,6 +2783,116 @@ const SettingsPage = () => {
           <button className="btn-save" onClick={handleSave}>
             💾 Enregistrer le logo CRPT
           </button>
+        </div>
+      )}
+
+      {/* Gestion du Logo PWA */}
+      {activeTab === 'logo' && (
+        <div className="settings-section" style={{ marginTop: '2rem' }}>
+          <h2>📱 Logo PWA (Application Installée)</h2>
+          <p style={{ marginBottom: '1rem', color: '#666' }}>
+            Ce logo s'affichera lorsque les utilisateurs installent l'application sur leur appareil (téléphone, tablette, ordinateur).
+          </p>
+          
+          <div className="settings-grid">
+            <div className="setting-item full-width">
+              <label>📤 Upload du logo PWA</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setPwaLogoFile(file);
+                    setPwaLogoPreview(URL.createObjectURL(file));
+                  }
+                }}
+                className="setting-input"
+              />
+              <small style={{ marginTop: '10px', display: 'block', color: '#666' }}>
+                Format recommandé : PNG carré (512x512px minimum) • Sera automatiquement redimensionné en 192x192 et 512x512
+              </small>
+            </div>
+
+            {(pwaLogoPreview || settings.pwaLogoUrl) && (
+              <div className="setting-item full-width">
+                <label>👁️ Aperçu du logo PWA</label>
+                <div style={{
+                  padding: '2rem',
+                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                  borderRadius: '12px',
+                  border: '2px solid #e0e0e0',
+                  textAlign: 'center'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    gap: '2rem'
+                  }}>
+                    {/* Aperçu 192x192 */}
+                    <div>
+                      <img 
+                        src={pwaLogoPreview || settings.pwaLogoUrl} 
+                        alt="Logo PWA 192" 
+                        style={{
+                          width: '96px',
+                          height: '96px',
+                          borderRadius: '20px',
+                          border: '2px solid white',
+                          background: 'white',
+                          padding: '2px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                        }}
+                      />
+                      <p style={{ marginTop: '0.5rem', color: 'white', fontSize: '0.875rem' }}>
+                        192x192
+                      </p>
+                    </div>
+
+                    {/* Aperçu 512x512 */}
+                    <div>
+                      <img 
+                        src={pwaLogoPreview || settings.pwaLogoUrl} 
+                        alt="Logo PWA 512" 
+                        style={{
+                          width: '128px',
+                          height: '128px',
+                          borderRadius: '28px',
+                          border: '2px solid white',
+                          background: 'white',
+                          padding: '4px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                        }}
+                      />
+                      <p style={{ marginTop: '0.5rem', color: 'white', fontSize: '0.875rem' }}>
+                        512x512
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <p style={{ 
+                    marginTop: '1.5rem', 
+                    color: 'rgba(255,255,255,0.9)', 
+                    fontSize: '0.875rem',
+                    fontStyle: 'italic'
+                  }}>
+                    💡 Ce logo apparaîtra sur l'écran d'accueil des utilisateurs après installation
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button className="btn-save" onClick={handleSave} disabled={!pwaLogoFile}>
+            💾 Enregistrer le logo PWA
+          </button>
+          
+          {!pwaLogoFile && settings.pwaLogoUrl && (
+            <p style={{ marginTop: '1rem', color: '#666', fontSize: '0.875rem' }}>
+              ✅ Logo PWA actuel : {settings.pwaLogoUrl}
+            </p>
+          )}
         </div>
       )}
 

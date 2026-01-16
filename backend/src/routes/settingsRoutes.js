@@ -37,5 +37,6 @@ router.put('/', auth, requireAdmin, acquireSettingsLock, settingsController.upda
 router.post('/reset', auth, requireAdmin, acquireSettingsLock, settingsController.resetSettings);
 router.post('/upload-logo', auth, requireAdmin, acquireSettingsLock, cloudinaryUpload, uploadToCloudinary, settingsController.uploadLogo);
 router.post('/upload-crpt-logo', auth, requireAdmin, acquireSettingsLock, cloudinaryUploadCrpt, uploadToCloudinary, settingsController.uploadCrptLogo);
+router.post('/upload-pwa-logo', auth, requireAdmin, acquireSettingsLock, cloudinaryUpload, settingsController.uploadPwaLogo);
 
 module.exports = router;

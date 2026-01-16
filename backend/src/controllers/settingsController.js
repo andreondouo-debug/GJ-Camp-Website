@@ -101,6 +101,10 @@ const DEFAULT_SETTINGS = {
   carouselHeight: '500px',
   carouselAutoplayInterval: 6000, // 6 secondes par défaut
   carouselTransitionDuration: 1000, // 1 seconde de transition
+  
+  // Logo PWA (pour l'installation de l'application)
+  pwaLogoUrl: '',
+  pwaLogoPublicId: '', // ID Cloudinary pour supprimer l'ancienne version
 };
 
 /**
@@ -283,3 +287,124 @@ exports.uploadCrptLogo = async (req, res) => {
     });
   }
 };
+
+/**
+ * Upload du logo PWA sur Cloudinary
+ * Ce logo sera utilisé pour l'icône de l'application installée
+ */
+exports.uploadPwaLogo = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ 
+        message: 'Aucun fichier logo PWA fourni' 
+      });
+    }
+
+    const fs = require('fs');
+    const path = require('path');
+    const cloudinary = require('../config/cloudinary');
+    
+    // Sauvegarder temporairement le fichier si multer utilise memoryStorage
+    let tempFilePath = req.file.path;
+    if (!tempFilePath) {
+      const uploadDir = path.join(__dirname, '../../uploads/temp');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      tempFilePath = path.join(uploadDir, `${Date.now()}-${req.file.originalname}`);
+      fs.writeFileSync(tempFilePath, req.file.buffer);
+    }
+    
+    // Upload vers Cloudinary avec transformations pour les tailles PWA
+    const uploadOptions = {
+      folder: 'gj-camp/pwa-logos',
+      public_id: `pwa-logo-${Date.now()}`,
+      transformation: [
+        { width: 512, height: 512, crop: 'fill', quality: 'auto' }
+      ]
+    };
+
+    const result = await cloudinary.uploader.upload(tempFilePath, uploadOptions);
+    
+    // Créer aussi une version 192x192
+    const result192 = await cloudinary.uploader.upload(tempFilePath, {
+      ...uploadOptions,
+      public_id: `${uploadOptions.public_id}-192`,
+      transformation: [
+        { width: 192, height: 192, crop: 'fill', quality: 'auto' }
+      ]
+    });
+
+    // Supprimer le fichier temporaire
+    if (fs.existsSync(tempFilePath)) {
+      fs.unlinkSync(tempFilePath);
+    }
+
+    // Mettre à jour les paramètres avec les URLs des logos PWA
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = new Settings({ settings: DEFAULT_SETTINGS });
+    }
+
+    // Supprimer l'ancien logo PWA de Cloudinary si existant
+    if (settings.settings.pwaLogoPublicId) {
+      try {
+        await cloudinary.uploader.destroy(settings.settings.pwaLogoPublicId);
+        await cloudinary.uploader.destroy(`${settings.settings.pwaLogoPublicId}-192`);
+        console.log('🗑️ Ancien logo PWA supprimé de Cloudinary');
+      } catch (err) {
+        console.error('⚠️ Erreur suppression ancien logo:', err.message);
+      }
+    }
+
+    settings.settings.pwaLogoUrl = result.secure_url;
+    settings.settings.pwaLogoPublicId = result.public_id;
+    settings.updatedBy = req.user.userId;
+    settings.markModified('settings');
+    await settings.save();
+
+    // Mettre à jour le manifest.json
+    const manifestPath = path.join(__dirname, '../../../frontend/public/manifest.json');
+    try {
+      const manifestContent = fs.readFileSync(manifestPath, 'utf8');
+      const manifest = JSON.parse(manifestContent);
+      
+      manifest.icons = [
+        {
+          src: result192.secure_url,
+          sizes: '192x192',
+          type: 'image/png',
+          purpose: 'any maskable'
+        },
+        {
+          src: result.secure_url,
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'any maskable'
+        }
+      ];
+      
+      fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+      console.log('✅ manifest.json mis à jour avec les nouveaux logos PWA');
+    } catch (err) {
+      console.error('⚠️ Erreur mise à jour manifest.json:', err.message);
+    }
+    
+    console.log(`✅ Logo PWA uploadé avec succès: ${result.secure_url}`);
+    
+    res.json({ 
+      success: true,
+      message: 'Logo PWA uploadé avec succès',
+      pwaLogoUrl: result.secure_url,
+      pwaLogo192Url: result192.secure_url,
+      publicId: result.public_id
+    });
+  } catch (error) {
+    console.error('❌ Erreur upload logo PWA:', error);
+    res.status(500).json({ 
+      message: 'Erreur lors de l\'upload du logo PWA',
+      error: error.message 
+    });
+  }
+};
+
