@@ -7,7 +7,7 @@ const CACHE_NAME = `gj-camp-${CACHE_VERSION}`;
 const urlsToCache = [
   `/?v=${CACHE_VERSION}`,
   `/manifest.json?v=${CACHE_VERSION}`,
-  `/images/logo-gj.png?v=${CACHE_VERSION}`
+  `/images/crpt-logo.png?v=${CACHE_VERSION}`
 ];
 
 // Installation du Service Worker

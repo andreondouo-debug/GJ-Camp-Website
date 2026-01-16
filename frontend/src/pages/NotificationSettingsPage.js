@@ -28,7 +28,7 @@ function NotificationSettingsPage() {
       setSettings({
         emailNotifications: response.data.emailNotifications ?? true,
         smsNotifications: response.data.smsNotifications ?? false,
-        pushNotifications: response.data.pushNotifications ?? false
+        pushNotifications: response.data.pushNotifications ?? true  // ✅ Activé par défaut
       });
       setPhoneNumber(response.data.phoneNumber || '');
       setLoading(false);
