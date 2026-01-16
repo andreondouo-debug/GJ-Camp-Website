@@ -40,6 +40,7 @@ import PasswordResetManagementPage from './pages/PasswordResetManagementPage';
 import GuardedRoute from './components/GuardedRoute';
 import CookieConsent from './components/CookieConsent';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
+import VersionBadge from './components/VersionBadge';
 import './styles/App.css';
 
 function App() {
@@ -183,6 +184,7 @@ function App() {
           </Routes>
           <Footer />
           <CookieConsent />
+          <VersionBadge />
         </div>
       </AuthProvider>
     </Router>

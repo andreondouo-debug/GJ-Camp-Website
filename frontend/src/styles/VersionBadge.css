@@ -1,0 +1,98 @@
+/* Badge de version en bas à droite */
+.version-badge-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+.version-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.version-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.version-details {
+  position: absolute;
+  bottom: 50px;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  min-width: 250px;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.version-detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.version-detail-item:last-child {
+  border-bottom: none;
+}
+
+.version-label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.version-value {
+  font-size: 0.85rem;
+  color: #2c3e50;
+  font-family: 'Courier New', monospace;
+  background: #f8f9fa;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .version-badge-container {
+    bottom: 70px;
+    right: 10px;
+  }
+
+  .version-badge {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+  }
+
+  .version-details {
+    min-width: 200px;
+    padding: 0.75rem;
+  }
+
+  .version-label,
+  .version-value {
+    font-size: 0.8rem;
+  }
+}

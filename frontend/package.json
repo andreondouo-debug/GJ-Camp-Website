@@ -16,8 +16,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "ESLINT_NO_DEV_ERRORS=true CI=false node update-sw-version.js && react-scripts build",
-    "prebuild": "node update-sw-version.js",
+    "build": "ESLINT_NO_DEV_ERRORS=true CI=false node generate-build-info.js && node update-sw-version.js && react-scripts build",
+    "prebuild": "node generate-build-info.js && node update-sw-version.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
