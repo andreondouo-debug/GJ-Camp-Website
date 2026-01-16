@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import DynamicBackground from './components/DynamicBackground';
+import { initOneSignal } from './services/oneSignalService';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -44,6 +45,20 @@ import VersionBadge from './components/VersionBadge';
 import './styles/App.css';
 
 function App() {
+  // Initialiser OneSignal au montage de l'application
+  useEffect(() => {
+    const initNotifications = async () => {
+      try {
+        await initOneSignal();
+        console.log('🔔 OneSignal prêt');
+      } catch (error) {
+        console.error('❌ Erreur init OneSignal:', error);
+      }
+    };
+
+    initNotifications();
+  }, []);
+
   return (
     <Router>
       <AuthProvider>
