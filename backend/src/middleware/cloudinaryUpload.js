@@ -50,6 +50,15 @@ const cloudinaryUploadCrpt = multer({
   fileFilter: fileFilter
 }).single('crptLogo');
 
+// Configuration de Multer pour logo PWA
+const cloudinaryUploadPwa = multer({
+  storage: storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB max
+  },
+  fileFilter: fileFilter
+}).single('pwaLogo');
+
 /**
  * Middleware pour uploader le fichier vers Cloudinary
  */
@@ -254,6 +263,7 @@ const uploadCarouselImageToCloudinary = async (req, res, next) => {
 module.exports = {
   cloudinaryUpload,
   cloudinaryUploadCrpt,
+  cloudinaryUploadPwa,
   uploadToCloudinary,
   uploadActivityImageToCloudinary,
   uploadCarouselImageToCloudinary

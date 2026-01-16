@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const { cloudinaryUpload, cloudinaryUploadCrpt, uploadToCloudinary } = require('../middleware/cloudinaryUpload');
+const { cloudinaryUpload, cloudinaryUploadCrpt, cloudinaryUploadPwa, uploadToCloudinary } = require('../middleware/cloudinaryUpload');
 const settingsController = require('../controllers/settingsController');
 const { 
   acquireSettingsLock, 
@@ -37,6 +37,6 @@ router.put('/', auth, requireAdmin, acquireSettingsLock, settingsController.upda
 router.post('/reset', auth, requireAdmin, acquireSettingsLock, settingsController.resetSettings);
 router.post('/upload-logo', auth, requireAdmin, acquireSettingsLock, cloudinaryUpload, uploadToCloudinary, settingsController.uploadLogo);
 router.post('/upload-crpt-logo', auth, requireAdmin, acquireSettingsLock, cloudinaryUploadCrpt, uploadToCloudinary, settingsController.uploadCrptLogo);
-router.post('/upload-pwa-logo', auth, requireAdmin, acquireSettingsLock, cloudinaryUpload, settingsController.uploadPwaLogo);
+router.post('/upload-pwa-logo', auth, requireAdmin, acquireSettingsLock, cloudinaryUploadPwa, settingsController.uploadPwaLogo);
 
 module.exports = router;
