@@ -27,11 +27,14 @@ function NotificationSettingsPage() {
       });
 
       console.log('📥 Paramètres reçus du backend:', response.data);
+      console.log('📥 pushNotifications brut:', response.data.pushNotifications);
+      console.log('📥 Type:', typeof response.data.pushNotifications);
       
+      // FORCER les notifications push à TOUJOURS être true
       const loadedSettings = {
-        emailNotifications: response.data.emailNotifications ?? true,
-        smsNotifications: response.data.smsNotifications ?? false,
-        pushNotifications: response.data.pushNotifications ?? true
+        emailNotifications: response.data.emailNotifications !== false, // true par défaut
+        smsNotifications: response.data.smsNotifications === true, // false par défaut
+        pushNotifications: true // ✅ TOUJOURS ACTIVÉ
       };
       
       console.log('📊 Paramètres chargés:', loadedSettings);
@@ -41,6 +44,12 @@ function NotificationSettingsPage() {
       setHasChanges(false);
     } catch (error) {
       console.error('❌ Erreur chargement paramètres:', error);
+      // En cas d'erreur, garder les notifications push activées
+      setSettings({
+        emailNotifications: true,
+        smsNotifications: false,
+        pushNotifications: true
+      });
       setLoading(false);
     }
   };
@@ -76,6 +85,14 @@ function NotificationSettingsPage() {
 
   const handleToggleChange = (field, value) => {
     console.log(`🔄 Changement ${field}:`, value);
+    
+    // BLOQUER la désactivation des notifications push
+    if (field === 'pushNotifications' && value === false) {
+      console.warn('⚠️ Désactivation des notifications push bloquée - Toujours activé');
+      alert('ℹ️ Les notifications push restent toujours activées pour ne manquer aucune information importante.');
+      return; // Ne pas appliquer le changement
+    }
+    
     setSettings(prev => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
@@ -201,23 +218,29 @@ function NotificationSettingsPage() {
           </div>
         )}
 
-        {/* Push */}
-        <div className="setting-item">
+        {/* Push - Toujours activé */}
+        <div className="setting-item push-always-on">
           <div className="setting-info">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="setting-icon">
               <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
               <line x1="12" y1="18" x2="12.01" y2="18"></line>
             </svg>
             <div>
-              <h3>Notifications Push</h3>
+              <h3>Notifications Push 🔔</h3>
               <p>Notifications instantanées sur votre appareil</p>
+              <span className="status-badge active">✅ Toujours activé</span>
+              <small style={{ display: 'block', marginTop: '0.5rem', color: '#7f8c8d', fontStyle: 'italic' }}>
+                Les notifications push restent activées pour ne manquer aucune information importante
+              </small>
             </div>
           </div>
-          <label className="toggle">
+          <label className="toggle toggle-locked">
             <input
               type="checkbox"
-              checked={settings.pushNotifications}
-              onChange={(e) => handleToggleChange('pushNotifications', e.target.checked)}
+              checked={true}
+              disabled={true}
+              readOnly
+              title="Les notifications push sont toujours activées"
             />
             <span className="toggle-slider"></span>
           </label>

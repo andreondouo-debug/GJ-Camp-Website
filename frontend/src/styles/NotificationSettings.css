@@ -65,6 +65,16 @@
   transform: translateX(5px);
 }
 
+.setting-item.push-always-on {
+  background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
+  border-color: #27ae60;
+}
+
+.setting-item.push-always-on:hover {
+  background: linear-gradient(135deg, #c8e6c9 0%, #ffffff 100%);
+  border-color: #2ecc71;
+}
+
 .setting-info {
   display: flex;
   align-items: center;
@@ -95,6 +105,11 @@
   width: 60px;
   height: 34px;
   flex-shrink: 0;
+}
+
+.toggle.toggle-locked {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .toggle input {
