@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Storage</title>
+</head>
+<body>
+    <h1>Nettoyage localStorage</h1>
+    <button onclick="clearStorage()">Nettoyer</button>
+    <div id="result"></div>
+    
+    <script>
+        function clearStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            document.getElementById('result').innerHTML = '✅ Storage nettoyé ! Rechargez la page principale.';
+        }
+    </script>
+</body>
+</html>
