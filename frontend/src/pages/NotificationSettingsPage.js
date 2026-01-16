@@ -234,16 +234,10 @@ function NotificationSettingsPage() {
               </small>
             </div>
           </div>
-          <label className="toggle toggle-locked">
-            <input
-              type="checkbox"
-              checked={true}
-              disabled={true}
-              readOnly
-              title="Les notifications push sont toujours activées"
-            />
-            <span className="toggle-slider"></span>
-          </label>
+          <div className="push-locked-badge">
+            <span className="locked-icon">🔒</span>
+            <span className="locked-text">ACTIVÉ</span>
+          </div>
         </div>
       </div>
 

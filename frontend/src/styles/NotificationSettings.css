@@ -110,6 +110,18 @@
 .toggle.toggle-locked {
   opacity: 0.7;
   cursor: not-allowed;
+  pointer-events: none; /* Empêche tous les clics */
+}
+
+.toggle.toggle-locked input {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.toggle.toggle-locked .toggle-slider {
+  cursor: not-allowed;
+  pointer-events: none;
+  background-color: #95a5a6 !important;
 }
 
 .toggle input {
@@ -370,6 +382,28 @@
 .status-badge.active {
   background: rgba(46, 204, 113, 0.2);
   color: #27ae60;
+}
+
+/* Push Locked Badge */
+.push-locked-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.locked-icon {
+  font-size: 1.2rem;
+}
+
+.locked-text {
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 1px;
 }
 
 /* Loading */
