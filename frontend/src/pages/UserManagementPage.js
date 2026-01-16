@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import { getOneSignalPlayerId, setUserEmail } from '../services/oneSignalService';
+import { getApiUrl } from '../config/api';
 import '../styles/UserManagementPage.css';
 
 const roleLabels = {
@@ -21,6 +23,16 @@ const UserManagementPage = () => {
   const [feedback, setFeedback] = useState({ type: null, message: '' });
   const [verifyingUserId, setVerifyingUserId] = useState(null);
   const [updatingPermissionUserId, setUpdatingPermissionUserId] = useState(null);
+
+  // États pour le test des notifications OneSignal
+  const [testNotification, setTestNotification] = useState({
+    testType: 'me',
+    userId: '',
+    title: '🧪 Test OneSignal',
+    message: 'Ceci est une notification de test'
+  });
+  const [sendingNotification, setSendingNotification] = useState(false);
+  const [notificationFeedback, setNotificationFeedback] = useState({ type: null, message: '' });
 
   const isAdmin = user?.role === 'admin';
   const canView = useMemo(() => ['responsable', 'admin'].includes(user?.role), [user]);
@@ -54,6 +66,98 @@ const UserManagementPage = () => {
 
     fetchData();
   }, [isAuthenticated, token, canView]);
+
+  // Test de notification OneSignal
+  const handleTestNotification = async () => {
+    if (!testNotification.title || !testNotification.message) {
+      setNotificationFeedback({ type: 'error', message: '⚠️ Titre et message requis' });
+      return;
+    }
+
+    setSendingNotification(true);
+    setNotificationFeedback({ type: null, message: '' });
+
+    try {
+      const response = await axios.post(
+        getApiUrl('/api/settings/test-notification'),
+        {
+          testType: testNotification.testType,
+          userId: testNotification.userId,
+          title: testNotification.title,
+          message: testNotification.message
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setNotificationFeedback({ type: 'success', message: response.data.message });
+      console.log('✅ Notification envoyée:', response.data);
+    } catch (error) {
+      console.error('❌ Erreur test notification:', error);
+      setNotificationFeedback({
+        type: 'error',
+        message: error.response?.data?.message || 'Erreur lors de l\'envoi'
+      });
+    } finally {
+      setSendingNotification(false);
+    }
+  };
+
+  // Enregistrer Player ID manuellement
+  const handleRegisterPlayerId = async () => {
+    setSendingNotification(true);
+    setNotificationFeedback({ type: null, message: '' });
+
+    try {
+      let playerId = null;
+      let attempts = 0;
+      const maxAttempts = 20;
+
+      while (!playerId && attempts < maxAttempts) {
+        playerId = await getOneSignalPlayerId();
+        if (!playerId) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          attempts++;
+        }
+      }
+
+      if (!playerId) {
+        setNotificationFeedback({
+          type: 'error',
+          message: '❌ OneSignal n\'est pas initialisé. Rechargez la page et réessayez.'
+        });
+        setSendingNotification(false);
+        return;
+      }
+
+      console.log('📱 Player ID trouvé:', playerId);
+
+      const response = await axios.put(
+        getApiUrl('/api/auth/push-player-id'),
+        { pushPlayerId: playerId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (user?.email) {
+        await setUserEmail(user.email);
+      }
+
+      console.log('✅ Player ID sauvegardé:', response.data);
+      setNotificationFeedback({
+        type: 'success',
+        message: '✅ Notifications activées ! Vous recevrez maintenant les notifications push.'
+      });
+    } catch (error) {
+      console.error('❌ Erreur enregistrement Player ID:', error);
+      setNotificationFeedback({
+        type: 'error',
+        message: error.response?.data?.message || '❌ Erreur lors de l\'activation des notifications'
+      });
+    } finally {
+      setSendingNotification(false);
+    }
+  };
 
   const filteredUsers = useMemo(() => {
     return users.filter((item) => {
@@ -290,6 +394,187 @@ const UserManagementPage = () => {
         {feedback.type && (
           <div className={`management-alert management-alert-${feedback.type}`}>
             {feedback.message}
+          </div>
+        )}
+
+        {/* Module Test Notifications OneSignal */}
+        {isAdmin && (
+          <div className="notification-test-section" style={{
+            margin: '20px 0',
+            padding: '25px',
+            background: 'linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(160, 30, 30, 0.05) 100%)',
+            borderRadius: '12px',
+            border: '2px solid var(--color-secondary, #d4af37)'
+          }}>
+            <h2 style={{ margin: '0 0 15px 0', color: 'var(--color-secondary, #d4af37)' }}>
+              🔔 Test Notifications OneSignal
+            </h2>
+
+            <div style={{ display: 'grid', gap: '15px', marginBottom: '20px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
+                  🎯 Type de test
+                </label>
+                <select
+                  value={testNotification.testType}
+                  onChange={(e) => setTestNotification(prev => ({ 
+                    ...prev, 
+                    testType: e.target.value,
+                    userId: e.target.value === 'user' ? prev.userId : ''
+                  }))}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '2px solid #ddd',
+                    fontSize: '1rem'
+                  }}
+                >
+                  <option value="me">📱 Envoyer à moi-même</option>
+                  <option value="user">👤 Envoyer à un utilisateur</option>
+                  <option value="all">🌍 Envoyer à tous</option>
+                </select>
+              </div>
+
+              {testNotification.testType === 'user' && (
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
+                    👤 Utilisateur cible
+                  </label>
+                  <select
+                    value={testNotification.userId}
+                    onChange={(e) => setTestNotification(prev => ({ ...prev, userId: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '2px solid #ddd',
+                      fontSize: '1rem'
+                    }}
+                  >
+                    <option value="">Sélectionner un utilisateur</option>
+                    {users.map(u => (
+                      <option key={u._id} value={u._id}>
+                        {u.firstName} {u.lastName} ({u.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
+                  📝 Titre de la notification
+                </label>
+                <input
+                  type="text"
+                  value={testNotification.title}
+                  onChange={(e) => setTestNotification(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="🧪 Test OneSignal"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '2px solid #ddd',
+                    fontSize: '1rem'
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
+                  💬 Message
+                </label>
+                <textarea
+                  value={testNotification.message}
+                  onChange={(e) => setTestNotification(prev => ({ ...prev, message: e.target.value }))}
+                  placeholder="Ceci est une notification de test"
+                  rows="3"
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '2px solid #ddd',
+                    fontSize: '1rem',
+                    resize: 'vertical',
+                    fontFamily: 'inherit'
+                  }}
+                />
+              </div>
+
+              {notificationFeedback.type && (
+                <div style={{
+                  padding: '12px 20px',
+                  borderRadius: '8px',
+                  fontWeight: '500',
+                  background: notificationFeedback.type === 'success' 
+                    ? 'rgba(76, 175, 80, 0.1)' 
+                    : 'rgba(244, 67, 54, 0.1)',
+                  border: `2px solid ${notificationFeedback.type === 'success' ? '#4CAF50' : '#f44336'}`,
+                  color: notificationFeedback.type === 'success' ? '#2e7d32' : '#c62828'
+                }}>
+                  {notificationFeedback.message}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <button
+                onClick={handleRegisterPlayerId}
+                disabled={sendingNotification}
+                style={{
+                  background: 'linear-gradient(135deg, var(--color-secondary, #d4af37) 0%, var(--color-gold-dark, #b8942a) 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  borderRadius: '50px',
+                  cursor: sendingNotification ? 'not-allowed' : 'pointer',
+                  opacity: sendingNotification ? 0.6 : 1,
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {sendingNotification ? '⏳ Activation...' : '🔔 Activer mes notifications'}
+              </button>
+
+              <button
+                onClick={handleTestNotification}
+                disabled={sendingNotification}
+                style={{
+                  background: 'linear-gradient(135deg, var(--color-primary, #a01e1e) 0%, var(--color-primary-dark, #7a1515) 100%)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  borderRadius: '50px',
+                  cursor: sendingNotification ? 'not-allowed' : 'pointer',
+                  opacity: sendingNotification ? 0.6 : 1,
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {sendingNotification ? '⏳ Envoi...' : '🚀 Envoyer la notification'}
+              </button>
+            </div>
+
+            <div style={{
+              marginTop: '20px',
+              padding: '15px',
+              background: 'rgba(212, 175, 55, 0.1)',
+              borderRadius: '10px',
+              borderLeft: '4px solid var(--color-secondary, #d4af37)'
+            }}>
+              <p style={{ margin: '0 0 10px 0', fontWeight: 'bold', color: 'var(--color-secondary, #d4af37)' }}>
+                ℹ️ Informations importantes
+              </p>
+              <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: '1.8' }}>
+                <li>Cliquez sur "Activer mes notifications" pour enregistrer votre Player ID</li>
+                <li>Les utilisateurs doivent avoir accepté les notifications</li>
+                <li>Les notifications fonctionnent même si le site est fermé (navigateur ouvert)</li>
+                <li>Vérifiez les Player IDs: <code style={{ background: 'rgba(0,0,0,0.1)', padding: '2px 6px', borderRadius: '3px' }}>node backend/check-player-ids.js</code></li>
+              </ul>
+            </div>
           </div>
         )}
 
