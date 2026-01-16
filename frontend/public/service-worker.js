@@ -154,7 +154,10 @@ self.addEventListener('push', (event) => {
         title: data.title || 'GJ Camp',
         body: data.body || 'Nouvelle notification',
         icon: data.icon || '/images/logo-gj.png',
-        badge: data.badge || '/images/logo-gj
+        badge: data.badge || '/images/logo-gj.png',
+        vibrate: data.vibrate || [200, 100, 200],
+        data: data.data || { url: '/' }
+      };
     } catch (error) {
       console.error('❌ Erreur parsing notification:', error);
       notificationData.body = event.data.text();
