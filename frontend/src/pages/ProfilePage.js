@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import NotificationSettings from '../components/NotificationSettings';
+import RegisterPlayerIdButton from '../components/RegisterPlayerIdButton';
 import '../styles/ProfilePage.css';
 
 const roleLabels = {
@@ -192,6 +193,9 @@ const ProfilePage = () => {
               </button>
             </div>
           )}
+
+          {/* Bouton activation notifications push */}
+          <RegisterPlayerIdButton />
 
           <div className="profile-meta">
           <div className="meta-item">
