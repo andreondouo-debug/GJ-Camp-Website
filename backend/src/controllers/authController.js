@@ -186,7 +186,14 @@ exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId)
       .select('-password -emailVerificationToken -emailVerificationExpires');
-    res.status(200).json(user);
+    
+    // Garantir les valeurs par défaut pour les utilisateurs existants
+    const userData = user.toObject();
+    userData.emailNotifications = userData.emailNotifications ?? true;
+    userData.pushNotifications = userData.pushNotifications ?? true;
+    userData.smsNotifications = userData.smsNotifications ?? false;
+    
+    res.status(200).json(userData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
