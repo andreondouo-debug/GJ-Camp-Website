@@ -1,10 +1,12 @@
 // Service Worker pour PWA - GJ Camp
-const CACHE_VERSION = '1.0.3'; // Incrémenter pour forcer mise à jour
+const BUILD_HASH = 'b426475'; // Hash du commit
+const BUILD_TIMESTAMP = '1768513480'; // Timestamp build
+const CACHE_VERSION = `${BUILD_HASH}-${BUILD_TIMESTAMP}`;
 const CACHE_NAME = `gj-camp-v${CACHE_VERSION}`;
 const urlsToCache = [
-  '/',
-  '/manifest.json',
-  '/images/logo-gj.png'
+  `/?v=${CACHE_VERSION}`,
+  `/manifest.json?v=${CACHE_VERSION}`,
+  `/images/logo-gj.png?v=${CACHE_VERSION}`
 ];
 
 // Installation du Service Worker
@@ -40,29 +42,56 @@ self.addEventListener('activate', (event) => {
 });
 
 // Interception des requêtes réseau - Network First Strategy
+
 self.addEventListener('fetch', (event) => {
-  // Toujours récupérer depuis le réseau pour éviter cache excessif
+  const url = new URL(event.request.url);
+  // Ajoute le paramètre de version sur les requêtes API et statiques
+  if (url.pathname.startsWith('/api/')) {
+    // Stratégie network first pour les API
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Mettre en cache la réponse API si succès
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Fallback cache si offline
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
+  // Stratégie network first pour les pages principales et fichiers statiques
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Vérifier si réponse valide
-        if (!response || response.status !== 200) {
-          return response;
-        }
-
-        // Ne mettre en cache que les ressources statiques importantes
-        const urlsToCache = ['/', '/manifest.json', '/images/logo-gj.png'];
-        if (urlsToCache.includes(new URL(event.request.url).pathname)) {
+        // Mettre en cache si succès et si fichier statique ou HTML
+        if (response && response.status === 200 && (
+          url.pathname.endsWith('.js') ||
+          url.pathname.endsWith('.css') ||
+          url.pathname.endsWith('.png') ||
+          url.pathname.endsWith('.jpg') ||
+          url.pathname.endsWith('.jpeg') ||
+          url.pathname.endsWith('.svg') ||
+          url.pathname.endsWith('.json') ||
+          url.pathname === '/'
+        )) {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
           });
         }
-
         return response;
       })
       .catch(() => {
-        // En cas d'échec réseau, essayer le cache
+        // Fallback cache si offline
         return caches.match(event.request).then((cachedResponse) => {
           return cachedResponse || caches.match('/');
         });
@@ -77,13 +106,8 @@ self.addEventListener('push', (event) => {
   let notificationData = {
     title: 'GJ Camp',
     body: 'Nouvelle notification',
-    icon: '/images/logo-192.png',
-    badge: '/images/logo-192.png',
-    vibrate: [200, 100, 200],
-    data: { url: '/' }
-  };
-gj.png',
-    badge: '/images/logo-gj.png',
+    icon: 'https://res.cloudinary.com/dbouijio-1/image/upload/v1767949247/gj-camp/logo/raujk6jdnoioiqgjop2f.jpg',
+    badge: 'https://res.cloudinary.com/dbouijio-1/image/upload/v1767949247/gj-camp/logo/raujk6jdnoioiqgjop2f.jpg',
     vibrate: [200, 100, 200],
     data: { url: '/' }
   };

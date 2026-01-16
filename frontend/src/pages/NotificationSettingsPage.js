@@ -8,7 +8,7 @@ function NotificationSettingsPage() {
   const [settings, setSettings] = useState({
     emailNotifications: true,
     smsNotifications: false,
-    pushNotifications: false
+    pushNotifications: true
   });
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(true);
@@ -49,6 +49,9 @@ function NotificationSettingsPage() {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      // Recharger les paramètres depuis le backend pour garantir la persistance
+      await fetchSettings();
 
       alert('✅ Paramètres de notification enregistrés !');
       setSaving(false);
