@@ -7,36 +7,29 @@ import OneSignal from 'react-onesignal';
 
 const ONESIGNAL_APP_ID = '100f3c29-e9fd-4ea0-a23c-db1add2ebee8';
 
+let isInitialized = false;
+
 /**
  * Initialiser OneSignal
  */
 export const initOneSignal = async () => {
   try {
+    if (isInitialized) {
+      console.log('✅ OneSignal déjà initialisé');
+      return true;
+    }
+
     console.log('🔔 Initialisation de OneSignal...');
     
     await OneSignal.init({
       appId: ONESIGNAL_APP_ID,
-      allowLocalhostAsSecureOrigin: true, // Pour dev local
-      notifyButton: {
-        enable: false, // On gère manuellement dans les paramètres
-      },
+      allowLocalhostAsSecureOrigin: true,
       autoResubscribe: true,
-      autoRegister: true,
-      serviceWorkerParam: { scope: '/' },
-      serviceWorkerPath: 'OneSignalSDKWorker.js'
+      autoRegister: true
     });
 
-    console.log('✅ OneSignal initialisé');
-
-    // Écouter les événements
-    OneSignal.on('subscriptionChange', (isSubscribed) => {
-      console.log('📊 Changement d\'abonnement:', isSubscribed);
-    });
-
-    OneSignal.on('notificationDisplay', (event) => {
-      console.log('🔔 Notification affichée:', event);
-    });
-
+    isInitialized = true;
+    console.log('✅ OneSignal initialisé avec succès');
     return true;
   } catch (error) {
     console.error('❌ Erreur initialisation OneSignal:', error);
@@ -50,9 +43,8 @@ export const initOneSignal = async () => {
 export const requestNotificationPermission = async () => {
   try {
     console.log('🔔 Demande de permission notifications...');
-    const permission = await OneSignal.showNativePrompt();
-    console.log('📋 Permission:', permission);
-    return permission;
+    await OneSignal.Slidedown.promptPush();
+    return true;
   } catch (error) {
     console.error('❌ Erreur demande permission:', error);
     return false;
@@ -64,22 +56,30 @@ export const requestNotificationPermission = async () => {
  */
 export const getOneSignalPlayerId = async () => {
   try {
-    const playerId = await OneSignal.getUserId();
-    console.log('🆔 OneSignal Player ID:', playerId);
-    return playerId;
+    if (!isInitialized) {
+      console.log('⏳ OneSignal pas encore initialisé, attente...');
+      await initOneSignal();
+      // Attendre un peu que l'initialisation se termine
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+
+    const userId = await OneSignal.User.PushSubscription.id;
+    console.log('🆔 OneSignal Player ID:', userId);
+    return userId;
   } catch (error) {
     console.error('❌ Erreur récupération Player ID:', error);
     return null;
   }
 };
 
+
 /**
  * Vérifier si l'utilisateur est abonné
  */
 export const isSubscribed = async () => {
   try {
-    const subscribed = await OneSignal.isPushNotificationsEnabled();
-    return subscribed;
+    const optedIn = await OneSignal.User.PushSubscription.optedIn;
+    return optedIn;
   } catch (error) {
     console.error('❌ Erreur vérification abonnement:', error);
     return false;
@@ -91,7 +91,7 @@ export const isSubscribed = async () => {
  */
 export const setUserEmail = async (email) => {
   try {
-    await OneSignal.setEmail(email);
+    await OneSignal.login(email);
     console.log('✅ Email défini:', email);
   } catch (error) {
     console.error('❌ Erreur définition email:', error);
@@ -103,23 +103,10 @@ export const setUserEmail = async (email) => {
  */
 export const setUserTags = async (tags) => {
   try {
-    await OneSignal.sendTags(tags);
+    await OneSignal.User.addTags(tags);
     console.log('✅ Tags définis:', tags);
   } catch (error) {
     console.error('❌ Erreur définition tags:', error);
-  }
-};
-
-/**
- * Envoyer une notification de test
- */
-export const sendTestNotification = async () => {
-  try {
-    console.log('🧪 Envoi notification de test...');
-    // Cette fonction nécessite l'API REST côté backend
-    console.log('⚠️ Utilisez l\'API backend pour envoyer des notifications');
-  } catch (error) {
-    console.error('❌ Erreur envoi notification test:', error);
   }
 };
 
@@ -129,6 +116,5 @@ export default {
   getOneSignalPlayerId,
   isSubscribed,
   setUserEmail,
-  setUserTags,
-  sendTestNotification
+  setUserTags
 };
