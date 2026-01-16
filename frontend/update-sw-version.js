@@ -9,13 +9,18 @@
 const fs = require('fs');
 const path = require('path');
 
+// Déterminer le dossier de travail (peut être racine ou frontend/)
+const workingDir = fs.existsSync(path.join(__dirname, 'package.json')) 
+  ? __dirname 
+  : path.join(__dirname, 'frontend');
+
 // Lire package.json
-const packageJsonPath = path.join(__dirname, 'package.json');
+const packageJsonPath = path.join(workingDir, 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 const version = packageJson.version;
 
 // Lire service-worker.js
-const swPath = path.join(__dirname, 'public', 'service-worker.js');
+const swPath = path.join(workingDir, 'public', 'service-worker.js');
 let swContent = fs.readFileSync(swPath, 'utf8');
 
 // Date du build
