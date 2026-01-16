@@ -484,6 +484,9 @@ exports.updateNotificationSettings = async (req, res) => {
     const userId = req.user.userId;
     const { emailNotifications, smsNotifications, pushNotifications, phoneNumber } = req.body;
 
+    console.log('📥 Mise à jour notifications pour userId:', userId);
+    console.log('📨 Données reçues:', { emailNotifications, smsNotifications, pushNotifications, phoneNumber });
+
     const updateData = {
       emailNotifications: emailNotifications ?? true,
       smsNotifications: smsNotifications ?? false,
@@ -493,6 +496,8 @@ exports.updateNotificationSettings = async (req, res) => {
     if (phoneNumber !== undefined) {
       updateData.phoneNumber = phoneNumber;
     }
+
+    console.log('💾 Données à sauvegarder:', updateData);
 
     const user = await User.findByIdAndUpdate(
       userId,
@@ -504,13 +509,18 @@ exports.updateNotificationSettings = async (req, res) => {
       return res.status(404).json({ message: 'Utilisateur introuvable' });
     }
 
-    console.log(`✅ Paramètres de notifications mis à jour pour ${user.email}`);
+    console.log(`✅ Paramètres sauvegardés pour ${user.email}:`, {
+      emailNotifications: user.emailNotifications,
+      pushNotifications: user.pushNotifications,
+      smsNotifications: user.smsNotifications
+    });
+    
     res.json({ 
       message: 'Paramètres enregistrés avec succès',
       user 
     });
   } catch (error) {
-    console.error('Erreur mise à jour notifications:', error);
+    console.error('❌ Erreur mise à jour notifications:', error);
     res.status(500).json({ message: 'Erreur lors de la sauvegarde' });
   }
 };

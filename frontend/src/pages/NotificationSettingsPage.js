@@ -25,11 +25,16 @@ function NotificationSettingsPage() {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      setSettings({
+      console.log('📥 Paramètres reçus du backend:', response.data);
+      
+      const loadedSettings = {
         emailNotifications: response.data.emailNotifications ?? true,
         smsNotifications: response.data.smsNotifications ?? false,
         pushNotifications: response.data.pushNotifications ?? true  // ✅ Activé par défaut
-      });
+      };
+      
+      console.log('📊 Paramètres chargés:', loadedSettings);
+      setSettings(loadedSettings);
       setPhoneNumber(response.data.phoneNumber || '');
       setLoading(false);
     } catch (error) {
@@ -65,19 +70,24 @@ function NotificationSettingsPage() {
 
   // Sauvegarde automatique lors du changement de toggle
   const handleToggleChange = async (field, value) => {
+    console.log(`🔄 Changement ${field}:`, value);
     const newSettings = { ...settings, [field]: value };
     setSettings(newSettings);
 
     try {
-      await axios.put(`${API_URL}/api/auth/notification-settings`, {
-        ...newSettings,
+      const response = await axios.put(`${API_URL}/api/auth/notification-settings`, {
+        emailNotifications: newSettings.emailNotifications,
+        smsNotifications: newSettings.smsNotifications,
+        pushNotifications: newSettings.pushNotifications,
         phoneNumber: phoneNumber
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log(`✅ ${field} sauvegardé automatiquement: ${value}`);
+      console.log(`✅ ${field} sauvegardé automatiquement:`, value);
+      console.log('📤 Réponse backend:', response.data);
     } catch (error) {
       console.error(`❌ Erreur sauvegarde ${field}:`, error);
+      console.error('Détails erreur:', error.response?.data);
     }
   };
 
