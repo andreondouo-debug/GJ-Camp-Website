@@ -82,7 +82,14 @@ self.addEventListener('fetch', (event) => {
   
   // Stratégie Network First pour les API
   if (url.pathname.startsWith('/api/')) {
-    // Stratégie network first pour les API
+    // Ne mettre en cache QUE les requêtes GET
+    if (event.request.method !== 'GET') {
+      // Laisser passer les requêtes non-GET (POST, PUT, DELETE) sans les cacher
+      event.respondWith(fetch(event.request));
+      return;
+    }
+    
+    // Stratégie network first pour les API GET uniquement
     event.respondWith(
       fetch(event.request)
         .then((response) => {
