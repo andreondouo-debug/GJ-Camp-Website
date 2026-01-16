@@ -12,11 +12,14 @@ const urlsToCache = [
 
 // Installation du Service Worker
 self.addEventListener('install', (event) => {
-  console.log('🚀 Service Worker: Installation en cours...');
+  console.log('🚀 Service Worker: Installation en cours...', CACHE_VERSION);
+  // Force l'activation immédiate sans attendre
+  self.skipWaiting();
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('✅ Cache ouvert');
+        console.log('✅ Cache ouvert:', CACHE_NAME);
         // Essayer d'ajouter les URLs au cache, mais ne pas échouer si certaines ne se trouvent pas
         return cache.addAll(urlsToCache).catch((error) => {
           console.log('⚠️ Certaines ressources ne peuvent pas être mises en cache:', error);
@@ -27,18 +30,24 @@ self.addEventListener('install', (event) => {
 
 // Activation du Service Worker
 self.addEventListener('activate', (event) => {
-  console.log('✅ Service Worker: Activé');
+  console.log('✅ Service Worker: Activé', CACHE_VERSION);
+  // Prendre le contrôle immédiatement de tous les clients
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('🗑️ Suppression ancien cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      // Supprimer les anciens caches
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              console.log('🗑️ Suppression ancien cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Prendre le contrôle immédiatement
+      self.clients.claim()
+    ])
   );
 });
 

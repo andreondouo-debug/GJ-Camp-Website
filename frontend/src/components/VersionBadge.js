@@ -14,29 +14,43 @@ const VersionBadge = () => {
     setIsUpdating(true);
 
     try {
-      // 1. Vider tous les caches
+      console.log('🔄 Début de la mise à jour...');
+
+      // 1. Forcer la mise à jour du Service Worker actif
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          // Forcer la vérification de mise à jour
+          await registration.update();
+          // Puis désinscrire
+          await registration.unregister();
+          console.log('✅ Service Worker désinscrit:', registration.scope);
+        }
+      }
+
+      // 2. Vider tous les caches
       if ('caches' in window) {
         const cacheNames = await caches.keys();
         await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
-        console.log('✅ Tous les caches supprimés:', cacheNames);
+        console.log('✅ Caches supprimés:', cacheNames);
       }
 
-      // 2. Désinscrire tous les Service Workers
-      if ('serviceWorker' in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(registrations.map(registration => registration.unregister()));
-        console.log('✅ Service Workers désinscrit');
-      }
-
-      // 3. Vider localStorage et sessionStorage
+      // 3. Vider localStorage et sessionStorage (sauf le token)
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
       localStorage.clear();
       sessionStorage.clear();
-      console.log('✅ Storage vidé');
+      if (token) localStorage.setItem('token', token);
+      if (user) localStorage.setItem('user', user);
+      console.log('✅ Storage vidé (token préservé)');
 
-      // 4. Attendre un peu et recharger la page
-      setTimeout(() => {
-        window.location.reload(true);
-      }, 500);
+      // 4. Forcer le rechargement complet avec bypass du cache
+      console.log('🔄 Rechargement de la page...');
+      
+      // Utiliser window.location.replace pour forcer un rechargement complet
+      const url = new URL(window.location.href);
+      url.searchParams.set('nocache', Date.now());
+      window.location.replace(url.toString());
 
     } catch (error) {
       console.error('❌ Erreur lors du nettoyage:', error);
