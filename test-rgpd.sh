@@ -32,11 +32,12 @@ else
 fi
 echo ""
 
+
 # TEST 2: Suppression/anonymisation compte
 echo "📋 Test 2: Suppression compte"
 RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$BACKEND_URL/api/auth/delete-account")
-if [ "$RESPONSE" = "401" ]; then
-    echo -e "${GREEN}✅ Endpoint suppression compte existe (nécessite authentification)${NC}"
+if [ "$RESPONSE" = "401" ] || [ "$RESPONSE" = "403" ]; then
+    echo -e "${GREEN}✅ Endpoint suppression compte existe (protégé)${NC}"
     ((PASSED++))
 else
     echo -e "${YELLOW}⚠️  Endpoint suppression compte: $RESPONSE${NC}"
@@ -87,11 +88,12 @@ else
 fi
 echo ""
 
+
 # TEST 6: Notifications configurables
 echo "📋 Test 6: Paramètres notifications"
 RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$BACKEND_URL/api/auth/notification-settings")
-if [ "$RESPONSE" = "401" ]; then
-    echo -e "${GREEN}✅ Endpoint paramètres notifications existe${NC}"
+if [ "$RESPONSE" = "401" ] || [ "$RESPONSE" = "403" ]; then
+    echo -e "${GREEN}✅ Endpoint paramètres notifications existe (protégé)${NC}"
     ((PASSED++))
 else
     echo -e "${YELLOW}⚠️  Endpoint notifications: $RESPONSE${NC}"

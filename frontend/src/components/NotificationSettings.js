@@ -5,7 +5,7 @@ import './NotificationSettings.css';
 
 const NotificationSettings = ({ user }) => {
   const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(false);
+  const [pushNotifications, setPushNotifications] = useState(true); // ✅ Activé par défaut
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -25,8 +25,8 @@ const NotificationSettings = ({ user }) => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      setEmailNotifications(response.data.emailEnabled || false);
-      setPushNotifications(response.data.pushEnabled || false);
+      setEmailNotifications(response.data.emailEnabled !== undefined ? response.data.emailEnabled : true);
+      setPushNotifications(response.data.pushEnabled !== undefined ? response.data.pushEnabled : true); // ✅ true par défaut
 
       // Vérifier si l'utilisateur est abonné localement
       const subscribed = await isPushSubscribed();

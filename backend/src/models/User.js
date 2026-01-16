@@ -141,7 +141,7 @@ const userSchema = new mongoose.Schema({
   },
   pushNotifications: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   pushPlayerId: {
     type: String,

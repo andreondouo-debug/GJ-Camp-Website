@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
+import { API_URL } from '../config/api';
 import '../styles/NotificationSettings.css';
 
 function NotificationSettingsPage() {
@@ -20,7 +21,7 @@ function NotificationSettingsPage() {
 
   const fetchSettings = async () => {
     try {
-      const response = await axios.get('/api/auth/me', {
+      const response = await axios.get(`${API_URL}/api/auth/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -41,7 +42,7 @@ function NotificationSettingsPage() {
     try {
       setSaving(true);
 
-      await axios.put('/api/auth/notification-settings', {
+      await axios.put(`${API_URL}/api/auth/notification-settings`, {
         emailNotifications: settings.emailNotifications,
         smsNotifications: settings.smsNotifications,
         pushNotifications: settings.pushNotifications,
@@ -84,7 +85,7 @@ function NotificationSettingsPage() {
           });
           OneSignal.getUserId(function(userId) {
             // Enregistrer le userId sur le serveur
-            axios.put('/api/auth/push-player-id', { pushPlayerId: userId }, {
+            axios.put(`${API_URL}/api/auth/push-player-id`, { pushPlayerId: userId }, {
               headers: { Authorization: `Bearer ${token}` }
             });
           });

@@ -18,7 +18,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "node update-sw-version.js && react-scripts build",
+    "prebuild": "node update-sw-version.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

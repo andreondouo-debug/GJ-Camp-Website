@@ -1,8 +1,9 @@
 // Service Worker pour PWA - GJ Camp
-const BUILD_HASH = 'b426475'; // Hash du commit
-const BUILD_TIMESTAMP = '1768513480'; // Timestamp build
-const CACHE_VERSION = `${BUILD_HASH}-${BUILD_TIMESTAMP}`;
-const CACHE_NAME = `gj-camp-v${CACHE_VERSION}`;
+// ✅ Gestion du cache par version pour forcer le rechargement de la dernière version
+const APP_VERSION = '0.1.0'; // Synchronisé avec package.json
+const BUILD_DATE = '2026-01-16'; // Format: YYYY-MM-DD
+const CACHE_VERSION = `v${APP_VERSION}-${BUILD_DATE}`;
+const CACHE_NAME = `gj-camp-${CACHE_VERSION}`;
 const urlsToCache = [
   `/?v=${CACHE_VERSION}`,
   `/manifest.json?v=${CACHE_VERSION}`,
@@ -41,11 +42,45 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Interception des requêtes réseau - Network First Strategy
+// Interception des requêtes réseau - Network First Strategy avec versioning automatique
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  // Ajoute le paramètre de version sur les requêtes API et statiques
+  
+  // Ajouter automatiquement le paramètre de version pour forcer le rechargement
+  const shouldAddVersion = (
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css') ||
+    url.pathname.endsWith('.json') ||
+    url.pathname === '/'
+  );
+  
+  if (shouldAddVersion && !url.searchParams.has('v')) {
+    url.searchParams.set('v', CACHE_VERSION);
+    const versionedRequest = new Request(url.toString(), {
+      method: event.request.method,
+      headers: event.request.headers,
+      mode: event.request.mode,
+      credentials: event.request.credentials,
+      redirect: event.request.redirect
+    });
+    event.respondWith(
+      fetch(versionedRequest)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(versionedRequest, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+  
+  // Stratégie Network First pour les API
   if (url.pathname.startsWith('/api/')) {
     // Stratégie network first pour les API
     event.respondWith(
