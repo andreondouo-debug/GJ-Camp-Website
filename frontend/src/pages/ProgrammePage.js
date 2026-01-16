@@ -13,6 +13,7 @@ function ProgrammePage() {
   const [selectedDay, setSelectedDay] = useState(joursDisponibles[0] || 1);
   const [hasRegistration, setHasRegistration] = useState(false);
   const [checkingRegistration, setCheckingRegistration] = useState(true);
+  const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(false);
 
   // Vérifier si l'utilisateur a une inscription validée
   useEffect(() => {
@@ -217,16 +218,27 @@ function ProgrammePage() {
 
       {/* Activités choisies pour ce jour (programme personnalisé) */}
       {isAuthenticated && (activitesObligatoires.length > 0 || activitesOptionnellesChoisies.length > 0) && (
-        <div className="selected-summary">
-          <h3>📌 Mon programme pour le jour {selectedDay}</h3>
-          <ul>
-            {activitesObligatoires.map(act => (
-              <li key={act._id}><b>{act.titre}</b> <span style={{color:'#764ba2'}}>(Obligatoire)</span></li>
-            ))}
-            {activitesOptionnellesChoisies.map(act => (
-              <li key={act._id}>{act.titre} <span style={{color:'#d4af37'}}>(Choix)</span></li>
-            ))}
-          </ul>
+        <div className={`selected-summary ${isSummaryCollapsed ? 'collapsed' : ''}`}>
+          <div className="summary-header">
+            <h3>📌 Mon programme pour le jour {selectedDay}</h3>
+            <button 
+              className="summary-toggle-btn"
+              onClick={() => setIsSummaryCollapsed(!isSummaryCollapsed)}
+              title={isSummaryCollapsed ? 'Agrandir' : 'Réduire'}
+            >
+              {isSummaryCollapsed ? '▲' : '▼'}
+            </button>
+          </div>
+          {!isSummaryCollapsed && (
+            <ul>
+              {activitesObligatoires.map(act => (
+                <li key={act._id}><b>{act.titre}</b> <span style={{color:'#764ba2'}}>(Obligatoire)</span></li>
+              ))}
+              {activitesOptionnellesChoisies.map(act => (
+                <li key={act._id}>{act.titre} <span style={{color:'#d4af37'}}>(Choix)</span></li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
     </div>
