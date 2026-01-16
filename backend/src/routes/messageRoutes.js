@@ -5,6 +5,7 @@ const { requireAdminRole } = require('../middleware/roleCheck');
 const Message = require('../models/Message');
 const User = require('../models/User');
 const pushService = require('../services/pushService');
+const oneSignalService = require('../services/oneSignalService');
 
 // Récupérer la liste des responsables pour la sélection
 router.get('/responsables', auth, async (req, res) => {
@@ -105,7 +106,7 @@ router.post('/', auth, async (req, res) => {
 
     await message.save();
 
-    // Envoyer notifications push aux destinataires
+    // Envoyer notifications push aux destinataires (Web Push natif)
     const sender = await User.findById(req.user.userId).select('firstName lastName');
     recipients.forEach(recipient => {
       pushService.notifyNewMessage({
@@ -116,6 +117,28 @@ router.post('/', auth, async (req, res) => {
         console.error('❌ Erreur notification push message:', err);
       });
     });
+
+    // Envoyer notifications OneSignal
+    try {
+      const recipientUsers = await User.find({ 
+        _id: { $in: recipients.map(r => r.user) },
+        pushPlayerId: { $exists: true, $ne: null }
+      }).select('pushPlayerId');
+
+      const playerIds = recipientUsers.map(u => u.pushPlayerId);
+      
+      if (playerIds.length > 0) {
+        await oneSignalService.sendNotificationToUsers(playerIds, {
+          title: `💬 Nouveau message${isAnonymous ? '' : ` de ${sender.firstName}`}`,
+          message: `${subject}: ${content.substring(0, 100)}...`,
+          url: 'https://gjsdecrpt.fr/messages',
+          data: { type: 'message', messageId: message._id }
+        });
+        console.log(`✅ Notification OneSignal envoyée à ${playerIds.length} users`);
+      }
+    } catch (error) {
+      console.error('❌ Erreur notification OneSignal:', error);
+    }
 
     res.status(201).json({ 
       message: 'Message envoyé avec succès', 

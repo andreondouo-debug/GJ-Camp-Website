@@ -3,9 +3,11 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const { requireAdminRole, canCreatePost } = require('../middleware/roleCheck');
 const Post = require('../models/Post');
+const User = require('../models/User');
 const { uploadFields, uploadToCloudinary } = require('../middleware/cloudinaryPostUpload');
 const { notifyNewPost } = require('../services/notificationService');
 const pushService = require('../services/pushService');
+const oneSignalService = require('../services/oneSignalService');
 
 // Récupérer tous les posts (avec pagination)
 router.get('/', async (req, res) => {
@@ -82,15 +84,29 @@ router.post('/', auth, canCreatePost, uploadFields, uploadToCloudinary, async (r
 
     console.log('✅ Post créé:', post._id);
     
-    // Envoyer les notifications en arrière-plan (ne bloque pas la réponse)
+    // Envoyer les notifications email en arrière-plan
     notifyNewPost(post).catch(err => {
       console.error('❌ Erreur notifications email:', err);
     });
     
-    // Envoyer les notifications push
+    // Envoyer les notifications push Web Push natif
     pushService.notifyNewPost(post).catch(err => {
       console.error('❌ Erreur notifications push:', err);
     });
+
+    // Envoyer notifications OneSignal à tous les utilisateurs
+    try {
+      const author = await User.findById(req.user.userId).select('firstName lastName');
+      await oneSignalService.sendNotificationToAll({
+        title: `📰 Nouveau post - ${author.firstName} ${author.lastName}`,
+        message: text.substring(0, 150).trim() + (text.length > 150 ? '...' : ''),
+        url: 'https://gjsdecrpt.fr/newsletter',
+        data: { type: 'post', postId: post._id }
+      });
+      console.log('✅ Notification OneSignal post envoyée à tous');
+    } catch (error) {
+      console.error('❌ Erreur notification OneSignal post:', error);
+    }
 
     res.status(201).json({ message: 'Post publié avec succès', post });
   } catch (error) {
@@ -155,6 +171,26 @@ router.post('/:id/comment', auth, async (req, res) => {
 
     await post.save();
     await post.populate('comments.author', 'firstName lastName profilePhoto');
+
+    // Envoyer notification à l'auteur du post (si ce n'est pas lui qui commente)
+    if (post.author.toString() !== req.user.userId) {
+      try {
+        const postAuthor = await User.findById(post.author).select('pushPlayerId firstName');
+        const commenter = await User.findById(req.user.userId).select('firstName lastName');
+        
+        if (postAuthor && postAuthor.pushPlayerId) {
+          await oneSignalService.sendNotificationToUser(postAuthor.pushPlayerId, {
+            title: `💭 Nouveau commentaire sur votre post`,
+            message: `${commenter.firstName} ${commenter.lastName}: ${text.substring(0, 100)}...`,
+            url: 'https://gjsdecrpt.fr/newsletter',
+            data: { type: 'comment', postId: post._id }
+          });
+          console.log(`✅ Notification commentaire envoyée à ${postAuthor.firstName}`);
+        }
+      } catch (error) {
+        console.error('❌ Erreur notification commentaire:', error);
+      }
+    }
 
     res.json({ 
       message: 'Commentaire ajouté', 

@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { API_URL } from '../config/api';
+import { getOneSignalPlayerId, setUserEmail } from '../services/oneSignalService';
 
 export const AuthContext = createContext();
 
@@ -110,6 +111,23 @@ export const AuthProvider = ({ children }) => {
       setUser(newUser);
       localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(newUser));
+      
+      // Sauvegarder le Player ID OneSignal
+      try {
+        const playerId = await getOneSignalPlayerId();
+        if (playerId) {
+          console.log('📱 Sauvegarde Player ID OneSignal:', playerId);
+          await axios.put(`${API_URL}/api/auth/push-player-id`, 
+            { pushPlayerId: playerId },
+            { headers: { Authorization: `Bearer ${newToken}` } }
+          );
+          // Définir l'email pour la segmentation
+          await setUserEmail(email);
+        }
+      } catch (error) {
+        console.error('❌ Erreur sauvegarde Player ID:', error);
+      }
+      
       return { success: true };
     } catch (error) {
       // Gérer les erreurs de validation
