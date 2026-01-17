@@ -17,14 +17,24 @@ const sendNotificationToUser = async (playerId, notification) => {
     return { success: false, error: 'API Key manquante' };
   }
 
-  const data = JSON.stringify({
+  const payload = {
     app_id: ONESIGNAL_APP_ID,
     include_player_ids: [playerId],
     headings: { en: notification.title || 'GJ Camp' },
-    contents: { en: notification.message || 'Nouvelle notification' },
-    url: notification.url || 'https://gjsdecrpt.fr',
-    data: notification.data || {}
-  });
+    contents: { en: notification.message || 'Nouvelle notification' }
+  };
+
+  // Ajouter l'URL seulement si elle existe
+  if (notification.url) {
+    payload.url = notification.url;
+  }
+
+  // Ajouter les data seulement si elles existent et ne sont pas vides
+  if (notification.data && Object.keys(notification.data).length > 0) {
+    payload.data = notification.data;
+  }
+
+  const data = JSON.stringify(payload);
 
   const options = {
     hostname: 'onesignal.com',
@@ -32,9 +42,8 @@ const sendNotificationToUser = async (playerId, notification) => {
     path: '/api/v1/notifications',
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Basic ${ONESIGNAL_REST_API_KEY}`,
-      'Content-Length': data.length
+      'Content-Type': 'application/json; charset=utf-8',
+      'Authorization': `Basic ${ONESIGNAL_REST_API_KEY}`
     }
   };
 
@@ -51,7 +60,7 @@ const sendNotificationToUser = async (playerId, notification) => {
           const result = JSON.parse(responseData);
           if (res.statusCode === 200) {
             console.log('✅ Notification OneSignal envoyée:', result.id);
-            resolve({ success: true, id: result.id });
+            resolve({ success: true, id: result.id, recipients: result.recipients });
           } else {
             console.error('❌ Erreur OneSignal:', result);
             resolve({ success: false, error: result });
