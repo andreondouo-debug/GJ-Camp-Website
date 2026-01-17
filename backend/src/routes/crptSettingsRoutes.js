@@ -39,30 +39,52 @@ router.get('/crpt', async (req, res) => {
  */
 router.put('/crpt', auth, authorize(...ADMIN_ROLES), async (req, res) => {
   try {
+    console.log('💾 Réception requête PUT /api/settings/crpt');
+    console.log('👤 Utilisateur:', req.user.userId, 'Role:', req.user.role);
+    
     const { crptSettings } = req.body;
 
     if (!crptSettings) {
+      console.log('❌ Paramètres CRPT manquants dans le body');
       return res.status(400).json({ message: 'Paramètres CRPT manquants' });
     }
+
+    console.log('📦 Données reçues (preview):', JSON.stringify(crptSettings).substring(0, 200) + '...');
 
     // Trouver ou créer le document Settings
     let settings = await Settings.findOne();
     
     if (!settings) {
+      console.log('🆕 Création nouveau document Settings');
       settings = new Settings({ settings: {} });
+    } else {
+      console.log('📝 Mise à jour document Settings existant');
     }
 
     // Mettre à jour les paramètres CRPT
     settings.settings.crptSettings = crptSettings;
+    settings.markModified('settings.crptSettings'); // Force Mongoose à détecter le changement
     await settings.save();
 
-    console.log('✅ Paramètres CRPT sauvegardés avec succès');
+    console.log('✅ Paramètres CRPT sauvegardés avec succès dans MongoDB');
+    console.log('🔍 Vérification sauvegarde...');
+    
+    // Vérifier que les données sont bien sauvegardées
+    const verification = await Settings.findOne();
+    if (verification && verification.settings.crptSettings) {
+      console.log('✅ Vérification OK: Données bien en base');
+    } else {
+      console.log('⚠️ Warning: Vérification échouée');
+    }
+
     res.json({ 
       message: '✅ Paramètres CRPT enregistrés avec succès !',
-      crptSettings: settings.settings.crptSettings 
+      crptSettings: settings.settings.crptSettings,
+      saved: true
     });
   } catch (error) {
     console.error('❌ Erreur sauvegarde paramètres CRPT:', error);
+    console.error('Stack:', error.stack);
     res.status(500).json({ 
       message: 'Erreur serveur lors de la sauvegarde des paramètres CRPT',
       error: error.message 

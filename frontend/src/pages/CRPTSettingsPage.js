@@ -88,20 +88,29 @@ const CRPTSettingsPage = () => {
     setLoading(true);
     setMessage({ type: '', text: '' });
 
+    console.log('💾 Début sauvegarde CRPT...');
+    console.log('📦 Données à sauvegarder:', JSON.stringify(settings).substring(0, 200) + '...');
+
     try {
-      await axios.put(
+      const response = await axios.put(
         getApiUrl('/api/settings/crpt'),
         { crptSettings: settings },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+      console.log('✅ Réponse serveur:', response.data);
       setMessage({ type: 'success', text: '✅ Paramètres CRPT sauvegardés avec succès !' });
+      
+      // Recharger les paramètres depuis le serveur pour confirmer
+      await fetchSettings();
+      console.log('🔄 Paramètres rechargés depuis le serveur');
       
       // Masquer le message après 3 secondes
       setTimeout(() => setMessage({ type: '', text: '' }), 3000);
     } catch (error) {
       console.error('❌ Erreur sauvegarde:', error);
-      setMessage({ type: 'error', text: '❌ Erreur lors de la sauvegarde' });
+      console.error('❌ Détails erreur:', error.response?.data);
+      setMessage({ type: 'error', text: `❌ Erreur: ${error.response?.data?.message || error.message}` });
     } finally {
       setLoading(false);
     }
