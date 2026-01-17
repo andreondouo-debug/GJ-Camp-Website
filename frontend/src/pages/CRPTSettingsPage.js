@@ -12,6 +12,7 @@ const CRPTSettingsPage = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [activeSection, setActiveSection] = useState('hero');
+  const [uploadingImages, setUploadingImages] = useState({});
 
   useEffect(() => {
     fetchSettings();
@@ -28,6 +29,58 @@ const CRPTSettingsPage = () => {
       }
     } catch (error) {
       console.log('📝 Utilisation des paramètres par défaut CRPT');
+    }
+  };
+
+  const handleImageUpload = async (fieldPath, file, arrayIndex = null) => {
+    const uploadKey = arrayIndex !== null ? `${fieldPath}-${arrayIndex}` : fieldPath;
+    
+    setUploadingImages(prev => ({ ...prev, [uploadKey]: true }));
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+      const response = await axios.post(
+        getApiUrl('/api/upload/crpt-image'),
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      
+      const imageUrl = response.data.url;
+      
+      // Mettre à jour le settings selon le type de champ
+      if (arrayIndex !== null) {
+        // Pour les champs dans un tableau (refuges)
+        const [section, field] = fieldPath.split('.');
+        const newItems = [...settings[section].items];
+        newItems[arrayIndex][field] = imageUrl;
+        setSettings(prev => ({
+          ...prev,
+          [section]: { ...prev[section], items: newItems }
+        }));
+      } else {
+        // Pour les champs simples (hero.backgroundImage)
+        const [section, field] = fieldPath.split('.');
+        setSettings(prev => ({
+          ...prev,
+          [section]: { ...prev[section], [field]: imageUrl }
+        }));
+      }
+      
+      setMessage({ type: 'success', text: '📸 Image uploadée avec succès !' });
+      setTimeout(() => setMessage({ type: '', text: '' }), 2000);
+      
+    } catch (error) {
+      console.error('❌ Erreur upload image:', error);
+      setMessage({ type: 'error', text: '❌ Erreur lors de l\'upload de l\'image' });
+    } finally {
+      setUploadingImages(prev => ({ ...prev, [uploadKey]: false }));
     }
   };
 
@@ -169,13 +222,38 @@ const CRPTSettingsPage = () => {
             <h2>🎯 Section Hero</h2>
             
             <div className="crpt-field">
-              <label>Image de fond (URL)</label>
-              <input
-                type="text"
-                value={settings.hero.backgroundImage}
-                onChange={(e) => handleChange('hero', 'backgroundImage', e.target.value)}
-                placeholder="/images/crpt-hero-bg.jpg"
-              />
+              <label>Image de fond</label>
+              <div className="image-upload-container">
+                {settings.hero.backgroundImage && (
+                  <div className="image-preview">
+                    <img src={settings.hero.backgroundImage} alt="Aperçu" />
+                  </div>
+                )}
+                <div className="upload-controls">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files[0]) {
+                        handleImageUpload('hero.backgroundImage', e.target.files[0]);
+                      }
+                    }}
+                    disabled={uploadingImages['hero.backgroundImage']}
+                    id="hero-bg-upload"
+                    style={{ display: 'none' }}
+                  />
+                  <label htmlFor="hero-bg-upload" className="btn-upload">
+                    {uploadingImages['hero.backgroundImage'] ? '⏳ Upload...' : '📸 Télécharger une image'}
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.hero.backgroundImage}
+                    onChange={(e) => handleChange('hero', 'backgroundImage', e.target.value)}
+                    placeholder="Ou collez une URL: /images/crpt-hero-bg.jpg"
+                    className="url-input"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="crpt-field">
@@ -573,13 +651,38 @@ const CRPTSettingsPage = () => {
                     />
                   </div>
                   <div className="crpt-field">
-                    <label>Photo du dirigeant (URL)</label>
-                    <input
-                      type="text"
-                      value={item.leaderPhoto || ''}
-                      onChange={(e) => handleArrayChange('refuges', index, 'leaderPhoto', e.target.value)}
-                      placeholder="/images/leaders/nom.jpg"
-                    />
+                    <label>Photo du dirigeant</label>
+                    <div className="image-upload-container">
+                      {item.leaderPhoto && (
+                        <div className="image-preview small">
+                          <img src={item.leaderPhoto} alt="Dirigeant" />
+                        </div>
+                      )}
+                      <div className="upload-controls">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files[0]) {
+                              handleImageUpload('refuges.leaderPhoto', e.target.files[0], index);
+                            }
+                          }}
+                          disabled={uploadingImages[`refuges.leaderPhoto-${index}`]}
+                          id={`leader-photo-${index}`}
+                          style={{ display: 'none' }}
+                        />
+                        <label htmlFor={`leader-photo-${index}`} className="btn-upload small">
+                          {uploadingImages[`refuges.leaderPhoto-${index}`] ? '⏳' : '📸 Photo'}
+                        </label>
+                        <input
+                          type="text"
+                          value={item.leaderPhoto || ''}
+                          onChange={(e) => handleArrayChange('refuges', index, 'leaderPhoto', e.target.value)}
+                          placeholder="Ou URL: /images/leaders/nom.jpg"
+                          className="url-input small"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="crpt-field-row">
