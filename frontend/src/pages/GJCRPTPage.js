@@ -29,8 +29,22 @@ function GJCRPTPage() {
 
   const fetchSettings = async () => {
     try {
-      const response = await axios.get(getApiUrl('/api/settings/crpt'));
+      console.log('🔄 Chargement paramètres CRPT depuis API...');
+      // Ajouter timestamp pour éviter le cache
+      const timestamp = new Date().getTime();
+      const response = await axios.get(getApiUrl(`/api/settings/crpt?t=${timestamp}`));
+      
+      console.log('📦 Paramètres reçus:', response.data.crptSettings ? 'Oui' : 'Non (valeurs par défaut)');
+      
       if (response.data.crptSettings) {
+        console.log('✅ Application des paramètres personnalisés CRPT');
+        console.log('🎨 Preview:', {
+          hero: response.data.crptSettings.hero.title,
+          mission: response.data.crptSettings.mission.title,
+          valuesCount: response.data.crptSettings.values.items.length,
+          refugesCount: response.data.crptSettings.refuges.items.length
+        });
+        
         setSettings(response.data.crptSettings);
         
         // Appliquer la couleur de la barre de statut mobile
