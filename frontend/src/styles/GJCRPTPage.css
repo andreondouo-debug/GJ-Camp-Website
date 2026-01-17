@@ -115,6 +115,13 @@
   text-align: center;
 }
 
+.gjcrpt-stat-icon {
+  font-size: 64px;
+  margin-bottom: 15px;
+  display: block;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+}
+
 .gjcrpt-stat-number {
   font-size: 48px;
   font-weight: 900;
