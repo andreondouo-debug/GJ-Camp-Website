@@ -3,12 +3,16 @@
 .gjcrpt-page {
   min-height: 100vh;
   background: #ffffff;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .gjcrpt-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
@@ -256,6 +260,8 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 30px;
   margin-top: 50px;
+  width: 100%;
+  overflow: visible;
 }
 
 .gjcrpt-value-card {
@@ -317,6 +323,8 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 30px;
   margin-top: 50px;
+  width: 100%;
+  overflow: visible;
 }
 
 .gjcrpt-refuge-card {
@@ -624,7 +632,17 @@
 
   .gjcrpt-values-grid,
   .gjcrpt-refuges-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: 20px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .gjcrpt-value-card,
+  .gjcrpt-refuge-card {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .gjcrpt-mission,
