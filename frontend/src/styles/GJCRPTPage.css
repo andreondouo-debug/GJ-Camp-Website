@@ -11,6 +11,18 @@
   padding: 0 20px;
 }
 
+@media (max-width: 768px) {
+  .gjcrpt-container {
+    padding: 0 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gjcrpt-container {
+    padding: 0 10px;
+  }
+}
+
 /* ========== HERO SECTION ========== */
 .gjcrpt-hero {
   position: relative;
@@ -581,11 +593,25 @@
   }
 
   .gjcrpt-hero-stats {
+    flex-wrap: wrap;
     gap: 30px;
+  }
+
+  .gjcrpt-stat {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .gjcrpt-stat-icon {
+    font-size: 48px;
   }
 
   .gjcrpt-stat-number {
     font-size: 36px;
+  }
+
+  .gjcrpt-stat-label {
+    font-size: 12px;
   }
 
   .gjcrpt-section-title {
@@ -632,6 +658,12 @@
 @media (max-width: 480px) {
   .gjcrpt-hero-title {
     font-size: 24px;
+    padding: 0 10px;
+  }
+
+  .gjcrpt-hero-subtitle {
+    font-size: 14px;
+    padding: 0 10px;
   }
 
   .gjcrpt-logo-circle {
@@ -646,5 +678,68 @@
   .gjcrpt-hero-stats {
     flex-direction: column;
     gap: 20px;
+  }
+
+  .gjcrpt-stat {
+    width: 100%;
+  }
+
+  .gjcrpt-stat-icon {
+    font-size: 40px;
+  }
+
+  .gjcrpt-stat-number {
+    font-size: 32px;
+  }
+
+  .gjcrpt-section-title {
+    font-size: 26px;
+    padding: 0 10px;
+  }
+
+  .gjcrpt-section-subtitle {
+    font-size: 14px;
+    padding: 0 10px;
+  }
+
+  .gjcrpt-value-card,
+  .gjcrpt-refuge-card {
+    padding: 25px 15px;
+  }
+
+  .gjcrpt-mission-text,
+  .gjcrpt-floating-card {
+    padding: 20px;
+  }
+
+  .gjcrpt-lead {
+    font-size: 16px;
+  }
+
+  .gjcrpt-refuge-header h3 {
+    font-size: 20px;
+  }
+
+  .gjcrpt-gj-title {
+    font-size: 28px;
+  }
+
+  .gjcrpt-gj-lead {
+    font-size: 14px;
+  }
+
+  .gjcrpt-gj-features li {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .gjcrpt-cta-title {
+    font-size: 28px;
+    padding: 0 10px;
+  }
+
+  .gjcrpt-cta-text {
+    font-size: 14px;
+    padding: 0 10px;
   }
 }
