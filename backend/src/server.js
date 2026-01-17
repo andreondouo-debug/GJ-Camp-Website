@@ -19,6 +19,7 @@ const passwordResetRoutes = require('./routes/passwordResetRoutes');
 const testRoutes = require('./routes/testRoutes');
 const maintenanceRoutes = require('./routes/maintenanceRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const crptSettingsRoutes = require('./routes/crptSettingsRoutes');
 
 const app = express();
 
@@ -70,6 +71,7 @@ app.use('/api/password-reset', passwordResetRoutes);
 app.use('/api/test', testRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/settings', crptSettingsRoutes);
 
 // Route de test
 app.get('/api/health', (req, res) => {

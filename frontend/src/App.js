@@ -31,6 +31,7 @@ import CashPaymentsManagement from './pages/CashPaymentsManagement';
 import MessagesPage from './pages/MessagesPage';
 import MessageManagementPage from './pages/MessageManagementPage';
 import SettingsPage from './pages/SettingsPage';
+import CRPTSettingsPage from './pages/CRPTSettingsPage';
 import AccessDeniedPage from './pages/AccessDeniedPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
@@ -174,6 +175,15 @@ function App() {
               element={
                 <GuardedRoute
                   element={<SettingsPage />}
+                  roles={['admin']}
+                />
+              }
+            />
+            <Route
+              path="/parametres/crpt"
+              element={
+                <GuardedRoute
+                  element={<CRPTSettingsPage />}
                   roles={['admin']}
                 />
               }
