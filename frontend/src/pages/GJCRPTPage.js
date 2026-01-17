@@ -18,6 +18,32 @@ function GJCRPTPage() {
       const response = await axios.get(getApiUrl('/api/settings/crpt'));
       if (response.data.crptSettings) {
         setSettings(response.data.crptSettings);
+        
+        // Appliquer la couleur de la barre de statut mobile
+        if (response.data.crptSettings.styles.statusBarColor) {
+          let themeColorMeta = document.querySelector('meta[name="theme-color"]');
+          if (!themeColorMeta) {
+            themeColorMeta = document.createElement('meta');
+            themeColorMeta.name = 'theme-color';
+            document.head.appendChild(themeColorMeta);
+          }
+          themeColorMeta.content = response.data.crptSettings.styles.statusBarColor;
+        }
+        
+        // Appliquer les couleurs au header et footer globalement
+        if (response.data.crptSettings.styles.headerColor) {
+          const header = document.querySelector('.header');
+          if (header) {
+            header.style.background = response.data.crptSettings.styles.headerColor;
+          }
+        }
+        
+        if (response.data.crptSettings.styles.footerColor) {
+          const footer = document.querySelector('.footer');
+          if (footer) {
+            footer.style.background = response.data.crptSettings.styles.footerColor;
+          }
+        }
       }
     } catch (error) {
       console.log('📝 Utilisation des paramètres CRPT par défaut');

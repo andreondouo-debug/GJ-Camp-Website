@@ -197,6 +197,9 @@ module.exports = {
   // === GENERAL STYLES ===
   styles: {
     pageBackgroundColor: '#ffffff',
+    statusBarColor: '#a01e1e',
+    headerColor: 'rgba(16, 35, 71, 0.95)',
+    footerColor: 'linear-gradient(135deg, rgba(9, 23, 50, 0.98) 0%, rgba(16, 35, 71, 0.95) 70%, rgba(18, 41, 82, 0.92) 100%)',
     primaryColor: '#a01e1e',
     secondaryColor: '#d4af37',
     backgroundColor: '#ffffff',

@@ -820,12 +820,41 @@ const CRPTSettingsPage = () => {
             <h3>Couleurs</h3>
             <div className="crpt-color-grid">
               <div className="crpt-field">
+                <label>Barre de statut mobile (tout en haut)</label>
+                <input
+                  type="color"
+                  value={settings.styles.statusBarColor || '#a01e1e'}
+                  onChange={(e) => handleChange('styles', 'statusBarColor', e.target.value)}
+                />
+                <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>Couleur de la barre système sur mobile (avec heure et batterie)</small>
+              </div>
+              <div className="crpt-field">
                 <label>Arrière-plan de la page</label>
                 <input
                   type="color"
                   value={settings.styles.pageBackgroundColor || '#ffffff'}
                   onChange={(e) => handleChange('styles', 'pageBackgroundColor', e.target.value)}
                 />
+              </div>
+              <div className="crpt-field">
+                <label>Couleur Header (haut)</label>
+                <input
+                  type="text"
+                  value={settings.styles.headerColor || 'rgba(16, 35, 71, 0.95)'}
+                  onChange={(e) => handleChange('styles', 'headerColor', e.target.value)}
+                  placeholder="rgba(16, 35, 71, 0.95)"
+                />
+                <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>Ex: #102347 ou rgba(16, 35, 71, 0.95)</small>
+              </div>
+              <div className="crpt-field">
+                <label>Couleur Footer (bas)</label>
+                <input
+                  type="text"
+                  value={settings.styles.footerColor || ''}
+                  onChange={(e) => handleChange('styles', 'footerColor', e.target.value)}
+                  placeholder="linear-gradient(...)"
+                />
+                <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>Ex: #102347 ou linear-gradient(135deg, rgba(9, 23, 50, 0.98) 0%, rgba(16, 35, 71, 0.95) 100%)</small>
               </div>
               <div className="crpt-field">
                 <label>Couleur primaire</label>
