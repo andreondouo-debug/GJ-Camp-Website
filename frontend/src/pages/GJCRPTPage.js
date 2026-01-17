@@ -178,7 +178,10 @@ function GJCRPTPage() {
   return (
     <>
       <style>{dynamicStyles}</style>
-      <div className="gjcrpt-page" style={{ fontFamily: settings.styles.fontFamily }}>
+      <div className="gjcrpt-page" style={{ 
+        fontFamily: settings.styles.fontFamily,
+        background: settings.styles.pageBackgroundColor || '#ffffff'
+      }}>
         {/* Hero Section */}
         <section className="gjcrpt-hero">
           <div className="gjcrpt-hero-overlay"></div>

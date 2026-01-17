@@ -196,6 +196,7 @@ module.exports = {
 
   // === GENERAL STYLES ===
   styles: {
+    pageBackgroundColor: '#ffffff',
     primaryColor: '#a01e1e',
     secondaryColor: '#d4af37',
     backgroundColor: '#ffffff',

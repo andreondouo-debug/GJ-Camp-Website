@@ -966,6 +966,37 @@ const SettingsPage = () => {
                 ✅ Vous avez le contrôle de cette page
               </p>
             )}
+            
+            {/* Bouton vers paramètres CRPT */}
+            <div style={{
+              marginTop: '20px',
+              padding: '15px',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: '12px',
+              textAlign: 'center'
+            }}>
+              <p style={{ color: 'white', marginBottom: '10px', fontSize: '16px', fontWeight: '600' }}>
+                🏛️ Personnaliser la page CRPT
+              </p>
+              <a 
+                href="/parametres/crpt"
+                style={{
+                  display: 'inline-block',
+                  padding: '12px 30px',
+                  background: 'white',
+                  color: '#667eea',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  fontWeight: 'bold',
+                  fontSize: '16px',
+                  transition: 'transform 0.2s'
+                }}
+                onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+                onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+              >
+                ✏️ Modifier la page CRPT →
+              </a>
+            </div>
           </div>
 
           {/* Onglets */}

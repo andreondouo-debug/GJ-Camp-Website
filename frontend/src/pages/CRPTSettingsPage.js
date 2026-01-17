@@ -820,6 +820,14 @@ const CRPTSettingsPage = () => {
             <h3>Couleurs</h3>
             <div className="crpt-color-grid">
               <div className="crpt-field">
+                <label>Arrière-plan de la page</label>
+                <input
+                  type="color"
+                  value={settings.styles.pageBackgroundColor || '#ffffff'}
+                  onChange={(e) => handleChange('styles', 'pageBackgroundColor', e.target.value)}
+                />
+              </div>
+              <div className="crpt-field">
                 <label>Couleur primaire</label>
                 <input
                   type="color"
