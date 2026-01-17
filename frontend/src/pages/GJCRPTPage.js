@@ -191,6 +191,14 @@ function GJCRPTPage() {
       grid-template-columns: repeat(${settings.refuges.gridColumns}, 1fr);
     }
 
+    /* Responsive: Force 1 colonne sur mobile */
+    @media (max-width: 1024px) {
+      .gjcrpt-values-grid,
+      .gjcrpt-refuges-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
     @keyframes fade-in {
       from { opacity: 0; }
       to { opacity: 1; }
