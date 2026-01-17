@@ -107,6 +107,12 @@ const CRPTSettingsPage = () => {
     }
   };
 
+  const handlePreview = () => {
+    // Ouvrir la page CRPT dans un nouvel onglet avec cache-busting
+    const timestamp = new Date().getTime();
+    window.open(`/gj-crpt?refresh=${timestamp}`, '_blank');
+  };
+
   const handleChange = (section, field, value) => {
     setSettings(prev => ({
       ...prev,
@@ -1035,6 +1041,12 @@ const CRPTSettingsPage = () => {
       </div>
 
       <div className="crpt-settings-footer">
+        <button 
+          onClick={handlePreview}
+          className="crpt-btn-preview"
+        >
+          👁️ Prévisualiser la page
+        </button>
         <button 
           onClick={handleSave} 
           disabled={loading}

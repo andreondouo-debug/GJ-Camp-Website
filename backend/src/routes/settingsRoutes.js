@@ -29,6 +29,7 @@ const requireAdmin = (req, res, next) => {
 
 // Routes protégées (admin uniquement avec verrouillage)
 router.get('/', settingsController.getSettings); // Public pour charger le logo
+router.get('/status-bar-color', settingsController.getStatusBarColor); // Public pour couleur barre statut
 router.get('/lock/status', auth, requireAdmin, checkSettingsLockStatus); // Vérifier état du verrou
 router.post('/lock/acquire', auth, requireAdmin, acquireSettingsLock, (req, res) => {
   res.json({ message: 'Verrou acquis avec succès', locked: true });

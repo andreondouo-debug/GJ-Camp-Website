@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import axios from 'axios';
+import { getApiUrl } from './config/api';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import DynamicBackground from './components/DynamicBackground';
@@ -58,6 +60,29 @@ function App() {
     };
 
     initNotifications();
+  }, []);
+
+  // Charger et appliquer la couleur de la barre de statut mobile globalement
+  useEffect(() => {
+    const loadStatusBarColor = async () => {
+      try {
+        const response = await axios.get(getApiUrl('/api/settings/status-bar-color'));
+        const color = response.data.statusBarColor || '#a01e1e';
+        
+        let themeColorMeta = document.querySelector('meta[name="theme-color"]');
+        if (!themeColorMeta) {
+          themeColorMeta = document.createElement('meta');
+          themeColorMeta.name = 'theme-color';
+          document.head.appendChild(themeColorMeta);
+        }
+        themeColorMeta.content = color;
+        console.log('🎨 Couleur barre statut appliquée:', color);
+      } catch (error) {
+        console.log('📱 Couleur barre statut par défaut');
+      }
+    };
+
+    loadStatusBarColor();
   }, []);
 
   return (

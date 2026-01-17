@@ -11,6 +11,20 @@ function GJCRPTPage() {
 
   useEffect(() => {
     fetchSettings();
+    
+    // Nettoyer le cache si paramètre refresh présent
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('refresh')) {
+      console.log('🔄 Forcer le rechargement des paramètres CRPT...');
+      // Supprimer le cache du service worker pour cette route
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => {
+            caches.delete(name);
+          });
+        });
+      }
+    }
   }, []);
 
   const fetchSettings = async () => {

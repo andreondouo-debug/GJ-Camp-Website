@@ -7,6 +7,9 @@ const Settings = require('../models/Settings');
 
 // Paramètres par défaut
 const DEFAULT_SETTINGS = {
+  // Couleur barre de statut mobile (globale)
+  statusBarColor: '#a01e1e',
+  
   // Palette de couleurs
   colorPrimary: '#a01e1e',
   colorPrimaryLight: '#e74c3c',
@@ -405,6 +408,21 @@ exports.uploadPwaLogo = async (req, res) => {
       message: 'Erreur lors de l\'upload du logo PWA',
       error: error.message 
     });
+  }
+};
+
+/**
+ * Récupérer uniquement la couleur de la barre de statut mobile (public)
+ */
+exports.getStatusBarColor = async (req, res) => {
+  try {
+    let settings = await Settings.findOne();
+    const statusBarColor = settings?.settings?.statusBarColor || '#a01e1e';
+    
+    res.json({ statusBarColor });
+  } catch (error) {
+    console.error('❌ Erreur récupération statusBarColor:', error);
+    res.json({ statusBarColor: '#a01e1e' }); // Fallback en cas d'erreur
   }
 };
 

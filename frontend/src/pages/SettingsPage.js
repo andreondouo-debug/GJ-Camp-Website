@@ -17,6 +17,9 @@ const SettingsPage = () => {
 
   // États pour chaque section de paramètres
   const [settings, setSettings] = useState({
+    // Couleur barre de statut mobile (globale)
+    statusBarColor: '#a01e1e',
+    
     // Palette de couleurs
     colorPrimary: '#a01e1e',
     colorPrimaryLight: '#e74c3c',
@@ -1073,7 +1076,29 @@ const SettingsPage = () => {
               
               <div className="settings-grid">
                 <div className="setting-item">
-                  <label>🔴 Rouge Principal (GJ Red)</label>
+                  <label>� Barre de statut mobile (toute l'application)</label>
+                  <div className="color-input-group">
+                    <input
+                      type="color"
+                      name="statusBarColor"
+                      value={settings.statusBarColor}
+                      onChange={handleChange}
+                    />
+                    <input
+                      type="text"
+                      value={settings.statusBarColor}
+                      onChange={handleChange}
+                      name="statusBarColor"
+                    />
+                  </div>
+                  <div className="color-preview" style={{ backgroundColor: settings.statusBarColor }}></div>
+                  <small style={{ color: '#666', marginTop: '5px', display: 'block' }}>
+                    Couleur de la barre système tout en haut sur mobile (heure, batterie)
+                  </small>
+                </div>
+
+                <div className="setting-item">
+                  <label>�🔴 Rouge Principal (GJ Red)</label>
                   <div className="color-input-group">
                     <input
                       type="color"
