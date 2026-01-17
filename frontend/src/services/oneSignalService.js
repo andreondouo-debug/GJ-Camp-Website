@@ -25,11 +25,7 @@ export const initOneSignal = async () => {
       appId: ONESIGNAL_APP_ID,
       allowLocalhostAsSecureOrigin: true,
       autoResubscribe: true,
-      autoRegister: true,
-      serviceWorkerParam: { scope: '/' },
-      serviceWorkerPath: '/service-worker.js',
-      // Utiliser notre SW existant au lieu d'en créer un nouveau
-      path: '/'
+      autoRegister: true
     });
 
     isInitialized = true;

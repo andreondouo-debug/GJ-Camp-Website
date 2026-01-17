@@ -1,9 +1,6 @@
 // Service Worker pour PWA - GJ Camp
 // ✅ Gestion du cache par version pour forcer le rechargement de la dernière version
 
-// Import OneSignal SDK pour les notifications push
-importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js');
-
 const APP_VERSION = '0.1.1'; // Synchronisé avec package.json
 const BUILD_DATE = '2026-01-16-23h06'; // Format: YYYY-MM-DD
 const CACHE_VERSION = `v${APP_VERSION}-${BUILD_DATE}`;
