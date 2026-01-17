@@ -78,7 +78,18 @@ const CRPTSettingsPage = () => {
   const addItem = (section) => {
     const defaultItem = section === 'values' 
       ? { icon: '⭐', title: 'Nouvelle valeur', description: 'Description...', iconColor: '#a01e1e' }
-      : { name: 'Nouvelle ville', region: 'Région', description: 'Description...', icon: '🏛️', iconColor: '#a01e1e' };
+      : { 
+          name: 'Nouvelle ville', 
+          region: 'Région', 
+          description: 'Description...', 
+          icon: '🏛️', 
+          iconColor: '#a01e1e',
+          address: '',
+          leaderPhoto: '',
+          leaderName: '',
+          phone: '',
+          email: ''
+        };
     
     setSettings(prev => ({
       ...prev,
@@ -136,6 +147,12 @@ const CRPTSettingsPage = () => {
           onClick={() => setActiveSection('refuges')}
         >
           🏛️ Refuges
+        </button>
+        <button 
+          className={activeSection === 'gj' ? 'active' : ''}
+          onClick={() => setActiveSection('gj')}
+        >
+          🎯 Génération Josué
         </button>
         <button 
           className={activeSection === 'styles' ? 'active' : ''}
@@ -536,6 +553,55 @@ const CRPTSettingsPage = () => {
                     rows="2"
                   />
                 </div>
+                <div className="crpt-field">
+                  <label>Adresse complète</label>
+                  <input
+                    type="text"
+                    value={item.address || ''}
+                    onChange={(e) => handleArrayChange('refuges', index, 'address', e.target.value)}
+                    placeholder="123 Rue Example, 75001 Paris"
+                  />
+                </div>
+                <div className="crpt-field-row">
+                  <div className="crpt-field">
+                    <label>Nom du dirigeant</label>
+                    <input
+                      type="text"
+                      value={item.leaderName || ''}
+                      onChange={(e) => handleArrayChange('refuges', index, 'leaderName', e.target.value)}
+                      placeholder="Pasteur Jean Dupont"
+                    />
+                  </div>
+                  <div className="crpt-field">
+                    <label>Photo du dirigeant (URL)</label>
+                    <input
+                      type="text"
+                      value={item.leaderPhoto || ''}
+                      onChange={(e) => handleArrayChange('refuges', index, 'leaderPhoto', e.target.value)}
+                      placeholder="/images/leaders/nom.jpg"
+                    />
+                  </div>
+                </div>
+                <div className="crpt-field-row">
+                  <div className="crpt-field">
+                    <label>Téléphone</label>
+                    <input
+                      type="text"
+                      value={item.phone || ''}
+                      onChange={(e) => handleArrayChange('refuges', index, 'phone', e.target.value)}
+                      placeholder="+33 1 23 45 67 89"
+                    />
+                  </div>
+                  <div className="crpt-field">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      value={item.email || ''}
+                      onChange={(e) => handleArrayChange('refuges', index, 'email', e.target.value)}
+                      placeholder="refuge@crpt.fr"
+                    />
+                  </div>
+                </div>
                 <div className="crpt-field-row">
                   <div className="crpt-field">
                     <label>Icône</label>
@@ -559,6 +625,190 @@ const CRPTSettingsPage = () => {
             <button onClick={() => addItem('refuges')} className="crpt-btn-add">
               ➕ Ajouter un refuge
             </button>
+          </div>
+        )}
+
+        {/* GÉNÉRATION JOSUÉ SECTION */}
+        {activeSection === 'gj' && (
+          <div className="crpt-section">
+            <h2>🎯 Section Génération Josué</h2>
+            
+            <div className="crpt-field">
+              <label>Badge</label>
+              <input
+                type="text"
+                value={settings.generationJosue?.badge || ''}
+                onChange={(e) => handleChange('generationJosue', 'badge', e.target.value)}
+                placeholder="Notre Jeunesse"
+              />
+            </div>
+
+            <div className="crpt-field-row">
+              <div className="crpt-field">
+                <label>Couleur du badge</label>
+                <input
+                  type="color"
+                  value={settings.generationJosue?.badgeColor || '#ffffff'}
+                  onChange={(e) => handleChange('generationJosue', 'badgeColor', e.target.value)}
+                />
+              </div>
+              <div className="crpt-field">
+                <label>Taille du titre</label>
+                <input
+                  type="text"
+                  value={settings.generationJosue?.titleFontSize || '2.8rem'}
+                  onChange={(e) => handleChange('generationJosue', 'titleFontSize', e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="crpt-field">
+              <label>Titre</label>
+              <input
+                type="text"
+                value={settings.generationJosue?.title || ''}
+                onChange={(e) => handleChange('generationJosue', 'title', e.target.value)}
+                placeholder="Génération Josué"
+              />
+            </div>
+
+            <div className="crpt-field-row">
+              <div className="crpt-field">
+                <label>Couleur du titre</label>
+                <input
+                  type="color"
+                  value={settings.generationJosue?.titleColor || '#ffffff'}
+                  onChange={(e) => handleChange('generationJosue', 'titleColor', e.target.value)}
+                />
+              </div>
+              <div className="crpt-field">
+                <label>Couleur du texte principal</label>
+                <input
+                  type="color"
+                  value={settings.generationJosue?.leadTextColor || '#f0f0f0'}
+                  onChange={(e) => handleChange('generationJosue', 'leadTextColor', e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="crpt-field">
+              <label>Texte principal</label>
+              <textarea
+                value={settings.generationJosue?.leadText || ''}
+                onChange={(e) => handleChange('generationJosue', 'leadText', e.target.value)}
+                rows="3"
+                placeholder="Le mouvement jeunesse de la CRPT..."
+              />
+            </div>
+
+            <h3>Caractéristiques / Activités</h3>
+            {(settings.generationJosue?.features || []).map((feature, index) => (
+              <div key={index} className="crpt-stat-item">
+                <input
+                  type="text"
+                  value={feature.icon}
+                  onChange={(e) => {
+                    const newFeatures = [...(settings.generationJosue?.features || [])];
+                    newFeatures[index].icon = e.target.value;
+                    setSettings(prev => ({ 
+                      ...prev, 
+                      generationJosue: { ...prev.generationJosue, features: newFeatures } 
+                    }));
+                  }}
+                  placeholder="✨"
+                  style={{ width: '80px' }}
+                />
+                <input
+                  type="text"
+                  value={feature.text}
+                  onChange={(e) => {
+                    const newFeatures = [...(settings.generationJosue?.features || [])];
+                    newFeatures[index].text = e.target.value;
+                    setSettings(prev => ({ 
+                      ...prev, 
+                      generationJosue: { ...prev.generationJosue, features: newFeatures } 
+                    }));
+                  }}
+                  placeholder="Rencontres mensuelles de louange"
+                />
+                <button
+                  onClick={() => {
+                    const newFeatures = (settings.generationJosue?.features || []).filter((_, i) => i !== index);
+                    setSettings(prev => ({ 
+                      ...prev, 
+                      generationJosue: { ...prev.generationJosue, features: newFeatures } 
+                    }));
+                  }}
+                  className="crpt-btn-remove"
+                  style={{ width: 'auto', padding: '8px 12px' }}
+                >
+                  🗑️
+                </button>
+              </div>
+            ))}
+            <button 
+              onClick={() => {
+                const newFeatures = [...(settings.generationJosue?.features || []), { icon: '✨', text: 'Nouvelle activité' }];
+                setSettings(prev => ({ 
+                  ...prev, 
+                  generationJosue: { ...prev.generationJosue, features: newFeatures } 
+                }));
+              }}
+              className="crpt-btn-add"
+            >
+              ➕ Ajouter une activité
+            </button>
+
+            <h3>Bouton d'action</h3>
+            <div className="crpt-field">
+              <label>Texte du bouton</label>
+              <input
+                type="text"
+                value={settings.generationJosue?.buttonText || ''}
+                onChange={(e) => handleChange('generationJosue', 'buttonText', e.target.value)}
+                placeholder="Découvrir Génération Josué"
+              />
+            </div>
+
+            <div className="crpt-field">
+              <label>Lien du bouton</label>
+              <input
+                type="text"
+                value={settings.generationJosue?.buttonLink || '/'}
+                onChange={(e) => handleChange('generationJosue', 'buttonLink', e.target.value)}
+                placeholder="/"
+              />
+            </div>
+
+            <div className="crpt-field">
+              <label>Emoji visuel</label>
+              <input
+                type="text"
+                value={settings.generationJosue?.visualEmoji || '🎯'}
+                onChange={(e) => handleChange('generationJosue', 'visualEmoji', e.target.value)}
+                placeholder="🎯"
+              />
+            </div>
+
+            <h3>Couleurs de fond (dégradé)</h3>
+            <div className="crpt-field-row">
+              <div className="crpt-field">
+                <label>Couleur de début</label>
+                <input
+                  type="color"
+                  value={settings.generationJosue?.backgroundColor || '#667eea'}
+                  onChange={(e) => handleChange('generationJosue', 'backgroundColor', e.target.value)}
+                />
+              </div>
+              <div className="crpt-field">
+                <label>Couleur de fin</label>
+                <input
+                  type="color"
+                  value={settings.generationJosue?.gradientColor || '#764ba2'}
+                  onChange={(e) => handleChange('generationJosue', 'gradientColor', e.target.value)}
+                />
+              </div>
+            </div>
           </div>
         )}
 

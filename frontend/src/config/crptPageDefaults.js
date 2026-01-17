@@ -131,26 +131,67 @@ module.exports = {
         region: 'Hauts-de-France',
         description: 'Un phare spirituel dans le nord de la France',
         icon: '🏛️',
-        iconColor: '#a01e1e'
+        iconColor: '#a01e1e',
+        address: '15 Rue de la Cathédrale, 80000 Amiens',
+        leaderPhoto: '/images/leaders/amiens-leader.jpg',
+        leaderName: 'Pasteur Michel Dubois',
+        phone: '+33 3 22 12 34 56',
+        email: 'amiens@crpt.fr'
       },
       {
         name: 'Nantes',
         region: 'Pays de la Loire',
         description: 'Une église vivante et missionnaire',
         icon: '🏛️',
-        iconColor: '#d4af37'
+        iconColor: '#d4af37',
+        address: '8 Place Royale, 44000 Nantes',
+        leaderPhoto: '/images/leaders/nantes-leader.jpg',
+        leaderName: 'Pasteur Claire Rousseau',
+        phone: '+33 2 40 12 34 56',
+        email: 'nantes@crpt.fr'
       },
       {
         name: 'Paris',
         region: 'Île-de-France',
         description: 'Au cœur de la capitale',
         icon: '🏛️',
-        iconColor: '#a01e1e'
+        iconColor: '#a01e1e',
+        address: '23 Avenue des Champs-Élysées, 75008 Paris',
+        leaderPhoto: '/images/leaders/paris-leader.jpg',
+        leaderName: 'Pasteur Jean Dupont',
+        phone: '+33 1 23 45 67 89',
+        email: 'paris@crpt.fr'
       }
     ],
     cardBackgroundColor: '#f8f9fa',
     cardHoverEffect: 'slide-up', // 'slide-up', 'scale', 'glow', 'none'
     gridColumns: 3
+  },
+
+  // === GÉNÉRATION JOSUÉ SECTION ===
+  generationJosue: {
+    badge: 'Notre Jeunesse',
+    badgeColor: '#ffffff',
+    title: 'Génération Josué',
+    titleFontSize: '2.8rem',
+    titleColor: '#ffffff',
+    leadText: 'Le mouvement jeunesse de la CRPT où les 15-30 ans peuvent grandir dans leur foi et avoir un impact pour le Royaume de Dieu.',
+    leadTextColor: '#f0f0f0',
+    
+    features: [
+      { icon: '✨', text: 'Rencontres mensuelles de louange' },
+      { icon: '🎤', text: 'Conférences pour jeunes' },
+      { icon: '🏕️', text: 'Camp d\'été annuel' },
+      { icon: '🤝', text: 'Groupes de prière et d\'étude' },
+      { icon: '🎵', text: 'École de musique et louange' }
+    ],
+    
+    buttonText: 'Découvrir Génération Josué',
+    buttonLink: '/',
+    visualEmoji: '🎯',
+    
+    backgroundColor: '#667eea',
+    gradientColor: '#764ba2'
   },
 
   // === GENERAL STYLES ===
