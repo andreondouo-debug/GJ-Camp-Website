@@ -50,10 +50,6 @@ function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day
   };
   const [readyToSave, setReadyToSave] = useState(false);
   const handleValider = () => {
-    if (!hasRegistration) {
-      alert('❌ Vous devez être inscrit au camp pour sélectionner des activités');
-      return;
-    }
     const group = creneaux[currentIdx];
     if (group.acts.length > 1) {
       onValidateCreneau(group.key, choix[group.key]);
@@ -66,10 +62,6 @@ function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day
     }
   };
   const handleSuivant = () => {
-    if (!hasRegistration) {
-      alert('❌ Vous devez être inscrit au camp pour continuer');
-      return;
-    }
     // Si c'est le dernier créneau, on prépare l'enregistrement
     if (currentIdx === creneaux.length - 1) {
       setReadyToSave(true);
