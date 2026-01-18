@@ -283,8 +283,13 @@ function MessageManagementPage() {
                       className="form-input"
                     >
                       <option value="private">Réponse privée (uniquement à l'expéditeur)</option>
-                      <option value="all-users">Envoyer à tous les utilisateurs</option>
-                      <option value="all-responsables">Envoyer à tous les responsables</option>
+                      {/* Option visible uniquement pour référents, responsables et admins */}
+                      {user && ['referent', 'responsable', 'admin'].includes(user.role) && (
+                        <>
+                          <option value="all-users">Envoyer à tous les utilisateurs</option>
+                          <option value="all-responsables">Envoyer à tous les responsables</option>
+                        </>
+                      )}
                     </select>
                   </div>
 

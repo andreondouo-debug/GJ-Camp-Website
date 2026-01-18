@@ -1,11 +1,23 @@
 /* Gestion des paiements en espèces */
 
+* {
+  box-sizing: border-box;
+}
+
 .cash-payments-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 40px 20px;
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cash-payments-container * {
+  max-width: 100%;
+  word-wrap: break-word;
 }
 
 .cash-payments-header {
@@ -17,6 +29,8 @@
   padding: 25px 30px;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .cash-payments-header h1 {
@@ -26,6 +40,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .refresh-btn {
@@ -49,7 +65,7 @@
 /* Statistiques */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
   gap: 20px;
   margin-bottom: 30px;
 }
@@ -63,6 +79,8 @@
   align-items: center;
   gap: 20px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .stat-card:hover {
@@ -111,6 +129,8 @@
   padding: 15px;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .tab {
@@ -124,6 +144,9 @@
   cursor: pointer;
   transition: all 0.3s ease;
   color: #6b7280;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tab:hover {
@@ -153,6 +176,9 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border-left: 5px solid #e5e7eb;
   transition: all 0.3s ease;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
 }
 
 .payment-card:hover {
@@ -177,12 +203,16 @@
   margin: 0 0 5px 0;
   color: #1f2937;
   font-size: 20px;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .user-info p {
   margin: 0;
   color: #6b7280;
   font-size: 14px;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .payment-amount {
@@ -219,7 +249,7 @@
 
 .payment-details {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
   gap: 15px;
   margin-bottom: 20px;
 }
@@ -240,6 +270,8 @@
   font-size: 15px;
   color: #1f2937;
   font-weight: 600;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Section de validation */
@@ -248,6 +280,8 @@
   padding: 20px;
   border-radius: 12px;
   margin-top: 20px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .validation-inputs {
@@ -255,6 +289,12 @@
   grid-template-columns: 1fr 2fr;
   gap: 15px;
   margin-bottom: 15px;
+}
+
+@media (max-width: 640px) {
+  .validation-inputs {
+    grid-template-columns: 1fr;
+  }
 }
 
 .input-group {
@@ -275,6 +315,9 @@
   border-radius: 8px;
   font-size: 15px;
   transition: all 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .input-group input:focus {
@@ -287,6 +330,8 @@
   display: flex;
   gap: 15px;
   align-items: end;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .validate-btn {
@@ -312,6 +357,9 @@
   display: flex;
   gap: 10px;
   flex: 1;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .reject-input {
@@ -320,6 +368,8 @@
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   font-size: 15px;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .reject-input:focus {
@@ -399,13 +449,13 @@
 /* Responsive */
 @media (max-width: 768px) {
   .cash-payments-container {
-    padding: 20px 15px;
+    padding: 20px 10px;
   }
 
   .cash-payments-header {
     flex-direction: column;
     gap: 15px;
-    padding: 20px 15px;
+    padding: 15px 10px;
   }
 
   .cash-payments-header h1 {
@@ -455,6 +505,11 @@
     gap: 10px;
   }
 
+  .reject-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
   .validate-btn, .reject-btn {
     width: 100%;
     padding: 14px 20px;
@@ -468,6 +523,10 @@
 
   .payment-amount {
     text-align: left;
+    width: 100%;
+  }
+
+  .payment-amount .amount {
     font-size: 24px;
   }
 
@@ -481,29 +540,126 @@
 }
 
 @media (max-width: 480px) {
+  .cash-payments-container {
+    padding: 15px 8px;
+  }
+
+  .cash-payments-header {
+    padding: 12px 8px;
+  }
+
   .cash-payments-header h1 {
-    font-size: 20px;
+    font-size: 18px;
+    gap: 8px;
   }
 
   .stat-card {
-    padding: 15px;
-    gap: 15px;
+    padding: 12px;
+    gap: 12px;
   }
 
   .stat-icon {
-    font-size: 36px;
+    font-size: 32px;
   }
 
   .stat-content h3 {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .stat-amount {
-    font-size: 16px;
+    font-size: 14px;
+  }
+
+  .payment-card {
+    padding: 15px;
+  }
+
+  .validation-section {
+    padding: 15px;
   }
 
   .validate-btn, .reject-btn {
-    font-size: 15px;
-    padding: 12px 18px;
+    font-size: 14px;
+    padding: 12px 16px;
+  }
+
+  .input-group input,
+  .reject-input {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+}
+
+/* Très petits écrans (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  .cash-payments-container {
+    padding: 10px 5px;
+  }
+
+  .cash-payments-header {
+    padding: 10px 8px;
+  }
+
+  .cash-payments-header h1 {
+    font-size: 16px;
+    gap: 6px;
+  }
+
+  .refresh-btn {
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+
+  .stat-card {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .stat-icon {
+    font-size: 28px;
+  }
+
+  .stat-content h3 {
+    font-size: 20px;
+  }
+
+  .stat-amount {
+    font-size: 13px;
+  }
+
+  .payment-card {
+    padding: 12px;
+  }
+
+  .validation-section {
+    padding: 12px;
+  }
+
+  .tab {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  .validate-btn, .reject-btn {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+
+  .input-group input,
+  .reject-input {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .payment-amount .amount {
+    font-size: 20px;
+  }
+
+  .user-info h3 {
+    font-size: 16px;
+  }
+
+  .user-info p {
+    font-size: 13px;
   }
 }

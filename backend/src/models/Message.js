@@ -98,6 +98,37 @@ const messageSchema = new mongoose.Schema({
     default: 'normal'
   },
   
+  // Édition du message
+  isEdited: {
+    type: Boolean,
+    default: false
+  },
+  editedAt: {
+    type: Date,
+    default: null
+  },
+  
+  // Suppressions individuelles (supprimer pour moi)
+  deletedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  
+  // Suppression totale (supprimer pour tous)
+  isDeletedForAll: {
+    type: Boolean,
+    default: false
+  },
+  deletedForAllAt: {
+    type: Date,
+    default: null
+  },
+  deletedForAllBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  
   // Métadonnées
   createdAt: {
     type: Date,

@@ -1,4 +1,4 @@
-const { ADMIN_ROLES } = require('../constants/roles');
+const { ADMIN_ROLES, MANAGEMENT_ROLES } = require('../constants/roles');
 const User = require('../models/User');
 
 /**
@@ -13,6 +13,24 @@ const requireAdminRole = (req, res, next) => {
   if (!ADMIN_ROLES.includes(req.user.role)) {
     return res.status(403).json({ 
       message: 'Accès refusé. Seuls les responsables et administrateurs peuvent effectuer cette action.' 
+    });
+  }
+
+  next();
+};
+
+/**
+ * Middleware pour vérifier si l'utilisateur a un rôle de gestion
+ * (referent, responsable ou admin)
+ */
+const requireManagementRole = (req, res, next) => {
+  if (!req.user || !req.user.role) {
+    return res.status(401).json({ message: 'Non authentifié' });
+  }
+
+  if (!MANAGEMENT_ROLES.includes(req.user.role)) {
+    return res.status(403).json({ 
+      message: 'Accès refusé. Seuls les référents, responsables et administrateurs peuvent effectuer cette action.' 
     });
   }
 
@@ -77,6 +95,7 @@ const requireAuthorOrAdmin = (resourceAuthorId) => {
 
 module.exports = {
   requireAdminRole,
+  requireManagementRole,
   canCreatePost,
   requireAuthorOrAdmin,
 };

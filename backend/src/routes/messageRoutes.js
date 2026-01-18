@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const { requireAdminRole } = require('../middleware/roleCheck');
+const { requireAdminRole, requireManagementRole } = require('../middleware/roleCheck');
 const Message = require('../models/Message');
 const User = require('../models/User');
 const pushService = require('../services/pushService');
@@ -21,6 +21,22 @@ router.get('/responsables', auth, async (req, res) => {
   } catch (error) {
     console.error('❌ Erreur récupération responsables:', error);
     res.status(500).json({ message: 'Erreur lors de la récupération des responsables' });
+  }
+});
+
+// Récupérer la liste de TOUS les utilisateurs (pour référents, responsables et admins)
+router.get('/all-users', auth, requireManagementRole, async (req, res) => {
+  try {
+    const users = await User.find({ 
+      isActive: true 
+    })
+    .select('firstName lastName email role profilePhoto')
+    .sort({ firstName: 1, lastName: 1 });
+
+    res.json(users);
+  } catch (error) {
+    console.error('❌ Erreur récupération utilisateurs:', error);
+    res.status(500).json({ message: 'Erreur lors de la récupération des utilisateurs' });
   }
 });
 
@@ -51,6 +67,14 @@ router.post('/', auth, async (req, res) => {
 
     if (!subject || !content) {
       return res.status(400).json({ message: 'Le sujet et le contenu sont obligatoires' });
+    }
+
+    // Vérifier les permissions pour envoyer à tous les utilisateurs
+    const { MANAGEMENT_ROLES } = require('../constants/roles');
+    if (recipientType === 'all-users' && !MANAGEMENT_ROLES.includes(req.user.role)) {
+      return res.status(403).json({ 
+        message: 'Seuls les référents, responsables et administrateurs peuvent envoyer des messages à tous les utilisateurs.' 
+      });
     }
 
     let recipients = [];
@@ -158,7 +182,9 @@ router.get('/inbox', auth, async (req, res) => {
     const skip = (page - 1) * limit;
 
     const query = { 
-      'recipients.user': req.user.userId 
+      'recipients.user': req.user.userId,
+      isDeletedForAll: false,  // Exclure les messages supprimés pour tous
+      deletedBy: { $ne: req.user.userId }  // Exclure les messages supprimés par l'utilisateur
     };
 
     if (status) {
@@ -212,7 +238,9 @@ router.get('/sent', auth, async (req, res) => {
     const skip = (page - 1) * limit;
 
     const messages = await Message.find({ 
-      sender: req.user.userId 
+      sender: req.user.userId,
+      isDeletedForAll: false,  // Exclure les messages supprimés pour tous
+      deletedBy: { $ne: req.user.userId }  // Exclure les messages supprimés par l'utilisateur
     })
       .populate('recipients.user', 'firstName lastName email role')
       .populate('replies.author', 'firstName lastName email role profilePhoto')
@@ -262,8 +290,127 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
+// Éditer/Modifier un message (dans les 30 minutes après envoi)
+router.patch('/:id/edit', auth, async (req, res) => {
+  try {
+    const { subject, content } = req.body;
+
+    if (!subject || !content) {
+      return res.status(400).json({ message: 'Le sujet et le contenu sont obligatoires' });
+    }
+
+    const message = await Message.findById(req.params.id);
+
+    if (!message) {
+      return res.status(404).json({ message: 'Message non trouvé' });
+    }
+
+    // Vérifier que l'utilisateur est l'expéditeur
+    if (!message.sender || message.sender.toString() !== req.user.userId) {
+      return res.status(403).json({ message: 'Seul l\'expéditeur peut modifier ce message' });
+    }
+
+    // Vérifier que le message a moins de 30 minutes
+    const now = new Date();
+    const messageAge = (now - message.createdAt) / 1000 / 60; // en minutes
+
+    if (messageAge > 30) {
+      return res.status(403).json({ 
+        message: 'Le délai de modification (30 minutes) est dépassé' 
+      });
+    }
+
+    // Mettre à jour le message
+    message.subject = subject.trim();
+    message.content = content.trim();
+    message.isEdited = true;
+    message.editedAt = now;
+    message.updatedAt = now;
+
+    await message.save();
+
+    res.json({ 
+      message: '✅ Message modifié avec succès',
+      messageData: message
+    });
+  } catch (error) {
+    console.error('❌ Erreur modification message:', error);
+    res.status(500).json({ message: 'Erreur lors de la modification du message' });
+  }
+});
+
+// Supprimer un message (pour moi)
+router.patch('/:id/delete-for-me', auth, async (req, res) => {
+  try {
+    const message = await Message.findById(req.params.id);
+
+    if (!message) {
+      return res.status(404).json({ message: 'Message non trouvé' });
+    }
+
+    // Vérifier que l'utilisateur est destinataire ou expéditeur
+    const isRecipient = message.recipients.some(r => r.user.toString() === req.user.userId);
+    const isSender = message.sender && message.sender.toString() === req.user.userId;
+
+    if (!isRecipient && !isSender) {
+      return res.status(403).json({ message: 'Non autorisé' });
+    }
+
+    // Ajouter l'utilisateur à la liste des suppressions
+    if (!message.deletedBy.includes(req.user.userId)) {
+      message.deletedBy.push(req.user.userId);
+      await message.save();
+    }
+
+    res.json({ message: '✅ Message supprimé de votre boîte de réception' });
+  } catch (error) {
+    console.error('❌ Erreur suppression message:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// Supprimer un message (pour tous) - uniquement si non lu
+router.delete('/:id/delete-for-all', auth, async (req, res) => {
+  try {
+    const message = await Message.findById(req.params.id);
+
+    if (!message) {
+      return res.status(404).json({ message: 'Message non trouvé' });
+    }
+
+    // Vérifier que l'utilisateur est l'expéditeur
+    if (!message.sender || message.sender.toString() !== req.user.userId) {
+      return res.status(403).json({ message: 'Seul l\'expéditeur peut supprimer ce message pour tous' });
+    }
+
+    // Vérifier qu'aucun destinataire n'a lu le message
+    const hasBeenRead = message.recipients.some(r => r.read === true);
+
+    if (hasBeenRead) {
+      return res.status(403).json({ 
+        message: 'Impossible de supprimer : le message a déjà été lu par au moins un destinataire' 
+      });
+    }
+
+    // Marquer comme supprimé pour tous
+    message.isDeletedForAll = true;
+    message.deletedForAllAt = new Date();
+    message.deletedForAllBy = req.user.userId;
+
+    await message.save();
+
+    res.json({ 
+      message: '✅ Message supprimé pour tous les destinataires',
+      messageId: message._id
+    });
+  } catch (error) {
+    console.error('❌ Erreur suppression totale message:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
 // Répondre à un message
-router.post('/:id/reply', auth, requireAdminRole, async (req, res) => {
+router.post('/:id/reply', auth, requireManagementRole, async (req, res) => {
   try {
     const { content, replyType, recipientIds } = req.body;
 

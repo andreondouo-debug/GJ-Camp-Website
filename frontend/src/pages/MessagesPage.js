@@ -13,6 +13,11 @@ function MessagesPage() {
   const [showNewMessage, setShowNewMessage] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   
+  // États pour édition et suppression
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingMessage, setEditingMessage] = useState(null);
+  const [editForm, setEditForm] = useState({ subject: '', content: '' });
+  
   // Liste des responsables disponibles
   const [responsables, setResponsables] = useState([]);
   const [selectedResponsables, setSelectedResponsables] = useState([]);
@@ -38,7 +43,13 @@ function MessagesPage() {
     if (!token) return;
     
     try {
-      const response = await axios.get('/api/messages/responsables', {
+      // Si l'utilisateur est référent, responsable ou admin, récupérer tous les utilisateurs
+      // Sinon, récupérer uniquement les responsables
+      const endpoint = user && ['referent', 'responsable', 'admin'].includes(user.role) 
+        ? '/api/messages/all-users'
+        : '/api/messages/responsables';
+      
+      const response = await axios.get(endpoint, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setResponsables(response.data || []);
@@ -150,6 +161,101 @@ function MessagesPage() {
     }
   };
 
+  const handleEditMessage = (message) => {
+    setEditingMessage(message);
+    setEditForm({ subject: message.subject, content: message.content });
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    
+    if (!editForm.subject.trim() || !editForm.content.trim()) {
+      alert('Le sujet et le contenu sont obligatoires');
+      return;
+    }
+
+    try {
+      await axios.patch(
+        `/api/messages/${editingMessage._id}/edit`,
+        editForm,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      alert('✅ Message modifié avec succès !');
+      setShowEditModal(false);
+      setEditingMessage(null);
+      fetchMessages();
+      
+      if (selectedMessage && selectedMessage._id === editingMessage._id) {
+        setSelectedMessage(null);
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || 'Erreur lors de la modification du message');
+    }
+  };
+
+  const handleDeleteForMe = async (messageId) => {
+    if (!confirm('Voulez-vous supprimer ce message de votre boîte de réception ?')) {
+      return;
+    }
+
+    try {
+      await axios.patch(
+        `/api/messages/${messageId}/delete-for-me`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      alert('✅ Message supprimé de votre boîte de réception');
+      fetchMessages();
+      
+      if (selectedMessage && selectedMessage._id === messageId) {
+        setSelectedMessage(null);
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || 'Erreur lors de la suppression');
+    }
+  };
+
+  const handleDeleteForAll = async (messageId) => {
+    if (!confirm('⚠️ Voulez-vous supprimer ce message pour TOUS les destinataires ? Cette action est irréversible.')) {
+      return;
+    }
+
+    try {
+      await axios.delete(
+        `/api/messages/${messageId}/delete-for-all`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      alert('✅ Message supprimé pour tous les destinataires');
+      fetchMessages();
+      
+      if (selectedMessage && selectedMessage._id === messageId) {
+        setSelectedMessage(null);
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || 'Erreur lors de la suppression');
+    }
+  };
+
+  const canEditMessage = (message) => {
+    if (!message || !message.sender || !user) return false;
+    if (message.sender._id !== user._id) return false;
+    
+    const messageAge = (new Date() - new Date(message.createdAt)) / 1000 / 60; // en minutes
+    return messageAge <= 30;
+  };
+
+  const canDeleteForAll = (message) => {
+    if (!message || !message.sender || !user) return false;
+    if (message.sender._id !== user._id) return false;
+    
+    // Vérifier qu'aucun destinataire n'a lu le message
+    return !message.recipients.some(r => r.read === true);
+  };
+
   const getPriorityBadge = (priority) => {
     const badges = {
       low: { label: 'Faible', className: 'priority-low' },
@@ -224,6 +330,10 @@ function MessagesPage() {
                   className="form-input"
                 >
                   <option value="all-responsables">📢 Tous les responsables</option>
+                  {/* Option "Tous les utilisateurs" visible pour référents, responsables et admins */}
+                  {user && ['referent', 'responsable', 'admin'].includes(user.role) && (
+                    <option value="all-users">👥 Tous les utilisateurs</option>
+                  )}
                   <option value="specific">👤 Sélection individuelle</option>
                 </select>
               </div>
@@ -232,7 +342,12 @@ function MessagesPage() {
               {showResponsablesList && (
                 <div className="form-group responsables-selection">
                   <div className="selection-header">
-                    <label>Sélectionner les responsables ({selectedResponsables.length} sélectionné(s))</label>
+                    <label>
+                      {user && ['referent', 'responsable', 'admin'].includes(user.role) 
+                        ? `Sélectionner les utilisateurs (${selectedResponsables.length} sélectionné(s))`
+                        : `Sélectionner les responsables (${selectedResponsables.length} sélectionné(s))`
+                      }
+                    </label>
                     <div className="selection-actions">
                       <button 
                         type="button" 
@@ -350,6 +465,66 @@ function MessagesPage() {
         </div>
       )}
 
+      {/* Modal d'édition de message */}
+      {showEditModal && editingMessage && (
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="modal-content message-form" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>✏️ Modifier le message</h2>
+              <button className="btn-close" onClick={() => setShowEditModal(false)}>×</button>
+            </div>
+
+            <form onSubmit={handleSaveEdit}>
+              <div className="form-group">
+                <label>Sujet</label>
+                <input
+                  type="text"
+                  value={editForm.subject}
+                  onChange={(e) => setEditForm({ ...editForm, subject: e.target.value })}
+                  className="form-input"
+                  placeholder="Objet du message"
+                  maxLength="200"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Message</label>
+                <textarea
+                  value={editForm.content}
+                  onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
+                  className="form-textarea"
+                  placeholder="Votre message..."
+                  rows={10}
+                  maxLength="5000"
+                  required
+                />
+              </div>
+
+              <div className="form-info" style={{
+                background: '#fff3cd',
+                padding: '12px',
+                borderRadius: '8px',
+                marginBottom: '20px',
+                fontSize: '14px',
+                color: '#856404'
+              }}>
+                ⚠️ Vous pouvez modifier ce message dans les 30 minutes suivant son envoi.
+              </div>
+
+              <div className="form-actions">
+                <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>
+                  Annuler
+                </button>
+                <button type="submit" className="btn-send">
+                  💾 Enregistrer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Détail message */}
       {selectedMessage && (
         <div className="modal-overlay" onClick={() => setSelectedMessage(null)}>
@@ -380,7 +555,108 @@ function MessagesPage() {
 
             <div className="message-content">
               <p>{selectedMessage.content}</p>
+              
+              {/* Indicateur si le message a été modifié */}
+              {selectedMessage.isEdited && (
+                <div className="edited-indicator" style={{ 
+                  marginTop: '10px', 
+                  fontSize: '13px', 
+                  color: '#6b7280', 
+                  fontStyle: 'italic' 
+                }}>
+                  ✏️ Modifié le {formatDate(selectedMessage.editedAt)}
+                </div>
+              )}
             </div>
+
+            {/* Actions sur le message */}
+            {activeTab === 'sent' && selectedMessage.sender && selectedMessage.sender._id === user._id && (
+              <div className="message-actions" style={{ 
+                display: 'flex', 
+                gap: '10px', 
+                marginTop: '20px',
+                paddingTop: '20px',
+                borderTop: '1px solid #e5e7eb'
+              }}>
+                {canEditMessage(selectedMessage) && (
+                  <button 
+                    onClick={() => handleEditMessage(selectedMessage)}
+                    className="btn-edit"
+                    style={{
+                      padding: '10px 20px',
+                      background: '#667eea',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    ✏️ Modifier
+                  </button>
+                )}
+                
+                {canDeleteForAll(selectedMessage) && (
+                  <button 
+                    onClick={() => handleDeleteForAll(selectedMessage._id)}
+                    className="btn-delete-all"
+                    style={{
+                      padding: '10px 20px',
+                      background: '#ef4444',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '14px'
+                    }}
+                  >
+                    🗑️ Supprimer pour tous
+                  </button>
+                )}
+                
+                <button 
+                  onClick={() => handleDeleteForMe(selectedMessage._id)}
+                  className="btn-delete-me"
+                  style={{
+                    padding: '10px 20px',
+                    background: '#6b7280',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  🗑️ Supprimer pour moi
+                </button>
+              </div>
+            )}
+
+            {activeTab === 'inbox' && (
+              <div className="message-actions" style={{ 
+                display: 'flex', 
+                gap: '10px', 
+                marginTop: '20px',
+                paddingTop: '20px',
+                borderTop: '1px solid #e5e7eb'
+              }}>
+                <button 
+                  onClick={() => handleDeleteForMe(selectedMessage._id)}
+                  className="btn-delete-me"
+                  style={{
+                    padding: '10px 20px',
+                    background: '#6b7280',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  🗑️ Supprimer
+                </button>
+              </div>
+            )}
 
             {/* Réponses */}
             {selectedMessage.replies && selectedMessage.replies.length > 0 && (
@@ -440,6 +716,16 @@ function MessagesPage() {
                   <div className="message-subject">
                     {isUnread && <span className="unread-dot">●</span>}
                     {message.subject}
+                    {message.isEdited && (
+                      <span style={{ 
+                        marginLeft: '8px', 
+                        fontSize: '12px', 
+                        color: '#6b7280',
+                        fontStyle: 'italic'
+                      }}>
+                        ✏️ modifié
+                      </span>
+                    )}
                   </div>
                   <div className="message-date-small">
                     {formatDate(message.createdAt)}
