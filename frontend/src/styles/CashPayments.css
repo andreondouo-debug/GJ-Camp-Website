@@ -269,6 +269,7 @@
   grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
   gap: 15px;
   margin-bottom: 20px;
+  width: 100%;
 }
 
 .detail {
@@ -276,7 +277,7 @@
   flex-direction: column;
   gap: 5px;
   min-width: 0;
-  max-width: 100%;
+  width: 100%;
   overflow: visible;
 }
 
@@ -288,6 +289,8 @@
   overflow: visible;
   text-overflow: clip;
   word-wrap: break-word;
+  width: 100%;
+  display: block;
 }
 
 .detail .value {
@@ -296,8 +299,9 @@
   font-weight: 600;
   word-break: break-word;
   overflow-wrap: break-word;
-  max-width: 100%;
+  width: 100%;
   white-space: normal;
+  display: block;
 }
 
 /* Section de validation */
