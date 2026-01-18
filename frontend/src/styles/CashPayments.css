@@ -266,7 +266,7 @@
 
 .payment-details {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
   gap: 15px;
   margin-bottom: 20px;
 }
@@ -277,24 +277,27 @@
   gap: 5px;
   min-width: 0;
   max-width: 100%;
+  overflow: visible;
 }
 
 .detail .label {
   font-size: 13px;
   color: #6b7280;
   font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-wrap: break-word;
 }
 
 .detail .value {
   font-size: 15px;
   color: #1f2937;
   font-weight: 600;
-  word-break: break-all;
+  word-break: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
+  white-space: normal;
 }
 
 /* Section de validation */
