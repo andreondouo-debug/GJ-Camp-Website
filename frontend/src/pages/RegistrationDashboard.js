@@ -572,7 +572,19 @@ const RegistrationDashboard = () => {
                     <td>{reg.phone}</td>
                     <td>{reg.sex === 'M' ? 'Homme' : 'Femme'}</td>
                     <td>{formatDate(reg.dateOfBirth)}</td>
-                    <td>{reg.address}</td>
+                    <td>
+                      {reg.address ? (
+                        <a 
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(reg.address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: '#667eea', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+                          title="Ouvrir dans Google Maps"
+                        >
+                          📍 {reg.address}
+                        </a>
+                      ) : '—'}
+                    </td>
                     <td>{reg.refuge}</td>
                     <td>
                       {reg.hasAllergies ? (

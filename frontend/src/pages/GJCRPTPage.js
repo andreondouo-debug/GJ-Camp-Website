@@ -325,6 +325,27 @@ function GJCRPTPage() {
                   <h3>{refuge.name}</h3>
                   <div className="gjcrpt-refuge-region">{refuge.region}</div>
                   <p>{refuge.description}</p>
+                  {refuge.address && (
+                    <a 
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(refuge.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="gjcrpt-refuge-address"
+                      title="Ouvrir dans Google Maps"
+                    >
+                      📍 {refuge.address}
+                    </a>
+                  )}
+                  {refuge.phone && (
+                    <div className="gjcrpt-refuge-contact">
+                      📞 {refuge.phone}
+                    </div>
+                  )}
+                  {refuge.email && (
+                    <div className="gjcrpt-refuge-contact">
+                      ✉️ {refuge.email}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

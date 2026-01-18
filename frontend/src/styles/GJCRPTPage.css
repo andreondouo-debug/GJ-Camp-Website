@@ -390,6 +390,36 @@
   line-height: 1.6;
 }
 
+.gjcrpt-refuge-address {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 15px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.gjcrpt-refuge-address:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.gjcrpt-refuge-contact {
+  font-size: 14px;
+  color: #555;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 /* ========== GJ SECTION ========== */
 .gjcrpt-gj {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
