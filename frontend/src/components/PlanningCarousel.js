@@ -50,6 +50,10 @@ function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day
   };
   const [readyToSave, setReadyToSave] = useState(false);
   const handleValider = () => {
+    if (!hasRegistration) {
+      alert('❌ Vous devez être inscrit au camp pour sélectionner des activités');
+      return;
+    }
     const group = creneaux[currentIdx];
     if (group.acts.length > 1) {
       onValidateCreneau(group.key, choix[group.key]);
@@ -62,6 +66,10 @@ function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day
     }
   };
   const handleSuivant = () => {
+    if (!hasRegistration) {
+      alert('❌ Vous devez être inscrit au camp pour continuer');
+      return;
+    }
     // Si c'est le dernier créneau, on prépare l'enregistrement
     if (currentIdx === creneaux.length - 1) {
       setReadyToSave(true);
@@ -94,9 +102,8 @@ function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day
         {group.acts.map(act => (
           <div
             key={act._id}
-            className={`planning-activity-card${choix[group.key] === act._id ? ' selected' : ''}${!hasRegistration && group.acts.length > 1 ? ' disabled' : ''}`}
-            onClick={() => hasRegistration && group.acts.length > 1 && handleChoix(group.key, act._id)}
-            style={!hasRegistration && group.acts.length > 1 ? { cursor: 'not-allowed', opacity: 0.7 } : {}}
+            className={`planning-activity-card${choix[group.key] === act._id ? ' selected' : ''}`}
+            onClick={() => group.acts.length > 1 && handleChoix(group.key, act._id)}
           >
             {act.image && (
               <div className="planning-activity-image">
@@ -124,8 +131,8 @@ function PlanningCarousel({ activities, selectedCreneaux, onValidateCreneau, day
                   type="radio"
                   name={`creneau-${group.key}`}
                   checked={choix[group.key] === act._id}
-                  onChange={() => hasRegistration && handleChoix(group.key, act._id)}
-                  disabled={!hasRegistration}
+                  onChange={() => handleChoix(group.key, act._id)}
+                  onClick={(e) => e.stopPropagation()}
                 />
               </div>
             )}

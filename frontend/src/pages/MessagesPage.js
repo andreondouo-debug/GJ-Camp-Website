@@ -196,7 +196,7 @@ function MessagesPage() {
   };
 
   const handleDeleteForMe = async (messageId) => {
-    if (!confirm('Voulez-vous supprimer ce message de votre boîte de réception ?')) {
+    if (!window.confirm('Voulez-vous supprimer ce message de votre boîte de réception ?')) {
       return;
     }
 
@@ -219,7 +219,7 @@ function MessagesPage() {
   };
 
   const handleDeleteForAll = async (messageId) => {
-    if (!confirm('⚠️ Voulez-vous supprimer ce message pour TOUS les destinataires ? Cette action est irréversible.')) {
+    if (!window.confirm('⚠️ Voulez-vous supprimer ce message pour TOUS les destinataires ? Cette action est irréversible.')) {
       return;
     }
 
