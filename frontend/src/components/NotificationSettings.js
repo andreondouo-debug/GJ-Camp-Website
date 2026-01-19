@@ -190,7 +190,52 @@ const NotificationSettings = ({ user }) => {
       console.error('Full Response:', error.response);
       console.error('Stack:', error.stack);
       console.error('═══════════════════════════════════════════');
-      showMessage(error.response?.data?.message || 'Erreur lors de l\'envoi', 'error');
+      
+      // Si erreur VAPID, proposer de réinitialiser
+      if (error.response?.status === 500 && 
+          error.response?.data?.message?.includes('VAPID')) {
+        showMessage('Erreur VAPID. Réinitialisez votre abonnement ci-dessous.', 'error');
+      } else {
+        showMessage(error.response?.data?.message || 'Erreur lors de l\'envoi', 'error');
+      }
+    }
+  };
+
+  const handleResetSubscription = async () => {
+    if (!window.confirm('⚠️ Voulez-vous réinitialiser votre abonnement notifications ?\n\nCela supprimera votre abonnement actuel. Vous devrez vous réabonner.')) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      
+      console.log('🗑️ Réinitialisation abonnement...');
+      
+      // Supprimer l'abonnement backend
+      await axios.delete('/api/notifications/reset-subscription', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // Désabonner le navigateur
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) {
+          await subscription.unsubscribe();
+          console.log('✅ Désabonné du navigateur');
+        }
+      }
+
+      setPushNotifications(false);
+      setIsSubscribed(false);
+      showMessage('✅ Abonnement réinitialisé ! Réactivez les notifications.', 'success');
+      console.log('✅ Réinitialisation terminée');
+    } catch (error) {
+      console.error('❌ Erreur réinitialisation:', error);
+      showMessage('Erreur lors de la réinitialisation', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -264,6 +309,15 @@ const NotificationSettings = ({ user }) => {
               disabled={loading}
             >
               🧪 Envoyer une notification test
+            </button>
+            
+            <button 
+              onClick={handleResetSubscription}
+              className="btn-reset-subscription"
+              disabled={loading}
+              style={{ marginLeft: '10px', backgroundColor: '#ff6b6b' }}
+            >
+              🗑️ Réinitialiser l'abonnement
             </button>
           </div>
         )}

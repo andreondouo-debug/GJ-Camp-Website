@@ -76,8 +76,61 @@ router.post('/subscribe', auth, async (req, res) => {
  */
 router.post('/unsubscribe', auth, async (req, res) => {
   try {
+    console.log('🔕 Désabonnement push pour:', req.user.userId);
+    
     await User.findByIdAndUpdate(req.user.userId, {
       pushSubscription: null,
+      pushNotifications: false
+    });
+
+    console.log('✅ Désabonnement réussi');
+    
+    res.json({ 
+      message: 'Désabonné avec succès',
+      success: true 
+    });
+  } catch (error) {
+    console.error('❌ Erreur suppression abonnement:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+/**
+ * @route   DELETE /api/notifications/reset-subscription
+ * @desc    Supprimer complètement l'abonnement push (pour réinitialisation)
+ * @access  Private
+ */
+router.delete('/reset-subscription', auth, async (req, res) => {
+  try {
+    console.log('═══════════════════════════════════════════');
+    console.log('🗑️ RESET abonnement push');
+    console.log('User ID:', req.user.userId);
+    console.log('═══════════════════════════════════════════');
+    
+    const user = await User.findByIdAndUpdate(
+      req.user.userId,
+      {
+        $unset: { pushSubscription: "" },
+        $set: { pushNotifications: false }
+      },
+      { new: true, select: 'pushSubscription pushNotifications email' }
+    );
+
+    console.log('✅ Abonnement supprimé:', {
+      email: user.email,
+      hasPushSubscription: !!user.pushSubscription,
+      pushNotifications: user.pushNotifications
+    });
+    
+    res.json({ 
+      message: '✅ Abonnement réinitialisé. Vous pouvez maintenant vous réabonner.',
+      success: true 
+    });
+  } catch (error) {
+    console.error('❌ Erreur reset abonnement:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
       pushNotifications: false
     });
 
