@@ -404,13 +404,22 @@ const UserDashboard = () => {
   console.log('👤 État userInfo:', userInfo);
 
   return (
-    <div className="user-dashboard-container">
+    <div className="user-dashboard-container" style={{ 
+      maxWidth: '100%', 
+      overflowX: 'hidden',
+      width: '100%',
+      boxSizing: 'border-box'
+    }}>
       <div className="dashboard-header">
         <h1>Mon Tableau de Bord</h1>
         <p>Bienvenue {userInfo?.firstName} {userInfo?.lastName}</p>
       </div>
 
-      <div className="dashboard-grid">
+      <div className="dashboard-grid" style={{ 
+        maxWidth: '100%', 
+        width: '100%',
+        boxSizing: 'border-box'
+      }}>
         {/* Section Profil */}
         <div className="dashboard-card profile-card">
           <div className="card-header">
