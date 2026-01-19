@@ -325,6 +325,18 @@ function GJCRPTPage() {
                   <h3>{refuge.name}</h3>
                   <div className="gjcrpt-refuge-region">{refuge.region}</div>
                   <p>{refuge.description}</p>
+                  {refuge.leaderPhoto && (
+                    <div className="gjcrpt-refuge-leader">
+                      <img 
+                        src={refuge.leaderPhoto} 
+                        alt={refuge.leaderName || 'Leader'}
+                        className="gjcrpt-refuge-leader-photo"
+                      />
+                      {refuge.leaderName && (
+                        <div className="gjcrpt-refuge-leader-name">{refuge.leaderName}</div>
+                      )}
+                    </div>
+                  )}
                   {refuge.address && (
                     <a 
                       href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(refuge.address)}`}

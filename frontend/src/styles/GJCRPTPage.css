@@ -411,6 +411,32 @@
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
 }
 
+.gjcrpt-refuge-leader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 15px 0;
+  padding: 12px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+}
+
+.gjcrpt-refuge-leader-photo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.gjcrpt-refuge-leader-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #2c3e50;
+  flex: 1;
+}
+
 .gjcrpt-refuge-contact {
   font-size: 14px;
   color: #555;
@@ -757,6 +783,34 @@
   .gjcrpt-value-card,
   .gjcrpt-refuge-card {
     padding: 25px 15px;
+  }
+
+  .gjcrpt-refuge-leader {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .gjcrpt-refuge-leader-photo {
+    width: 50px;
+    height: 50px;
+  }
+
+  .gjcrpt-refuge-leader-name {
+    font-size: 13px;
+  }
+
+  .gjcrpt-refuge-address {
+    font-size: 12px;
+    padding: 8px 12px;
+    word-wrap: break-word;
+    text-align: center;
+  }
+
+  .gjcrpt-refuge-contact {
+    font-size: 12px;
+    word-wrap: break-word;
   }
 
   .gjcrpt-mission-text,

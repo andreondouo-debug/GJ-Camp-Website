@@ -3,6 +3,9 @@
   margin: 0 auto;
   padding: 2rem;
   min-height: calc(100vh - 80px);
+  overflow-x: hidden;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .dashboard-header {
@@ -41,6 +44,16 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.dashboard-card * {
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .dashboard-card:hover {
@@ -650,20 +663,61 @@
 
 @media (max-width: 768px) {
   .user-dashboard-container {
-    padding: 1rem;
+    padding: 0.75rem;
+    max-width: 100%;
+    overflow-x: hidden;
   }
   
   .dashboard-header h1 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    word-wrap: break-word;
+  }
+  
+  .dashboard-header p {
+    font-size: 0.95rem;
   }
   
   .dashboard-grid {
+    grid-template-columns: 1fr;
     gap: 1rem;
   }
   
+  .dashboard-card {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  .card-header {
+    padding: 1rem;
+  }
+  
+  .card-header h2 {
+    font-size: 1.1rem;
+    word-wrap: break-word;
+  }
+  
+  .profile-content,
+  .inscription-content,
+  .activities-content,
+  .guests-content {
+    padding: 1rem;
+  }
+  
   .photo-container {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
+  }
+  
+  .info-row {
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.6rem;
+  }
+  
+  .info-label,
+  .info-value {
+    font-size: 0.9rem;
+    word-wrap: break-word;
   }
   
   .payment-cards-grid {
@@ -672,48 +726,82 @@
   }
   
   .payment-card {
-    padding: 0.85rem;
+    padding: 0.75rem;
+    max-width: 100%;
   }
   
   .payment-card-icon {
-    width: 45px;
-    height: 45px;
+    width: 40px;
+    height: 40px;
   }
   
   .payment-card-icon svg {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
   
   .payment-card-label {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
   }
   
   .payment-card-value {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
   
   .progress-percentage {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+  }
+  
+  .progress-bar-container {
+    height: 30px;
+  }
+  
+  .progress-bar-label {
+    font-size: 0.8rem;
+    padding-right: 0.5rem;
   }
   
   .chart-container {
-    height: 240px;
+    height: 220px;
+    padding: 0.75rem;
+  }
+  
+  .activity-item {
     padding: 1rem;
+  }
+  
+  .activity-header-item {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .activity-image-small {
+    width: 100%;
+    height: 150px;
+  }
+  
+  .activity-info h3 {
+    font-size: 1rem;
+    word-wrap: break-word;
+  }
+  
+  .activity-description {
+    font-size: 0.9rem;
+    word-wrap: break-word;
   }
   
   /* Invités - Adaptation mobile */
   .guest-item {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
-    padding: 1rem;
+    gap: 0.75rem;
+    padding: 0.85rem;
   }
   
   .guest-number {
-    width: 35px;
-    height: 35px;
-    font-size: 14px;
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
   }
   
   .guest-info {
@@ -721,25 +809,258 @@
   }
   
   .guest-info h4 {
-    font-size: 16px;
+    font-size: 15px;
+    word-wrap: break-word;
+  }
+  
+  .guest-email,
+  .guest-refuge {
+    font-size: 13px;
+    word-wrap: break-word;
   }
   
   .guest-payment {
     width: 100%;
     align-items: flex-start;
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
   
   .guest-amount {
-    font-size: 15px;
+    font-size: 14px;
     align-self: flex-start;
   }
   
   .btn-pay-guest-remaining {
     width: 100%;
-    padding: 10px 16px;
-    font-size: 14px;
+    padding: 9px 14px;
+    font-size: 13px;
     border-radius: 8px;
+  }
+  
+  /* Modal responsive */
+  .payment-modal {
+    width: 95%;
+    max-height: 85vh;
+  }
+  
+  .payment-modal-header {
+    padding: 1rem;
+  }
+  
+  .payment-modal-header h3 {
+    font-size: 1.2rem;
+  }
+  
+  .payment-modal-body {
+    padding: 1rem;
+  }
+  
+  .summary-row {
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+  }
+  
+  .summary-row.total {
+    font-size: 1.05rem;
+  }
+  
+  .payment-method-options-modal {
+    grid-template-columns: 1fr;
+  }
+  
+  .btn-pay-remaining {
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-dashboard-container {
+    padding: 0.5rem;
+  }
+  
+  .dashboard-header h1 {
+    font-size: 1.2rem;
+  }
+  
+  .dashboard-header p {
+    font-size: 0.85rem;
+  }
+  
+  .card-header {
+    padding: 0.75rem;
+  }
+  
+  .card-header h2 {
+    font-size: 1rem;
+  }
+  
+  .profile-content,
+  .inscription-content,
+  .activities-content,
+  .guests-content {
+    padding: 0.75rem;
+  }
+  
+  .photo-container {
+    width: 80px;
+    height: 80px;
+    border: 2px solid #667eea;
+  }
+  
+  .photo-upload-btn {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+  }
+  
+  .info-row {
+    padding: 0.5rem;
+  }
+  
+  .info-label,
+  .info-value {
+    font-size: 0.8rem;
+  }
+  
+  .payment-card {
+    padding: 0.6rem;
+  }
+  
+  .payment-card-icon {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .payment-card-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .payment-card-label {
+    font-size: 0.55rem;
+  }
+  
+  .payment-card-value {
+    font-size: 0.9rem;
+  }
+  
+  .progress-bar-container {
+    height: 25px;
+  }
+  
+  .progress-bar-label {
+    font-size: 0.7rem;
+  }
+  
+  .progress-labels {
+    font-size: 0.75rem;
+  }
+  
+  .chart-container {
+    height: 200px;
+    padding: 0.5rem;
+  }
+  
+  .chart-title {
+    font-size: 0.95rem;
+  }
+  
+  .activity-item {
+    padding: 0.75rem;
+  }
+  
+  .activity-badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.65rem;
+  }
+  
+  .activity-description {
+    font-size: 0.85rem;
+  }
+  
+  .activity-pdf-link {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .guest-item {
+    padding: 0.7rem;
+  }
+  
+  .guest-number {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  
+  .guest-info h4 {
+    font-size: 14px;
+  }
+  
+  .guest-email,
+  .guest-refuge {
+    font-size: 12px;
+  }
+  
+  .guest-status {
+    font-size: 12px;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .guest-amount {
+    font-size: 13px;
+  }
+  
+  .btn-pay-guest-remaining {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  .payment-modal {
+    width: 98%;
+  }
+  
+  .payment-modal-header {
+    padding: 0.75rem;
+  }
+  
+  .payment-modal-header h3 {
+    font-size: 1.1rem;
+  }
+  
+  .payment-modal-body {
+    padding: 0.75rem;
+  }
+  
+  .summary-row {
+    font-size: 0.85rem;
+    padding: 0.5rem 0;
+  }
+  
+  .summary-row.total {
+    font-size: 0.95rem;
+  }
+  
+  .payment-method-option-modal {
+    padding: 10px 12px;
+  }
+  
+  .payment-method-option-modal .method-icon {
+    font-size: 20px;
+  }
+  
+  .payment-method-option-modal .method-text {
+    font-size: 13px;
+  }
+  
+  .btn-pay-remaining {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+  }
+  
+  .btn-validate-amount {
+    padding: 12px 20px;
+    font-size: 14px;
   }
 }
 
