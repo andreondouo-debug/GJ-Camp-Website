@@ -122,7 +122,9 @@ const sendSubscriptionToBackend = async (subscription) => {
       return;
     }
 
-    const response = await fetch('/api/notifications/subscribe', {
+    const API_URL = process.env.REACT_APP_API_URL || '';
+
+    const response = await fetch(`${API_URL}/api/notifications/subscribe`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -134,12 +136,17 @@ const sendSubscriptionToBackend = async (subscription) => {
     });
 
     if (response.ok) {
-      console.log('✅ Abonnement envoyé au backend');
+      const data = await response.json();
+      console.log('✅ Abonnement envoyé au backend:', data.message);
+      return true;
     } else {
-      console.error('❌ Erreur envoi abonnement:', response.status);
+      const error = await response.json();
+      console.error('❌ Erreur envoi abonnement:', response.status, error);
+      return false;
     }
   } catch (error) {
     console.error('❌ Erreur communication backend:', error);
+    return false;
   }
 };
 
@@ -151,7 +158,9 @@ const removeSubscriptionFromBackend = async () => {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    await fetch('/api/notifications/unsubscribe', {
+    const API_URL = process.env.REACT_APP_API_URL || '';
+
+    await fetch(`${API_URL}/api/notifications/unsubscribe`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

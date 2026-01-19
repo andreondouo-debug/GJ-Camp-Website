@@ -26,11 +26,20 @@ const NotificationSettings = ({ user }) => {
       });
 
       setEmailNotifications(response.data.emailEnabled !== undefined ? response.data.emailEnabled : true);
-      setPushNotifications(response.data.pushEnabled !== undefined ? response.data.pushEnabled : true); // ✅ true par défaut
-
-      // Vérifier si l'utilisateur est abonné localement
+      
+      // Vérifier si l'utilisateur est réellement abonné (browser + backend)
       const subscribed = await isPushSubscribed();
       setIsSubscribed(subscribed);
+      
+      // Le toggle doit refléter l'abonnement réel ET le setting backend
+      const backendEnabled = response.data.pushEnabled !== undefined ? response.data.pushEnabled : true;
+      setPushNotifications(subscribed && backendEnabled);
+      
+      console.log('📊 État notifications:', { 
+        backendEnabled, 
+        subscribed, 
+        finalState: subscribed && backendEnabled 
+      });
     } catch (error) {
       console.error('❌ Erreur chargement paramètres:', error);
     }
@@ -59,24 +68,46 @@ const NotificationSettings = ({ user }) => {
   const handlePushToggle = async (enabled) => {
     setLoading(true);
     try {
+      const token = localStorage.getItem('token');
+      
       if (enabled) {
-        // Activer les notifications push
+        console.log('🔔 Activation des notifications push...');
+        
+        // Étape 1: Demander la permission
         const granted = await requestNotificationPermission();
         
-        if (granted) {
-          setPushNotifications(true);
-          setIsSubscribed(true);
-          showMessage('Notifications push activées ! 🎉', 'success');
-          
-          // Envoyer une notification de test
-          setTimeout(() => showTestNotification(), 1000);
-        } else {
+        if (!granted) {
           showMessage('Permission refusée. Activez les notifications dans les paramètres du navigateur.', 'error');
+          setPushNotifications(false);
+          setLoading(false);
+          return;
         }
-      } else {
-        // Désactiver les notifications push
-        const token = localStorage.getItem('token');
         
+        console.log('✅ Permission accordée');
+        
+        // Étape 2: Vérifier l'abonnement
+        const subscribed = await isPushSubscribed();
+        console.log('📊 État abonnement:', subscribed);
+        
+        // Étape 3: Mettre à jour le backend
+        await axios.post('/api/notifications/settings', 
+          { pushNotifications: true },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        
+        console.log('✅ Backend mis à jour');
+        
+        // Étape 4: Mettre à jour l'interface
+        setPushNotifications(true);
+        setIsSubscribed(subscribed);
+        showMessage('Notifications push activées ! 🎉', 'success');
+        
+        // Envoyer une notification de test
+        setTimeout(() => showTestNotification(), 1000);
+      } else {
+        console.log('🔕 Désactivation des notifications push...');
+        
+        // Désactiver dans le backend
         await axios.post('/api/notifications/settings', 
           { pushNotifications: false },
           { headers: { Authorization: `Bearer ${token}` } }
@@ -88,6 +119,7 @@ const NotificationSettings = ({ user }) => {
     } catch (error) {
       console.error('❌ Erreur mise à jour push:', error);
       showMessage('Erreur lors de la mise à jour', 'error');
+      setPushNotifications(false);
     } finally {
       setLoading(false);
     }
