@@ -131,20 +131,6 @@ router.delete('/reset-subscription', auth, async (req, res) => {
     res.status(500).json({ message: 'Erreur serveur' });
   }
 });
-      pushNotifications: false
-    });
-
-    console.log('✅ Abonnement push supprimé pour utilisateur:', req.user.userId);
-    
-    res.json({ 
-      message: 'Abonnement supprimé avec succès',
-      success: true 
-    });
-  } catch (error) {
-    console.error('❌ Erreur suppression abonnement:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
-  }
-});
 
 /**
  * @route   POST /api/notifications/test
