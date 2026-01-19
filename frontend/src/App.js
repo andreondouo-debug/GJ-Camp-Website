@@ -6,7 +6,7 @@ import { getApiUrl } from './config/api';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import DynamicBackground from './components/DynamicBackground';
-import { initOneSignal } from './services/oneSignalService';
+// import { initOneSignal } from './services/oneSignalService'; // ❌ Désactivé - On utilise Web Push natif
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -48,19 +48,18 @@ import VersionBadge from './components/VersionBadge';
 import './styles/App.css';
 
 function App() {
-  // Initialiser OneSignal au montage de l'application
-  useEffect(() => {
-    const initNotifications = async () => {
-      try {
-        await initOneSignal();
-        console.log('🔔 OneSignal prêt');
-      } catch (error) {
-        console.error('❌ Erreur init OneSignal:', error);
-      }
-    };
-
-    initNotifications();
-  }, []);
+  // ❌ OneSignal désactivé - On utilise Web Push natif avec VAPID
+  // useEffect(() => {
+  //   const initNotifications = async () => {
+  //     try {
+  //       await initOneSignal();
+  //       console.log('🔔 OneSignal prêt');
+  //     } catch (error) {
+  //       console.error('❌ Erreur init OneSignal:', error);
+  //     }
+  //   };
+  //   initNotifications();
+  // }, []);
 
   // Charger et appliquer la couleur de la barre de statut mobile globalement
   useEffect(() => {

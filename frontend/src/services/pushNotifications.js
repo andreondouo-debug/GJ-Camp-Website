@@ -5,11 +5,23 @@
 
 const VAPID_PUBLIC_KEY = process.env.REACT_APP_VAPID_PUBLIC_KEY || '';
 
+// Vérifier que la clé VAPID est configurée
+if (!VAPID_PUBLIC_KEY) {
+  console.error('❌ VAPID_PUBLIC_KEY manquante ! Configurez REACT_APP_VAPID_PUBLIC_KEY dans Vercel.');
+  console.log('📝 Documentation: Voir NOTIFICATIONS_PUSH_CONFIG.md');
+}
+
 /**
  * Demander la permission pour les notifications push
  */
 export const requestNotificationPermission = async () => {
   try {
+    if (!VAPID_PUBLIC_KEY) {
+      console.error('❌ Clé VAPID manquante - Notifications désactivées');
+      alert('⚠️ Les notifications push ne sont pas configurées. Contactez l\'administrateur.');
+      return false;
+    }
+
     if (!('Notification' in window)) {
       console.warn('⚠️ Notifications non supportées par ce navigateur');
       return false;
