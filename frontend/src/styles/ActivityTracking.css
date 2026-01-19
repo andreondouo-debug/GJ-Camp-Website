@@ -57,8 +57,10 @@
 
 .activities-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
+  width: 100%;
+  max-width: 100%;
 }
 
 .activity-tracking-card {
@@ -426,5 +428,40 @@
   .participants-table th,
   .participants-table td {
     padding: 0.6rem 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .activity-tracking-container {
+    padding: 0.75rem;
+  }
+  
+  .tracking-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .stats-summary {
+    gap: 0.75rem;
+  }
+  
+  .summary-card {
+    padding: 1rem;
+  }
+  
+  .activities-grid {
+    gap: 1rem;
+  }
+  
+  .activity-tracking-card {
+    margin-bottom: 1rem;
+  }
+  
+  .modal-content {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .participants-table {
+    font-size: 0.8rem;
   }
 }

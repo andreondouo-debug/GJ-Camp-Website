@@ -98,6 +98,15 @@
   justify-items: center;
   margin-bottom: 2rem;
   padding: 1rem 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 991px) {
+  .activities-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
 }
 
 /* Nouveau format de carte d'activité inspiré du modèle fourni */
