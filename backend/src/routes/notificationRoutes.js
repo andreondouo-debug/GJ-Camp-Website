@@ -124,6 +124,7 @@ router.post('/test', auth, async (req, res) => {
     }
 
     console.log('📤 Envoi notification via Web Push...');
+    console.log('📊 Subscription complète:', JSON.stringify(user.pushSubscription, null, 2));
     
     const payload = JSON.stringify({
       title: '🎉 GJ Camp',
@@ -133,9 +134,24 @@ router.post('/test', auth, async (req, res) => {
       data: { url: '/' }
     });
 
-    await webpush.sendNotification(user.pushSubscription, payload);
+    console.log('📊 Payload:', payload);
+
+    // Options pour l'envoi (importantes pour FCM)
+    const options = {
+      TTL: 3600, // Durée de vie en secondes
+      vapidDetails: {
+        subject: process.env.VAPID_EMAIL || 'mailto:contact@gjsdecrpt.fr',
+        publicKey: process.env.VAPID_PUBLIC_KEY,
+        privateKey: process.env.VAPID_PRIVATE_KEY
+      }
+    };
+
+    console.log('📊 Options d\'envoi:', { TTL: options.TTL, subject: options.vapidDetails.subject });
+
+    const result = await webpush.sendNotification(user.pushSubscription, payload, options);
     
     console.log('✅ Notification test envoyée avec succès');
+    console.log('📊 Résultat:', { statusCode: result.statusCode, headers: result.headers });
     
     res.json({ 
       message: 'Notification test envoyée avec succès !',
@@ -145,20 +161,37 @@ router.post('/test', auth, async (req, res) => {
     console.error('═══════════════════════════════════════════');
     console.error('❌ Erreur envoi notification test');
     console.error('Error:', error.message);
+    console.error('Status Code:', error.statusCode);
+    console.error('Body:', error.body);
+    console.error('Headers:', error.headers);
     console.error('Stack:', error.stack);
     console.error('═══════════════════════════════════════════');
     
-    // Si l'abonnement est invalide, le supprimer
-    if (error.statusCode === 410) {
-      console.warn('⚠️ Abonnement expiré, suppression de la base');
+    // Si l'abonnement est invalide ou expiré, le supprimer
+    if (error.statusCode === 410 || error.statusCode === 404) {
+      console.warn('⚠️ Abonnement expiré ou invalide, suppression de la base');
       await User.findByIdAndUpdate(req.user.userId, {
         pushSubscription: null,
         pushNotifications: false
       });
-      return res.status(410).json({ message: 'Abonnement expiré, réabonnez-vous' });
+      return res.status(410).json({ 
+        message: 'Abonnement expiré ou invalide. Réactivez les notifications push dans votre profil.' 
+      });
+    }
+
+    // Si erreur 401/403 - problème VAPID
+    if (error.statusCode === 401 || error.statusCode === 403) {
+      console.error('❌ ERREUR VAPID: Clés invalides ou mal configurées');
+      return res.status(500).json({ 
+        message: 'Erreur configuration serveur (VAPID). Contactez l\'administrateur.' 
+      });
     }
     
-    res.status(500).json({ message: 'Erreur envoi notification: ' + error.message });
+    res.status(500).json({ 
+      message: 'Erreur envoi notification: ' + error.message,
+      statusCode: error.statusCode,
+      details: error.body
+    });
   }
 });
 
