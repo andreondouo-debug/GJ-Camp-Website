@@ -27,19 +27,37 @@ if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
  */
 router.post('/subscribe', auth, async (req, res) => {
   try {
+    console.log('═══════════════════════════════════════════');
+    console.log('🔔 POST /api/notifications/subscribe');
+    console.log('User ID:', req.user.userId);
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+    console.log('═══════════════════════════════════════════');
+    
     const { subscription } = req.body;
     
     if (!subscription || !subscription.endpoint) {
+      console.error('❌ Abonnement invalide:', subscription);
       return res.status(400).json({ message: 'Abonnement invalide' });
     }
 
-    // Sauvegarder l'abonnement dans l'utilisateur
-    await User.findByIdAndUpdate(req.user.userId, {
-      pushSubscription: subscription,
-      pushNotifications: true
-    });
+    console.log('📊 Abonnement valide, endpoint:', subscription.endpoint);
 
-    console.log('✅ Abonnement push enregistré pour utilisateur:', req.user.userId);
+    // Sauvegarder l'abonnement dans l'utilisateur
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.userId, 
+      {
+        pushSubscription: subscription,
+        pushNotifications: true
+      },
+      { new: true, select: 'pushSubscription pushNotifications firstName' }
+    );
+
+    console.log('✅ Utilisateur mis à jour:', {
+      id: updatedUser._id,
+      firstName: updatedUser.firstName,
+      hasPushSubscription: !!updatedUser.pushSubscription,
+      pushNotifications: updatedUser.pushNotifications
+    });
     
     res.json({ 
       message: 'Abonnement enregistré avec succès',
@@ -82,12 +100,31 @@ router.post('/unsubscribe', auth, async (req, res) => {
  */
 router.post('/test', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select('pushSubscription firstName');
+    console.log('═══════════════════════════════════════════');
+    console.log('🧪 POST /api/notifications/test');
+    console.log('User ID:', req.user.userId);
+    console.log('═══════════════════════════════════════════');
+    
+    const user = await User.findById(req.user.userId).select('pushSubscription pushNotifications firstName email');
+    
+    console.log('📊 Utilisateur trouvé:', {
+      id: user?._id,
+      firstName: user?.firstName,
+      email: user?.email,
+      pushNotifications: user?.pushNotifications,
+      hasPushSubscription: !!user?.pushSubscription,
+      subscriptionEndpoint: user?.pushSubscription?.endpoint?.substring(0, 50) + '...'
+    });
     
     if (!user || !user.pushSubscription) {
-      return res.status(400).json({ message: 'Aucun abonnement push trouvé' });
+      console.error('❌ Aucun abonnement push dans la base de données');
+      return res.status(400).json({ 
+        message: 'Aucun abonnement push trouvé. Activez les notifications push dans votre profil.' 
+      });
     }
 
+    console.log('📤 Envoi notification via Web Push...');
+    
     const payload = JSON.stringify({
       title: '🎉 GJ Camp',
       body: `Salut ${user.firstName} ! Les notifications fonctionnent parfaitement.`,
@@ -98,17 +135,22 @@ router.post('/test', auth, async (req, res) => {
 
     await webpush.sendNotification(user.pushSubscription, payload);
     
-    console.log('✅ Notification test envoyée à:', req.user.userId);
+    console.log('✅ Notification test envoyée avec succès');
     
     res.json({ 
-      message: 'Notification test envoyée',
+      message: 'Notification test envoyée avec succès !',
       success: true 
     });
   } catch (error) {
-    console.error('❌ Erreur envoi notification test:', error);
+    console.error('═══════════════════════════════════════════');
+    console.error('❌ Erreur envoi notification test');
+    console.error('Error:', error.message);
+    console.error('Stack:', error.stack);
+    console.error('═══════════════════════════════════════════');
     
     // Si l'abonnement est invalide, le supprimer
     if (error.statusCode === 410) {
+      console.warn('⚠️ Abonnement expiré, suppression de la base');
       await User.findByIdAndUpdate(req.user.userId, {
         pushSubscription: null,
         pushNotifications: false
@@ -116,7 +158,7 @@ router.post('/test', auth, async (req, res) => {
       return res.status(410).json({ message: 'Abonnement expiré, réabonnez-vous' });
     }
     
-    res.status(500).json({ message: 'Erreur envoi notification' });
+    res.status(500).json({ message: 'Erreur envoi notification: ' + error.message });
   }
 });
 

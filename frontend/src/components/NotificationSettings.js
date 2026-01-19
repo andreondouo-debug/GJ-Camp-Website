@@ -67,40 +67,65 @@ const NotificationSettings = ({ user }) => {
 
   const handlePushToggle = async (enabled) => {
     setLoading(true);
+    console.log('═══════════════════════════════════════════');
+    console.log('🔔 DÉBUT handlePushToggle:', { enabled });
+    console.log('═══════════════════════════════════════════');
+    
     try {
       const token = localStorage.getItem('token');
+      console.log('🔑 Token présent:', !!token);
       
       if (enabled) {
         console.log('🔔 Activation des notifications push...');
         
-        // Étape 1: Demander la permission
-        const granted = await requestNotificationPermission();
-        
-        if (!granted) {
-          showMessage('Permission refusée. Activez les notifications dans les paramètres du navigateur.', 'error');
+        // Étape 1: Vérifier Service Worker
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          console.log('📊 Service Workers enregistrés:', registrations.length);
+          registrations.forEach((reg, i) => {
+            console.log(`  SW ${i+1}:`, reg.scope);
+          });
+        } else {
+          console.error('❌ Service Worker non supporté');
+          showMessage('Votre navigateur ne supporte pas les notifications push', 'error');
           setPushNotifications(false);
           setLoading(false);
           return;
         }
         
+        // Étape 2: Demander la permission
+        console.log('🔔 Étape 2: Demande permission...');
+        const granted = await requestNotificationPermission();
+        console.log('📊 Permission résultat:', granted);
+        
+        if (!granted) {
+          showMessage('Permission refusée. Activez les notifications dans les paramètres du navigateur.', 'error');
+          setPushNotifications(false);
+          setLoading(false);
+          console.log('❌ FIN handlePushToggle: Permission refusée');
+          return;
+        }
+        
         console.log('✅ Permission accordée');
         
-        // Étape 2: Vérifier l'abonnement
+        // Étape 3: Vérifier l'abonnement
+        console.log('🔔 Étape 3: Vérification abonnement...');
         const subscribed = await isPushSubscribed();
         console.log('📊 État abonnement:', subscribed);
         
-        // Étape 3: Mettre à jour le backend
-        await axios.post('/api/notifications/settings', 
+        // Étape 4: Mettre à jour le backend
+        console.log('🔔 Étape 4: Mise à jour backend...');
+        const response = await axios.post('/api/notifications/settings', 
           { pushNotifications: true },
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        console.log('✅ Backend réponse:', response.data);
         
-        console.log('✅ Backend mis à jour');
-        
-        // Étape 4: Mettre à jour l'interface
+        // Étape 5: Mettre à jour l'interface
         setPushNotifications(true);
         setIsSubscribed(subscribed);
         showMessage('Notifications push activées ! 🎉', 'success');
+        console.log('✅ FIN handlePushToggle: Succès complet');
         
         // Envoyer une notification de test
         setTimeout(() => showTestNotification(), 1000);
@@ -115,9 +140,15 @@ const NotificationSettings = ({ user }) => {
 
         setPushNotifications(false);
         showMessage('Notifications push désactivées', 'success');
+        console.log('✅ FIN handlePushToggle: Désactivation réussie');
       }
     } catch (error) {
-      console.error('❌ Erreur mise à jour push:', error);
+      console.error('═══════════════════════════════════════════');
+      console.error('❌ ERREUR handlePushToggle:', error);
+      console.error('Message:', error.message);
+      console.error('Stack:', error.stack);
+      console.error('Response:', error.response?.data);
+      console.error('═══════════════════════════════════════════');
       showMessage('Erreur lors de la mise à jour', 'error');
       setPushNotifications(false);
     } finally {
@@ -126,16 +157,38 @@ const NotificationSettings = ({ user }) => {
   };
 
   const handleTestNotification = async () => {
+    console.log('═══════════════════════════════════════════');
+    console.log('🧪 DÉBUT Test Notification');
+    console.log('═══════════════════════════════════════════');
+    
     try {
       const token = localStorage.getItem('token');
+      console.log('🔑 Token présent:', !!token);
       
-      await axios.post('/api/notifications/test', {}, {
+      // Vérifier l'abonnement local
+      const subscribed = await isPushSubscribed();
+      console.log('📊 Abonné localement:', subscribed);
+      
+      if (!subscribed) {
+        console.warn('⚠️ Pas d\'abonnement local - tentative d\'envoi quand même');
+      }
+      
+      console.log('📤 Envoi requête backend...');
+      const response = await axios.post('/api/notifications/test', {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
+      
+      console.log('✅ Réponse backend:', response.data);
       showMessage('Notification test envoyée !', 'success');
+      console.log('✅ FIN Test Notification: Succès');
     } catch (error) {
-      console.error('❌ Erreur notification test:', error);
+      console.error('═══════════════════════════════════════════');
+      console.error('❌ ERREUR Test Notification');
+      console.error('Message:', error.message);
+      console.error('Status:', error.response?.status);
+      console.error('Data:', error.response?.data);
+      console.error('Stack:', error.stack);
+      console.error('═══════════════════════════════════════════');
       showMessage(error.response?.data?.message || 'Erreur lors de l\'envoi', 'error');
     }
   };

@@ -60,12 +60,24 @@ export const requestNotificationPermission = async () => {
  */
 export const subscribeToPush = async () => {
   try {
-    const registration = await navigator.serviceWorker.ready;
+    console.log('🔄 Attente du Service Worker...');
+    
+    // Attendre que le Service Worker soit prêt (timeout 10s)
+    const registration = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout Service Worker')), 10000)
+      )
+    ]);
+    
+    console.log('✅ Service Worker prêt:', registration.scope);
     
     // Vérifier si déjà abonné
     let subscription = await registration.pushManager.getSubscription();
     
     if (!subscription) {
+      console.log('🔔 Création nouvel abonnement push...');
+      
       // Créer un nouvel abonnement
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
@@ -78,11 +90,19 @@ export const subscribeToPush = async () => {
     }
 
     // Envoyer l'abonnement au backend
-    await sendSubscriptionToBackend(subscription);
+    const sent = await sendSubscriptionToBackend(subscription);
+    
+    if (!sent) {
+      console.error('❌ Échec envoi abonnement au backend');
+      return null;
+    }
     
     return subscription;
   } catch (error) {
     console.error('❌ Erreur abonnement push:', error);
+    if (error.message === 'Timeout Service Worker') {
+      alert('⚠️ Service Worker non disponible. Rechargez la page et réessayez.');
+    }
     return null;
   }
 };
