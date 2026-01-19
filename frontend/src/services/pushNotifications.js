@@ -15,12 +15,18 @@ if (!VAPID_PUBLIC_KEY) {
  * Demander la permission pour les notifications push
  */
 export const requestNotificationPermission = async () => {
+  console.log('═══════════════════════════════════════════');
+  console.log('🔔 requestNotificationPermission DÉBUT');
+  console.log('═══════════════════════════════════════════');
+  
   try {
     if (!VAPID_PUBLIC_KEY) {
       console.error('❌ Clé VAPID manquante - Notifications désactivées');
       alert('⚠️ Les notifications push ne sont pas configurées. Contactez l\'administrateur.');
       return false;
     }
+
+    console.log('✅ Clé VAPID présente:', VAPID_PUBLIC_KEY.substring(0, 20) + '...');
 
     if (!('Notification' in window)) {
       console.warn('⚠️ Notifications non supportées par ce navigateur');
@@ -32,19 +38,26 @@ export const requestNotificationPermission = async () => {
       return false;
     }
 
+    console.log('📊 Permission actuelle:', Notification.permission);
+
     // Vérifier si déjà accordée
     if (Notification.permission === 'granted') {
       console.log('✅ Permission notifications déjà accordée');
-      return true;
+      const subscription = await subscribeToPush();
+      console.log('📊 Résultat subscribeToPush:', !!subscription);
+      return !!subscription;
     }
 
     // Demander la permission
+    console.log('🔔 Demande de permission...');
     const permission = await Notification.requestPermission();
+    console.log('📊 Résultat permission:', permission);
     
     if (permission === 'granted') {
       console.log('✅ Permission notifications accordée');
-      await subscribeToPush();
-      return true;
+      const subscription = await subscribeToPush();
+      console.log('📊 Résultat subscribeToPush:', !!subscription);
+      return !!subscription;
     } else {
       console.log('❌ Permission notifications refusée');
       return false;
@@ -52,6 +65,10 @@ export const requestNotificationPermission = async () => {
   } catch (error) {
     console.error('❌ Erreur demande permission:', error);
     return false;
+  } finally {
+    console.log('═══════════════════════════════════════════');
+    console.log('🔔 requestNotificationPermission FIN');
+    console.log('═══════════════════════════════════════════');
   }
 };
 
@@ -135,37 +152,56 @@ export const unsubscribeFromPush = async () => {
  * Envoyer l'abonnement au backend
  */
 const sendSubscriptionToBackend = async (subscription) => {
+  console.log('═══════════════════════════════════════════');
+  console.log('📤 sendSubscriptionToBackend DÉBUT');
+  console.log('═══════════════════════════════════════════');
+  
   try {
     const token = localStorage.getItem('token');
     if (!token) {
       console.warn('⚠️ Utilisateur non connecté, abonnement local uniquement');
-      return;
+      return false;
     }
 
-    const API_URL = process.env.REACT_APP_API_URL || '';
+    console.log('✅ Token présent');
 
-    const response = await fetch(`${API_URL}/api/notifications/subscribe`, {
+    const API_URL = process.env.REACT_APP_API_URL || '';
+    const url = `${API_URL}/api/notifications/subscribe`;
+    
+    console.log('📊 URL backend:', url);
+    console.log('📊 Subscription endpoint:', subscription.endpoint);
+
+    const body = {
+      subscription: subscription.toJSON()
+    };
+    
+    console.log('📊 Body à envoyer:', JSON.stringify(body, null, 2));
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({
-        subscription: subscription.toJSON()
-      })
+      body: JSON.stringify(body)
     });
+
+    console.log('📊 Response status:', response.status);
 
     if (response.ok) {
       const data = await response.json();
-      console.log('✅ Abonnement envoyé au backend:', data.message);
+      console.log('✅ Abonnement envoyé au backend:', data);
+      console.log('═══════════════════════════════════════════');
       return true;
     } else {
       const error = await response.json();
       console.error('❌ Erreur envoi abonnement:', response.status, error);
+      console.log('═══════════════════════════════════════════');
       return false;
     }
   } catch (error) {
     console.error('❌ Erreur communication backend:', error);
+    console.log('═══════════════════════════════════════════');
     return false;
   }
 };

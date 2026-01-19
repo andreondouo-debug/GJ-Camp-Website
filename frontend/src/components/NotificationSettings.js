@@ -186,7 +186,8 @@ const NotificationSettings = ({ user }) => {
       console.error('❌ ERREUR Test Notification');
       console.error('Message:', error.message);
       console.error('Status:', error.response?.status);
-      console.error('Data:', error.response?.data);
+      console.error('Data:', JSON.stringify(error.response?.data, null, 2));
+      console.error('Full Response:', error.response);
       console.error('Stack:', error.stack);
       console.error('═══════════════════════════════════════════');
       showMessage(error.response?.data?.message || 'Erreur lors de l\'envoi', 'error');
