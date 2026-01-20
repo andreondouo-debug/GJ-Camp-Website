@@ -894,6 +894,8 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   width: 100vw !important;
   max-width: 100vw !important;
   z-index: 1000;
+  min-height: auto;
+  height: auto;
 }
 
 .header::after {
@@ -923,7 +925,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   align-items: center;
   flex-shrink: 0;
   position: absolute;
-  z-index: 5;
+  z-index: 1100;
 }
 
 .logo-link-left {
@@ -969,7 +971,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   align-items: center;
   flex-wrap: nowrap;
   position: relative;
-  z-index: 100;
+  z-index: 10;
 }
 
 .nav-menu ul {
@@ -981,7 +983,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   margin: 0;
   padding: 0;
   position: relative;
-  z-index: 100;
+  z-index: 10;
 }
 
 .nav-menu li {
@@ -2956,43 +2958,18 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
 }
 
 @media (max-width: 1024px) {
-  /* Header tablette */
-  .header {
-    padding: 15px 0;
-  }
-
-  .header-content {
-    padding: 0 120px !important;
-    gap: 20px;
-  }
-
-  .logo-link {
-    z-index: 5;
-  }
-
-  .logo-link-left {
-    left: 15px;
-  }
-
-  .logo-link-right {
-    right: 15px;
-  }
-
-  .header-logo {
-    width: 55px;
-    height: 55px;
-  }
-
   .nav-menu {
-    gap: 10px;
-    z-index: 100;
+    gap: 12px;
   }
 
   .nav-menu a,
   .dropdown-toggle {
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     letter-spacing: 0.04em;
-    padding: 8px 12px;
+  }
+
+  .header-content {
+    gap: 16px;
   }
 }
 
@@ -3583,32 +3560,6 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   .carousel-item,
   .carousel-background {
     min-height: 550px;
-  }
-
-  /* Carousel split tablette */
-  .carousel-split {
-    grid-template-columns: 1fr;
-    height: auto;
-    min-height: 600px;
-    max-width: 100%;
-  }
-
-  .carousel-left {
-    padding: 35px 30px;
-  }
-
-  .carousel-right {
-    height: 400px;
-    min-height: 350px;
-  }
-
-  .headline-text,
-  .headline-highlight {
-    font-size: 2rem;
-  }
-
-  .carousel-description {
-    font-size: 1rem;
   }
 }
 
