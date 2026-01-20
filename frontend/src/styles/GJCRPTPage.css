@@ -849,3 +849,130 @@
     padding: 0 10px;
   }
 }
+
+/* ========== MODAL PHOTO ========== */
+.gjcrpt-photo-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+  padding: 20px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.gjcrpt-photo-modal-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.gjcrpt-photo-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 45px;
+  height: 45px;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.gjcrpt-photo-modal-close:hover {
+  background: #f44336;
+  color: white;
+  transform: rotate(90deg) scale(1.1);
+}
+
+.gjcrpt-photo-modal-img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(90vh - 80px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+.gjcrpt-photo-modal-caption {
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-top: 2px solid #667eea;
+}
+
+@media (max-width: 768px) {
+  .gjcrpt-photo-modal {
+    padding: 10px;
+  }
+  .gjcrpt-photo-modal-content {
+    max-width: 95vw;
+    max-height: 95vh;
+    border-radius: 8px;
+  }
+  .gjcrpt-photo-modal-close {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  .gjcrpt-photo-modal-img {
+    max-height: calc(95vh - 70px);
+  }
+  .gjcrpt-photo-modal-caption {
+    padding: 15px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gjcrpt-photo-modal-close {
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+  }
+  .gjcrpt-photo-modal-caption {
+    padding: 12px;
+    font-size: 14px;
+  }
+}

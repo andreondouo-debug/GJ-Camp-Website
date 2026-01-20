@@ -589,13 +589,66 @@
   .dashboard-table-container {
     overflow-x: auto;
   }
-
   .dashboard-table {
     min-width: 1200px;
   }
-  
   .dashboard-stats {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .dashboard-container {
+    padding: 18px 12px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  .dashboard-header {
+    flex-wrap: wrap;
+  }
+  .dashboard-header h1 {
+    font-size: 1.4rem;
+  }
+  .search-container {
+    max-width: 100%;
+  }
+  .search-box {
+    max-width: 100%;
+  }
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  .filters-container {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .filter-btn {
+    flex: 1 1 calc(33.333% - 10px);
+    min-width: 140px;
+  }
+  .registrations-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    max-width: 100%;
+  }
+  .registrations-table {
+    min-width: 950px;
+    font-size: 0.85rem;
+  }
+  .registrations-table th,
+  .registrations-table td {
+    padding: 12px 8px;
+  }
+  .action-buttons {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .edit-registration-btn,
+  .delete-registration-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 

@@ -8,6 +8,7 @@ const crptDefaults = require('../config/crptPageDefaults');
 function GJCRPTPage() {
   const [settings, setSettings] = useState(crptDefaults);
   const [loading, setLoading] = useState(true);
+  const [photoModal, setPhotoModal] = useState({ isOpen: false, photoUrl: '', leaderName: '' });
 
   useEffect(() => {
     fetchSettings();
@@ -331,6 +332,13 @@ function GJCRPTPage() {
                         src={refuge.leaderPhoto} 
                         alt={refuge.leaderName || 'Leader'}
                         className="gjcrpt-refuge-leader-photo"
+                        onClick={() => setPhotoModal({ 
+                          isOpen: true, 
+                          photoUrl: refuge.leaderPhoto, 
+                          leaderName: refuge.leaderName || 'Leader' 
+                        })}
+                        style={{ cursor: 'pointer' }}
+                        title="Cliquer pour agrandir"
                       />
                       {refuge.leaderName && (
                         <div className="gjcrpt-refuge-leader-name">{refuge.leaderName}</div>
@@ -431,6 +439,32 @@ function GJCRPTPage() {
             </button>
           </div>
         </section>
+
+        {/* Modal pour agrandir les photos */}
+        {photoModal.isOpen && (
+          <div 
+            className="gjcrpt-photo-modal"
+            onClick={() => setPhotoModal({ isOpen: false, photoUrl: '', leaderName: '' })}
+          >
+            <div className="gjcrpt-photo-modal-content" onClick={(e) => e.stopPropagation()}>
+              <button 
+                className="gjcrpt-photo-modal-close"
+                onClick={() => setPhotoModal({ isOpen: false, photoUrl: '', leaderName: '' })}
+                aria-label="Fermer"
+              >
+                ✕
+              </button>
+              <img 
+                src={photoModal.photoUrl} 
+                alt={photoModal.leaderName}
+                className="gjcrpt-photo-modal-img"
+              />
+              <div className="gjcrpt-photo-modal-caption">
+                {photoModal.leaderName}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
