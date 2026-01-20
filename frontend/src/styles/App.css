@@ -3612,42 +3612,6 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   }
 }
 
-  .hero {
-    padding: 15px 15px 0 15px;
-    margin: 15px 12px 0 12px;
-  }
-
-  .carousel-title-overlay {
-    top: 7vh;
-  }
-
-  .carousel-main-title {
-    font-size: 2.6rem;
-  }
-
-  .carousel-subtitle {
-    font-size: 1.3rem;
-  }
-
-  /* Nouveau carousel split responsive */
-  .carousel-split {
-    height: 450px;
-  }
-
-  .carousel-left {
-    padding: 40px 30px;
-  }
-
-  .headline-text,
-  .headline-highlight {
-    font-size: 2.4rem;
-  }
-
-  .carousel-description {
-    font-size: 0.95rem;
-  }
-}
-
 /* Responsive pour petites tablettes */
 @media (max-width: 900px) {
   .day-selector {
