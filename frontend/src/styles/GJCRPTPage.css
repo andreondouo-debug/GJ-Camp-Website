@@ -192,6 +192,9 @@
   color: #666;
   margin-bottom: 50px;
   text-align: center;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.8;
 }
 
 /* ========== MISSION SECTION ========== */
@@ -213,15 +216,20 @@
 
 .gjcrpt-lead {
   font-size: 20px;
-  line-height: 1.8;
+  line-height: 1.9;
   color: #333;
   margin-bottom: 20px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .gjcrpt-mission-text p {
   font-size: 16px;
-  line-height: 1.8;
+  line-height: 1.9;
   color: #555;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin-bottom: 15px;
 }
 
 .gjcrpt-floating-card {
@@ -310,7 +318,11 @@
 .gjcrpt-value-card p {
   font-size: 15px;
   color: #666;
-  line-height: 1.6;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  text-align: left;
+  margin-bottom: 0;
 }
 
 /* ========== REFUGES SECTION ========== */
