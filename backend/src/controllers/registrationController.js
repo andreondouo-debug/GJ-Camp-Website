@@ -556,12 +556,38 @@ exports.getUserGuests = async (req, res) => {
 exports.deleteRegistration = async (req, res) => {
   try {
     const registrationId = req.params.id;
+    const Payout = require('../models/Payout');
 
     // Vérifier que l'inscription existe
     const registration = await Registration.findById(registrationId);
     
     if (!registration) {
       return res.status(404).json({ message: 'Inscription non trouvée' });
+    }
+
+    // ✅ SYNCHRONISATION: Annuler ou supprimer les payouts associés
+    const associatedPayouts = await Payout.find({ registration: registrationId });
+    
+    if (associatedPayouts.length > 0) {
+      console.log(`🔄 ${associatedPayouts.length} payout(s) associé(s) trouvé(s)`);
+      
+      // Annuler les payouts en attente ou échoués, supprimer les autres
+      for (const payout of associatedPayouts) {
+        if (['pending', 'failed', 'cancelled'].includes(payout.status)) {
+          await Payout.findByIdAndDelete(payout._id);
+          console.log(`🗑️ Payout supprimé: ${payout._id} (${payout.status})`);
+        } else if (payout.status === 'success') {
+          payout.status = 'cancelled';
+          payout.errorMessage = 'Inscription supprimée - payout annulé';
+          await payout.save();
+          console.log(`⚠️ Payout réussi marqué comme annulé: ${payout._id}`);
+        } else if (payout.status === 'processing') {
+          payout.status = 'cancelled';
+          payout.errorMessage = 'Inscription supprimée pendant le traitement';
+          await payout.save();
+          console.log(`⚠️ Payout en cours annulé: ${payout._id}`);
+        }
+      }
     }
 
     // Supprimer l'inscription
@@ -574,7 +600,8 @@ exports.deleteRegistration = async (req, res) => {
       deletedRegistration: {
         id: registrationId,
         name: `${registration.firstName} ${registration.lastName}`
-      }
+      },
+      payoutsAffected: associatedPayouts.length
     });
   } catch (error) {
     console.error('❌ Erreur lors de la suppression de l\'inscription:', error);

@@ -391,6 +391,19 @@
   margin-bottom: 2rem;
 }
 
+@media (max-width: 1024px) {
+  .stats-summary {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
 .summary-card {
   background: rgba(6, 14, 28, 0.6);
   padding: 1.8rem;
@@ -445,6 +458,8 @@
   font-weight: 700;
   color: #ffffff;
   margin-bottom: 0.3rem;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .summary-subtitle {
@@ -467,6 +482,19 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2.5rem;
+}
+
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .stat-card {
@@ -512,6 +540,13 @@
   font-weight: 700;
   color: #d4af37;
   line-height: 1;
+  word-break: break-word;
+}
+
+@media (max-width: 1024px) {
+  .stat-count {
+    font-size: 1.8rem;
+  }
 }
 
 .stat-label {
@@ -536,17 +571,30 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .stat-label-small {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.6);
+  word-break: break-word;
+  flex: 1;
+  min-width: 0;
 }
 
 .stat-value-large {
   font-size: 1.3rem;
   font-weight: 700;
   color: #2ecc71;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 1024px) {
+  .stat-value-large {
+    font-size: 1.1rem;
+  }
 }
 
 .stat-value-small {
@@ -558,6 +606,18 @@
 /* Campus Grid for Stats */
 .campus-grid {
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+@media (max-width: 1024px) {
+  .campus-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .campus-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .campus-card {
