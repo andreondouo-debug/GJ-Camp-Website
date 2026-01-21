@@ -21,13 +21,19 @@ const CRPTSettingsPage = () => {
 
   const fetchSettings = async () => {
     try {
-      const response = await axios.get(getApiUrl('/api/settings/crpt'), {
+      const timestamp = new Date().getTime();
+      const response = await axios.get(getApiUrl(`/api/settings/crpt?t=${timestamp}`), {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('📦 Données reçues:', response.data);
       if (response.data.crptSettings) {
+        console.log('✅ Settings chargés:', Object.keys(response.data.crptSettings));
         setSettings(response.data.crptSettings);
+      } else {
+        console.log('⚠️ Pas de crptSettings, utilisation défauts');
       }
     } catch (error) {
+      console.error('❌ Erreur chargement settings:', error);
       console.log('📝 Utilisation des paramètres par défaut CRPT');
     }
   };

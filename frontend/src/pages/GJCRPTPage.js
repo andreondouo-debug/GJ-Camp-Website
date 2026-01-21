@@ -253,7 +253,7 @@ function GJCRPTPage() {
               <img src={settings.hero.logoUrl} alt="CRPT Logo" className="gjcrpt-logo-img" />
             </div>
             <h1 className="gjcrpt-hero-title">{settings.hero.title}</h1>
-            <p className="gjcrpt-hero-subtitle">{settings.hero.subtitle}</p>
+            <p className="gjcrpt-hero-subtitle" style={{ whiteSpace: 'pre-wrap' }}>{settings.hero.subtitle}</p>
             <div className="gjcrpt-hero-stats">
               {settings.hero.stats.map((stat, index) => (
                 <div key={index} className="gjcrpt-stat">
@@ -273,8 +273,8 @@ function GJCRPTPage() {
             <h2 className="gjcrpt-section-title">{settings.mission.title}</h2>
             <div className="gjcrpt-mission-content">
               <div className="gjcrpt-mission-text">
-                <p className="gjcrpt-lead">{settings.mission.leadText}</p>
-                <p>{settings.mission.bodyText}</p>
+                <p className="gjcrpt-lead" style={{ whiteSpace: 'pre-wrap' }}>{settings.mission.leadText}</p>
+                <p style={{ whiteSpace: 'pre-wrap' }}>{settings.mission.bodyText}</p>
               </div>
               <div className="gjcrpt-mission-visual">
                 <div className="gjcrpt-floating-card">
@@ -304,7 +304,7 @@ function GJCRPTPage() {
                     </span>
                   </div>
                   <h3>{value.title}</h3>
-                  <p>{value.description}</p>
+                  <p style={{ whiteSpace: 'pre-wrap' }}>{value.description}</p>
                 </div>
               ))}
             </div>
@@ -316,7 +316,7 @@ function GJCRPTPage() {
           <div className="gjcrpt-container">
             <div className="gjcrpt-section-badge">{settings.refuges.badge}</div>
             <h2 className="gjcrpt-section-title">{settings.refuges.title}</h2>
-            <p className="gjcrpt-section-subtitle">{settings.refuges.subtitle}</p>
+            <p className="gjcrpt-section-subtitle" style={{ whiteSpace: 'pre-wrap' }}>{settings.refuges.subtitle}</p>
             <div className="gjcrpt-refuges-grid">
               {settings.refuges.items.map((refuge, index) => (
                 <div key={index} className="gjcrpt-refuge-card">
@@ -325,7 +325,7 @@ function GJCRPTPage() {
                   </div>
                   <h3>{refuge.name}</h3>
                   <div className="gjcrpt-refuge-region">{refuge.region}</div>
-                  <p>{refuge.description}</p>
+                  <p style={{ whiteSpace: 'pre-wrap' }}>{refuge.description}</p>
                   {refuge.leaderPhoto && (
                     <div className="gjcrpt-refuge-leader">
                       <img 
