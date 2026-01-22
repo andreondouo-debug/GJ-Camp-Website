@@ -3813,6 +3813,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   /* Dropdown mobile */
   .dropdown {
     width: 100%;
+    border-bottom: none !important;
   }
 
   .dropdown-toggle {
@@ -3821,38 +3822,43 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
     justify-content: space-between;
     font-size: 1rem;
     text-align: left;
+    background: transparent;
   }
 
   .dropdown-menu {
-    position: static;
+    position: static !important;
     width: 100%;
     background: rgba(0, 10, 30, 0.95);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border-radius: 0;
-    box-shadow: none;
-    border: none;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.4s ease, padding 0.4s ease;
-    padding: 0;
-    margin: 0;
+    transition: max-height 0.4s ease;
+    padding: 0 !important;
+    margin: 0 !important;
     z-index: 10;
+    display: block !important;
   }
 
   .dropdown-menu-open {
     max-height: 600px;
-    padding: 10px 0;
-    margin: 0;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   .dropdown-menu li {
-    border-bottom: none;
+    border-bottom: none !important;
+    padding: 0;
+    margin: 0;
   }
 
   .dropdown-menu li a {
     padding: 12px 24px 12px 44px;
     font-size: 0.9rem;
+    border-left: none !important;
   }
 
   /* Section utilisateur mobile */
