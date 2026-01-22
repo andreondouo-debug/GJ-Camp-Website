@@ -35,6 +35,7 @@ import MessagesPage from './pages/MessagesPage';
 import MessageManagementPage from './pages/MessageManagementPage';
 import SettingsPage from './pages/SettingsPage';
 import CRPTSettingsPage from './pages/CRPTSettingsPage';
+import GJSettingsPage from './pages/GJSettingsPage';
 import AccessDeniedPage from './pages/AccessDeniedPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
@@ -211,6 +212,15 @@ function App() {
                 <GuardedRoute
                   element={<CRPTSettingsPage />}
                   roles={['admin']}
+                />
+              }
+            />
+            <Route
+              path="/parametres/gj"
+              element={
+                <GuardedRoute
+                  element={<GJSettingsPage />}
+                  roles={['responsable', 'admin']}
                 />
               }
             />
