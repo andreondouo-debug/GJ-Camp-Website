@@ -894,8 +894,8 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   width: 100vw !important;
   max-width: 100vw !important;
   z-index: 1000;
-  min-height: auto;
-  height: auto;
+  min-height: 100px;
+  height: 100px;
 }
 
 .header::after {
