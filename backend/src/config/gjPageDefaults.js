@@ -11,6 +11,7 @@ module.exports = {
     backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     overlayOpacity: 0.3,
     logoEnabled: true,
+    logoUrl: '/images/logo-gj.png',
     logoSize: '150px'
   },
 

@@ -245,6 +245,35 @@ function GJSettingsPage() {
     }));
   };
 
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      showMessage('info', '📤 Upload du logo en cours...');
+      
+      const response = await axios.post(
+        getApiUrl('/api/upload/gj-image'),
+        formData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+
+      updateGjSetting('hero', 'logoUrl', response.data.url);
+      showMessage('success', '✅ Logo uploadé avec succès !');
+    } catch (error) {
+      console.error('❌ Erreur upload logo:', error);
+      showMessage('error', '❌ Erreur lors de l\'upload du logo');
+    }
+  };
+
   return (
     <div className="gj-settings-page">
       <div className="gj-settings-header">
@@ -366,6 +395,30 @@ function GJSettingsPage() {
             <div className="gj-settings-group">
               <h3 className="group-title">🎬 Section Hero</h3>
               
+              <div className="form-group">
+                <label>Logo</label>
+                <div className="logo-upload-section">
+                  {gjSettings.hero.logoUrl && (
+                    <div className="logo-preview">
+                      <img src={gjSettings.hero.logoUrl} alt="Logo GJ" />
+                    </div>
+                  )}
+                  <div className="logo-upload-controls">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      id="logo-upload"
+                      style={{ display: 'none' }}
+                    />
+                    <label htmlFor="logo-upload" className="btn-upload-logo">
+                      📤 Changer le logo
+                    </label>
+                    <small>Format recommandé : PNG avec fond transparent, max 500x500px</small>
+                  </div>
+                </div>
+              </div>
+
               <div className="form-group">
                 <label>Titre</label>
                 <input

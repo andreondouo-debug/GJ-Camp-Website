@@ -81,4 +81,58 @@ router.post('/crpt-image',
   }
 );
 
+/**
+ * @route   POST /api/upload/gj-image
+ * @desc    Upload une image pour la page GJ vers Cloudinary (logo)
+ * @access  Private (Admin/Responsable)
+ */
+router.post('/gj-image', 
+  auth, 
+  authorize(...ADMIN_ROLES),
+  upload.single('image'),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: '❌ Aucune image fournie' });
+      }
+
+      // Upload vers Cloudinary via buffer
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'gj-camp/gj-logos',
+            resource_type: 'image',
+            transformation: [
+              { width: 500, height: 500, crop: 'limit' }, // Logo max 500x500
+              { quality: 'auto:good' },
+              { fetch_format: 'auto' }
+            ]
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+
+        uploadStream.end(req.file.buffer);
+      });
+
+      console.log('✅ Logo GJ uploadé sur Cloudinary:', result.secure_url);
+
+      res.json({
+        message: '✅ Logo uploadé avec succès',
+        url: result.secure_url,
+        publicId: result.public_id
+      });
+
+    } catch (error) {
+      console.error('❌ Erreur upload logo GJ:', error);
+      res.status(500).json({ 
+        message: '❌ Erreur lors de l\'upload du logo',
+        error: error.message 
+      });
+    }
+  }
+);
+
 module.exports = router;
