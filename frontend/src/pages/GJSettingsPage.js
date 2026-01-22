@@ -4,10 +4,16 @@ import { AuthContext } from '../context/AuthContext';
 import { getApiUrl } from '../config/api';
 import '../styles/GJSettingsPage.css';
 
+const gjDefaults = require('../config/gjPageDefaults');
+
 function GJSettingsPage() {
   const { token } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('leaders');
   const [message, setMessage] = useState({ type: '', text: '' });
+
+  // ===== SETTINGS GJ =====
+  const [gjSettings, setGjSettings] = useState(gjDefaults);
+  const [loadingSettings, setLoadingSettings] = useState(false);
 
   // ===== GESTION DES RESPONSABLES =====
   const [leaders, setLeaders] = useState([]);
@@ -31,7 +37,44 @@ function GJSettingsPage() {
 
   useEffect(() => {
     fetchLeadersData();
+    fetchGjSettings();
   }, []);
+
+  const fetchGjSettings = async () => {
+    try {
+      const timestamp = new Date().getTime();
+      const response = await axios.get(getApiUrl(`/api/settings/gj?t=${timestamp}`), {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.data.gjSettings) {
+        setGjSettings(response.data.gjSettings);
+      }
+    } catch (error) {
+      console.error('❌ Erreur chargement settings GJ:', error);
+    }
+  };
+
+  const handleSaveGjSettings = async () => {
+    setLoadingSettings(true);
+    try {
+      const response = await axios.put(
+        getApiUrl('/api/settings/gj'),
+        { gjSettings },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      showMessage('success', response.data.message);
+    } catch (error) {
+      console.error('❌ Erreur sauvegarde:', error);
+      showMessage('error', 'Erreur lors de la sauvegarde');
+    } finally {
+      setLoadingSettings(false);
+    }
+  };
 
   const fetchLeadersData = async () => {
     try {
@@ -192,6 +235,16 @@ function GJSettingsPage() {
     }
   };
 
+  const updateGjSetting = (section, field, value) => {
+    setGjSettings(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value
+      }
+    }));
+  };
+
   return (
     <div className="gj-settings-page">
       <div className="gj-settings-header">
@@ -294,13 +347,237 @@ function GJSettingsPage() {
         </div>
       )}
 
-      {/* Tab: Contenu Page (À venir) */}
+      {/* Tab: Contenu Page */}
       {activeTab === 'content' && (
         <div className="gj-tab-content">
-          <div className="gj-coming-soon">
-            <h2>📝 Personnalisation du Contenu</h2>
-            <p>Cette section permettra de personnaliser les textes, couleurs et images de la page GJ.</p>
-            <p className="gj-coming-soon-note">🚧 Fonctionnalité à venir...</p>
+          <div className="gj-content-section">
+            <div className="gj-section-header">
+              <h2>📝 Personnalisation du Contenu</h2>
+              <button 
+                className="btn-save-settings" 
+                onClick={handleSaveGjSettings}
+                disabled={loadingSettings}
+              >
+                {loadingSettings ? '⏳ Sauvegarde...' : '💾 Enregistrer'}
+              </button>
+            </div>
+
+            {/* Hero Section */}
+            <div className="gj-settings-group">
+              <h3 className="group-title">🎬 Section Hero</h3>
+              
+              <div className="form-group">
+                <label>Titre</label>
+                <input
+                  type="text"
+                  value={gjSettings.hero.title}
+                  onChange={(e) => updateGjSetting('hero', 'title', e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Sous-titre</label>
+                <textarea
+                  rows="3"
+                  value={gjSettings.hero.subtitle}
+                  onChange={(e) => updateGjSetting('hero', 'subtitle', e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Couleur de fond (Gradient)</label>
+                <input
+                  type="text"
+                  value={gjSettings.hero.backgroundColor}
+                  onChange={(e) => updateGjSetting('hero', 'backgroundColor', e.target.value)}
+                  placeholder="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                />
+                <small>Exemple: linear-gradient(135deg, #667eea 0%, #764ba2 100%)</small>
+              </div>
+
+              <div className="form-group">
+                <label>Taille du logo</label>
+                <input
+                  type="text"
+                  value={gjSettings.hero.logoSize}
+                  onChange={(e) => updateGjSetting('hero', 'logoSize', e.target.value)}
+                  placeholder="150px"
+                />
+              </div>
+            </div>
+
+            {/* Section Génération */}
+            <div className="gj-settings-group">
+              <h3 className="group-title">👨‍👩‍👧‍👦 Section Notre Jeunesse</h3>
+              
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={gjSettings.generation.enabled}
+                    onChange={(e) => updateGjSetting('generation', 'enabled', e.target.checked)}
+                  />
+                  <span>Activer cette section</span>
+                </label>
+              </div>
+
+              <div className="form-group">
+                <label>Titre</label>
+                <input
+                  type="text"
+                  value={gjSettings.generation.title}
+                  onChange={(e) => updateGjSetting('generation', 'title', e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Description</label>
+                <textarea
+                  rows="4"
+                  value={gjSettings.generation.description}
+                  onChange={(e) => updateGjSetting('generation', 'description', e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Couleur de fond</label>
+                <input
+                  type="text"
+                  value={gjSettings.generation.backgroundColor}
+                  onChange={(e) => updateGjSetting('generation', 'backgroundColor', e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Section Groupes de Jeunesse */}
+            <div className="gj-settings-group">
+              <h3 className="group-title">⛪ Section Groupes de Jeunesse</h3>
+              
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={gjSettings.youthGroups.enabled}
+                    onChange={(e) => updateGjSetting('youthGroups', 'enabled', e.target.checked)}
+                  />
+                  <span>Activer cette section</span>
+                </label>
+              </div>
+
+              <div className="form-group">
+                <label>Titre</label>
+                <input
+                  type="text"
+                  value={gjSettings.youthGroups.title}
+                  onChange={(e) => updateGjSetting('youthGroups', 'title', e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Sous-titre</label>
+                <textarea
+                  rows="2"
+                  value={gjSettings.youthGroups.subtitle}
+                  onChange={(e) => updateGjSetting('youthGroups', 'subtitle', e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={gjSettings.youthGroups.showLeaderPhotos}
+                    onChange={(e) => updateGjSetting('youthGroups', 'showLeaderPhotos', e.target.checked)}
+                  />
+                  <span>Afficher les photos des responsables</span>
+                </label>
+              </div>
+
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={gjSettings.youthGroups.showContactInfo}
+                    onChange={(e) => updateGjSetting('youthGroups', 'showContactInfo', e.target.checked)}
+                  />
+                  <span>Afficher les informations de contact</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Section CTA */}
+            <div className="gj-settings-group">
+              <h3 className="group-title">📢 Section Call-to-Action</h3>
+              
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={gjSettings.cta.enabled}
+                    onChange={(e) => updateGjSetting('cta', 'enabled', e.target.checked)}
+                  />
+                  <span>Activer cette section</span>
+                </label>
+              </div>
+
+              <div className="form-group">
+                <label>Titre</label>
+                <input
+                  type="text"
+                  value={gjSettings.cta.title}
+                  onChange={(e) => updateGjSetting('cta', 'title', e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Texte du bouton</label>
+                <input
+                  type="text"
+                  value={gjSettings.cta.buttonText}
+                  onChange={(e) => updateGjSetting('cta', 'buttonText', e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Lien du bouton</label>
+                <input
+                  type="text"
+                  value={gjSettings.cta.buttonLink}
+                  onChange={(e) => updateGjSetting('cta', 'buttonLink', e.target.value)}
+                  placeholder="/inscription"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Couleur de fond</label>
+                <input
+                  type="text"
+                  value={gjSettings.cta.backgroundColor}
+                  onChange={(e) => updateGjSetting('cta', 'backgroundColor', e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Couleur du bouton</label>
+                <input
+                  type="text"
+                  value={gjSettings.cta.buttonColor}
+                  onChange={(e) => updateGjSetting('cta', 'buttonColor', e.target.value)}
+                  placeholder="#d4af37"
+                />
+              </div>
+            </div>
+
+            {/* Bouton Enregistrer en bas */}
+            <div className="gj-save-footer">
+              <button 
+                className="btn-save-settings btn-large" 
+                onClick={handleSaveGjSettings}
+                disabled={loadingSettings}
+              >
+                {loadingSettings ? '⏳ Sauvegarde en cours...' : '💾 Enregistrer tous les changements'}
+              </button>
+            </div>
           </div>
         </div>
       )}

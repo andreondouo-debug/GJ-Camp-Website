@@ -190,12 +190,6 @@ const Header = () => {
                     <li><Link to="/gestion/utilisateurs" onClick={closeMobileMenu}>Utilisateurs</Link></li>
                   )}
                   {canAccessUserAdmin && (
-                    <li><Link to="/parametres/gj" onClick={closeMobileMenu}>🌟 Page GJ</Link></li>
-                  )}
-                  {isAdmin && (
-                    <li><Link to="/parametres/crpt" onClick={closeMobileMenu}>⚙️ Page CRPT</Link></li>
-                  )}
-                  {canAccessUserAdmin && (
                     <li className="dropdown-messages-item">
                       <Link to="/gestion/messages" onClick={closeMobileMenu}>
                         Messages

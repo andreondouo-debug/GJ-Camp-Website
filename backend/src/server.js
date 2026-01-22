@@ -20,6 +20,7 @@ const testRoutes = require('./routes/testRoutes');
 const maintenanceRoutes = require('./routes/maintenanceRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const crptSettingsRoutes = require('./routes/crptSettingsRoutes');
+const gjSettingsRoutes = require('./routes/gjSettingsRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const campusLeaderRoutes = require('./routes/campusLeaderRoutes');
 
@@ -74,6 +75,7 @@ app.use('/api/test', testRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/settings', crptSettingsRoutes);
+app.use('/api/settings', gjSettingsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/campus-leaders', campusLeaderRoutes);
 
