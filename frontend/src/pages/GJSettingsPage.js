@@ -475,6 +475,16 @@ function GJSettingsPage() {
               </div>
 
               <div className="form-group">
+                <label>Badge</label>
+                <input
+                  type="text"
+                  value={gjSettings.generation.badge}
+                  onChange={(e) => updateGjSetting('generation', 'badge', e.target.value)}
+                  placeholder="Notre Jeunesse"
+                />
+              </div>
+
+              <div className="form-group">
                 <label>Titre</label>
                 <input
                   type="text"
@@ -493,12 +503,116 @@ function GJSettingsPage() {
               </div>
 
               <div className="form-group">
+                <label>Emoji/Icône</label>
+                <input
+                  type="text"
+                  value={gjSettings.generation.emojiIcon}
+                  onChange={(e) => updateGjSetting('generation', 'emojiIcon', e.target.value)}
+                  placeholder="🎯"
+                />
+                <small>Emoji affiché dans la section (ex: 🎯)</small>
+              </div>
+
+              <div className="form-group">
+                <label>Texte du bouton</label>
+                <input
+                  type="text"
+                  value={gjSettings.generation.buttonText}
+                  onChange={(e) => updateGjSetting('generation', 'buttonText', e.target.value)}
+                  placeholder="Rejoindre Génération Josué →"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Lien du bouton</label>
+                <input
+                  type="text"
+                  value={gjSettings.generation.buttonLink}
+                  onChange={(e) => updateGjSetting('generation', 'buttonLink', e.target.value)}
+                  placeholder="/"
+                />
+              </div>
+
+              <div className="form-group">
                 <label>Couleur de fond</label>
                 <input
                   type="text"
                   value={gjSettings.generation.backgroundColor}
                   onChange={(e) => updateGjSetting('generation', 'backgroundColor', e.target.value)}
                 />
+              </div>
+
+              <div className="form-group">
+                <label>Couleur du texte</label>
+                <input
+                  type="text"
+                  value={gjSettings.generation.textColor}
+                  onChange={(e) => updateGjSetting('generation', 'textColor', e.target.value)}
+                  placeholder="#ffffff"
+                />
+              </div>
+
+              <div className="features-section">
+                <h4>🌟 Caractéristiques (Features)</h4>
+                <p className="form-hint">Les points clés affichés dans cette section</p>
+                
+                {gjSettings.generation.features.map((feature, index) => (
+                  <div key={index} className="feature-item">
+                    <div className="feature-row">
+                      <div className="form-group">
+                        <label>Icône {index + 1}</label>
+                        <input
+                          type="text"
+                          value={feature.icon}
+                          onChange={(e) => {
+                            const newFeatures = [...gjSettings.generation.features];
+                            newFeatures[index].icon = e.target.value;
+                            updateGjSetting('generation', 'features', newFeatures);
+                          }}
+                          placeholder="🙏"
+                        />
+                      </div>
+                      <div className="form-group flex-grow">
+                        <label>Texte {index + 1}</label>
+                        <input
+                          type="text"
+                          value={feature.text}
+                          onChange={(e) => {
+                            const newFeatures = [...gjSettings.generation.features];
+                            newFeatures[index].text = e.target.value;
+                            updateGjSetting('generation', 'features', newFeatures);
+                          }}
+                          placeholder="Des moments de louange puissants"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        className="btn-remove-feature"
+                        onClick={() => {
+                          const newFeatures = gjSettings.generation.features.filter((_, i) => i !== index);
+                          updateGjSetting('generation', 'features', newFeatures);
+                        }}
+                        title="Supprimer"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  className="btn-add-feature"
+                  onClick={() => {
+                    const newFeatures = [
+                      ...gjSettings.generation.features,
+                      { icon: '⭐', text: 'Nouvelle caractéristique' }
+                    ];
+                    updateGjSetting('generation', 'features', newFeatures);
+                  }}
+                >
+                  ➕ Ajouter une caractéristique
+                </button>
               </div>
             </div>
 
@@ -518,6 +632,16 @@ function GJSettingsPage() {
               </div>
 
               <div className="form-group">
+                <label>Badge</label>
+                <input
+                  type="text"
+                  value={gjSettings.youthGroups.badge}
+                  onChange={(e) => updateGjSetting('youthGroups', 'badge', e.target.value)}
+                  placeholder="Nos Groupes"
+                />
+              </div>
+
+              <div className="form-group">
                 <label>Titre</label>
                 <input
                   type="text"
@@ -534,6 +658,86 @@ function GJSettingsPage() {
                   onChange={(e) => updateGjSetting('youthGroups', 'subtitle', e.target.value)}
                 />
               </div>
+
+              <h4 style={{ marginTop: '1.5rem', marginBottom: '1rem' }}>🎨 Icônes</h4>
+
+              <div className="form-group">
+                <label>Icône de carte (Campus)</label>
+                <input
+                  type="text"
+                  value={gjSettings.youthGroups.cardIcon}
+                  onChange={(e) => updateGjSetting('youthGroups', 'cardIcon', e.target.value)}
+                  placeholder="🏛️"
+                />
+                <small>Icône affichée sur les cartes des groupes</small>
+              </div>
+
+              <div className="form-group">
+                <label>Icône de localisation</label>
+                <input
+                  type="text"
+                  value={gjSettings.youthGroups.locationIcon}
+                  onChange={(e) => updateGjSetting('youthGroups', 'locationIcon', e.target.value)}
+                  placeholder="📍"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Icône d'email</label>
+                <input
+                  type="text"
+                  value={gjSettings.youthGroups.emailIcon}
+                  onChange={(e) => updateGjSetting('youthGroups', 'emailIcon', e.target.value)}
+                  placeholder="✉️"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Icône de téléphone</label>
+                <input
+                  type="text"
+                  value={gjSettings.youthGroups.phoneIcon}
+                  onChange={(e) => updateGjSetting('youthGroups', 'phoneIcon', e.target.value)}
+                  placeholder="📞"
+                />
+              </div>
+
+              <h4 style={{ marginTop: '1.5rem', marginBottom: '1rem' }}>📝 Textes</h4>
+
+              <div className="form-group">
+                <label>Titre responsable (singulier)</label>
+                <input
+                  type="text"
+                  value={gjSettings.youthGroups.leaderTitleSingular}
+                  onChange={(e) => updateGjSetting('youthGroups', 'leaderTitleSingular', e.target.value)}
+                  placeholder="Responsable du groupe"
+                />
+                <small>Affiché quand il y a 1 seul responsable</small>
+              </div>
+
+              <div className="form-group">
+                <label>Titre responsable (pluriel)</label>
+                <input
+                  type="text"
+                  value={gjSettings.youthGroups.leaderTitlePlural}
+                  onChange={(e) => updateGjSetting('youthGroups', 'leaderTitlePlural', e.target.value)}
+                  placeholder="Responsables du groupe"
+                />
+                <small>Affiché quand il y a plusieurs responsables</small>
+              </div>
+
+              <div className="form-group">
+                <label>Message "aucune donnée"</label>
+                <input
+                  type="text"
+                  value={gjSettings.youthGroups.noDataMessage}
+                  onChange={(e) => updateGjSetting('youthGroups', 'noDataMessage', e.target.value)}
+                  placeholder="Aucun groupe de jeunesse disponible pour le moment."
+                />
+                <small>Affiché quand il n'y a aucun groupe à montrer</small>
+              </div>
+
+              <h4 style={{ marginTop: '1.5rem', marginBottom: '1rem' }}>⚙️ Options d'affichage</h4>
 
               <div className="form-group">
                 <label className="checkbox-label">
@@ -583,6 +787,15 @@ function GJSettingsPage() {
               </div>
 
               <div className="form-group">
+                <label>Sous-titre</label>
+                <input
+                  type="text"
+                  value={gjSettings.cta.subtitle}
+                  onChange={(e) => updateGjSetting('cta', 'subtitle', e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
                 <label>Texte du bouton</label>
                 <input
                   type="text"
@@ -607,6 +820,16 @@ function GJSettingsPage() {
                   type="text"
                   value={gjSettings.cta.backgroundColor}
                   onChange={(e) => updateGjSetting('cta', 'backgroundColor', e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Couleur du texte</label>
+                <input
+                  type="text"
+                  value={gjSettings.cta.textColor}
+                  onChange={(e) => updateGjSetting('cta', 'textColor', e.target.value)}
+                  placeholder="#ffffff"
                 />
               </div>
 

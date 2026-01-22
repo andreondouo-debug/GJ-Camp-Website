@@ -6,7 +6,7 @@
 module.exports = {
   hero: {
     title: 'Génération Josué',
-    subtitle: 'Une génération passionnée pour Christ, engagée dans la mission et transformée par la Parole',
+    subtitle: 'Le mouvement jeunesse où les 15-30 ans peuvent grandir dans leur foi et avoir un impact pour le Royaume de Dieu',
     backgroundImage: '/images/gj-hero-bg.jpg',
     backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     overlayOpacity: 0.3,
@@ -17,40 +17,51 @@ module.exports = {
 
   generation: {
     enabled: true,
-    title: 'Notre Jeunesse',
-    subtitle: 'Une génération qui grandit ensemble',
-    description: 'Génération Josué est un mouvement de jeunes passionnés par Christ et engagés dans la mission. Nous croyons en une jeunesse transformée par la Parole de Dieu et engagée à impacter leur génération.',
+    badge: 'Notre Jeunesse',
+    title: 'Génération Josué',
+    description: 'Un mouvement dynamique de jeunes passionnés par Dieu, engagés dans leur communauté et déterminés à faire une différence dans le monde.',
     backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     textColor: '#ffffff',
+    emojiIcon: '🎯',
+    buttonText: 'Rejoindre Génération Josué →',
+    buttonLink: '/',
     features: [
       {
-        icon: '📖',
-        title: 'Étude biblique',
-        description: 'Approfondir notre connaissance de la Parole'
-      },
-      {
         icon: '🙏',
-        title: 'Prière',
-        description: 'Développer une vie de prière puissante'
+        text: 'Des moments de louange puissants'
       },
       {
-        icon: '🎯',
-        title: 'Mission',
-        description: 'Partager l\'Évangile avec notre génération'
+        icon: '📖',
+        text: 'Enseignements bibliques pertinents'
       },
       {
         icon: '🤝',
-        title: 'Communion',
-        description: 'Vivre en communauté fraternelle'
+        text: 'Communauté fraternelle et authentique'
+      },
+      {
+        icon: '🎯',
+        text: 'Projets d\'évangélisation et missions'
+      },
+      {
+        icon: '🌟',
+        text: 'Développement du leadership'
       }
     ]
   },
 
   youthGroups: {
     enabled: true,
-    title: 'Nos Groupes de Jeunesse',
+    badge: 'Nos Groupes',
+    title: 'Groupes de Jeunesse par Église',
     subtitle: 'Retrouvez votre groupe de jeunesse près de chez vous et rencontrez vos responsables',
     backgroundColor: '#f8f9fa',
+    cardIcon: '🏛️',
+    locationIcon: '📍',
+    emailIcon: '✉️',
+    phoneIcon: '📞',
+    leaderTitleSingular: 'Responsable du groupe',
+    leaderTitlePlural: 'Responsables du groupe',
+    noDataMessage: 'Aucun groupe de jeunesse disponible pour le moment.',
     cardStyle: 'modern',
     showLeaderPhotos: true,
     showContactInfo: true
@@ -59,9 +70,9 @@ module.exports = {
   cta: {
     enabled: true,
     title: 'Rejoignez-nous !',
-    subtitle: 'Envie de faire partie de cette aventure ?',
-    buttonText: 'Inscrivez-vous au camp',
-    buttonLink: '/inscription',
+    subtitle: 'Trouvez un groupe près de chez vous et faites partie de notre famille',
+    buttonText: 'Accéder au tableau de bord',
+    buttonLink: '/tableau-de-bord',
     backgroundColor: 'linear-gradient(135deg, #102347 0%, #667eea 100%)',
     textColor: '#ffffff',
     buttonColor: '#d4af37'

@@ -700,6 +700,79 @@
   }
 }
 
+/* ===== FEATURES SECTION ===== */
+.features-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 2px solid #e9ecef;
+}
+
+.features-section h4 {
+  font-size: 1.2rem;
+  color: #102347;
+  margin-bottom: 1rem;
+}
+
+.feature-item {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.feature-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.feature-row .form-group {
+  flex: 0 0 100px;
+}
+
+.feature-row .flex-grow {
+  flex: 1;
+}
+
+.btn-remove-feature {
+  flex: 0 0 45px;
+  height: 45px;
+  padding: 0;
+  border: 2px solid #dc3545;
+  background: #ffffff;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-remove-feature:hover {
+  background: #dc3545;
+  transform: scale(1.1);
+}
+
+.btn-add-feature {
+  width: 100%;
+  padding: 12px 20px;
+  margin-top: 1rem;
+  border: 2px dashed #667eea;
+  background: #ffffff;
+  color: #667eea;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-add-feature:hover {
+  background: #667eea;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
 @media (max-width: 480px) {
   .gj-settings-header h1 {
     font-size: 1.8rem;
@@ -719,4 +792,17 @@
   .gj-form {
     padding: 20px;
   }
-}
+
+  .feature-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .feature-row .form-group,
+  .feature-row .flex-grow {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .btn-remove-feature {
+    width: 100%;
