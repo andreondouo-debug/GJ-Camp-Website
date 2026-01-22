@@ -84,7 +84,8 @@ function PayoutManagementPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setCampusList(response.data.campus || []);
+      // La réponse est maintenant directement un tableau de campus
+      setCampusList(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('❌ Erreur récupération campus:', error);
       setFeedback({ type: 'error', message: 'Impossible de charger les campus' });

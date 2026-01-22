@@ -4,16 +4,13 @@ const auth = require('../middleware/auth');
 const { requireAdminRole } = require('../middleware/roleCheck');
 const Campus = require('../models/Campus');
 
-// Toutes les routes nécessitent l'authentification admin
-router.use(auth, requireAdminRole);
-
 /**
- * GET /api/campus - Lister tous les campus
+ * GET /api/campus - Lister tous les campus (PUBLIC - utilisé pour formulaires)
  */
 router.get('/', async (req, res) => {
   try {
     const campus = await Campus.find().sort({ name: 1 });
-    res.json({ campus });
+    res.json(campus);
   } catch (error) {
     console.error('❌ Erreur récupération campus:', error);
     res.status(500).json({ message: 'Erreur serveur' });
@@ -21,7 +18,7 @@ router.get('/', async (req, res) => {
 });
 
 /**
- * GET /api/campus/:name - Obtenir un campus par nom
+ * GET /api/campus/:name - Obtenir un campus par nom (PUBLIC)
  */
 router.get('/:name', async (req, res) => {
   try {
@@ -39,9 +36,9 @@ router.get('/:name', async (req, res) => {
 });
 
 /**
- * POST /api/campus - Créer ou mettre à jour un campus
+ * POST /api/campus - Créer ou mettre à jour un campus (PROTÉGÉ - Admin uniquement)
  */
-router.post('/', async (req, res) => {
+router.post('/', auth, requireAdminRole, async (req, res) => {
   try {
     const { name, paypalEmail, iban, redistributionPercentage, isActive, contactPerson, notes } = req.body;
 
@@ -93,9 +90,9 @@ router.post('/', async (req, res) => {
 });
 
 /**
- * PATCH /api/campus/:name - Mettre à jour un campus
+ * PATCH /api/campus/:name - Mettre à jour un campus (PROTÉGÉ - Admin uniquement)
  */
-router.patch('/:name', async (req, res) => {
+router.patch('/:name', auth, requireAdminRole, async (req, res) => {
   try {
     const { paypalEmail, iban, redistributionPercentage, isActive, contactPerson, notes } = req.body;
 
@@ -125,9 +122,9 @@ router.patch('/:name', async (req, res) => {
 });
 
 /**
- * DELETE /api/campus/:name - Supprimer un campus
+ * DELETE /api/campus/:name - Supprimer un campus (PROTÉGÉ - Admin uniquement)
  */
-router.delete('/:name', async (req, res) => {
+router.delete('/:name', auth, requireAdminRole, async (req, res) => {
   try {
     const campus = await Campus.findOneAndDelete({ name: req.params.name });
 

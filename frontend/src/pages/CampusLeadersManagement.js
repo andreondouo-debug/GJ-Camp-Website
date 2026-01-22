@@ -44,7 +44,8 @@ function CampusLeadersManagement() {
         setLeaders(leadersArray);
       }
 
-      if (campusesRes.data) {
+      // La réponse est maintenant directement un tableau de campus
+      if (Array.isArray(campusesRes.data)) {
         setCampuses(campusesRes.data);
       }
     } catch (error) {
