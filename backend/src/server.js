@@ -21,6 +21,7 @@ const maintenanceRoutes = require('./routes/maintenanceRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const crptSettingsRoutes = require('./routes/crptSettingsRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const campusLeaderRoutes = require('./routes/campusLeaderRoutes');
 
 const app = express();
 
@@ -74,6 +75,7 @@ app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/settings', crptSettingsRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/campus-leaders', campusLeaderRoutes);
 
 // Route de test
 app.get('/api/health', (req, res) => {

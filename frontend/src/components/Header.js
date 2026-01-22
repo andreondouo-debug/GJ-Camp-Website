@@ -153,6 +153,7 @@ const Header = () => {
                 </Link>
               </li>
             )}
+            <li><Link to="/generation-josue" onClick={closeMobileMenu}>GJ</Link></li>
             <li><Link to="/gj-crpt" onClick={closeMobileMenu}>GJ CRPT</Link></li>
             {isAuthenticated && <li><Link to="/tableau-de-bord" onClick={closeMobileMenu}>TABLEAU DE BORD</Link></li>}
             {isAuthenticated && canAccessGestion && (
@@ -187,6 +188,9 @@ const Header = () => {
                   )}
                   {canAccessUserAdmin && (
                     <li><Link to="/gestion/utilisateurs" onClick={closeMobileMenu}>Utilisateurs</Link></li>
+                  )}
+                  {canAccessUserAdmin && (
+                    <li><Link to="/gestion/responsables-campus" onClick={closeMobileMenu}>👥 Responsables Campus</Link></li>
                   )}
                   {canAccessUserAdmin && (
                     <li className="dropdown-messages-item">

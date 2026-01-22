@@ -26,6 +26,7 @@ import ActivityTrackingPage from './pages/ActivityTrackingPage';
 import ProfilePage from './pages/ProfilePage';
 import AboutPage from './pages/AboutPage';
 import GJCRPTPage from './pages/GJCRPTPage';
+import GJPage from './pages/GJPage';
 import NewsletterPageNew from './pages/NewsletterPageNew';
 import UserManagementPage from './pages/UserManagementPage';
 import PayoutManagementPage from './pages/PayoutManagementPage';
@@ -41,6 +42,7 @@ import DataManagementPage from './pages/DataManagementPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import PasswordResetManagementPage from './pages/PasswordResetManagementPage';
+import CampusLeadersManagement from './pages/CampusLeadersManagement';
 import GuardedRoute from './components/GuardedRoute';
 import CookieConsent from './components/CookieConsent';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
@@ -225,6 +227,16 @@ function App() {
             <Route path="/activites" element={<ActivitiesPage />} />
             <Route path="/a-propos" element={<AboutPage />} />
             <Route path="/gj-crpt" element={<GJCRPTPage />} />
+            <Route path="/generation-josue" element={<GJPage />} />
+            <Route
+              path="/gestion/responsables-campus"
+              element={
+                <GuardedRoute
+                  element={<CampusLeadersManagement />}
+                  roles={['responsable', 'admin']}
+                />
+              }
+            />
             <Route path="/newsletter" element={<NewsletterPageNew />} />
             <Route path="/politique-confidentialite" element={<PrivacyPolicyPage />} />
             <Route path="/conditions-utilisation" element={<TermsOfServicePage />} />
