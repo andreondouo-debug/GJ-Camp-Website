@@ -3006,6 +3006,8 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
     padding: 10px 12px;
     margin: 0;
     border-radius: 0;
+    min-height: 90px;
+    height: 90px;
   }
 
   .header-content {
@@ -3237,6 +3239,7 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
     margin: 0;
     border-radius: 0;
     min-height: 100px;
+    height: 100px;
   }
 
   .header-content {
