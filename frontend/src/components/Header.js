@@ -154,7 +154,7 @@ const Header = () => {
               </li>
             )}
             <li><Link to="/generation-josue" onClick={closeMobileMenu}>GJ</Link></li>
-            <li><Link to="/gj-crpt" onClick={closeMobileMenu}>GJ CRPT</Link></li>
+            <li><Link to="/gj-crpt" onClick={closeMobileMenu}>CRPT</Link></li>
             {isAuthenticated && <li><Link to="/tableau-de-bord" onClick={closeMobileMenu}>TABLEAU DE BORD</Link></li>}
             {isAuthenticated && canAccessGestion && (
               <li

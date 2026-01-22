@@ -187,7 +187,7 @@ const CRPTSettingsPage = () => {
   return (
     <div className="crpt-settings-container">
       <div className="crpt-settings-header">
-        <h1>⚙️ Paramètres Page GJ CRPT</h1>
+        <h1>⚙️ Paramètres Page CRPT</h1>
         <p>Personnalisez tous les éléments de la page Christ Refuge Pour Tous</p>
       </div>
 
