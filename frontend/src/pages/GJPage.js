@@ -7,10 +7,23 @@ function GJPage() {
   const [leadersByCampus, setLeadersByCampus] = useState({});
   const [loading, setLoading] = useState(true);
   const [photoModal, setPhotoModal] = useState({ isOpen: false, photoUrl: '', leaderName: '' });
+  const [logoUrl, setLogoUrl] = useState('/images/logo-gj.png');
 
   useEffect(() => {
     fetchCampusLeaders();
+    fetchLogo();
   }, []);
+
+  const fetchLogo = async () => {
+    try {
+      const response = await axios.get(getApiUrl('/api/settings'));
+      if (response.data.settings && response.data.settings.logoUrl) {
+        setLogoUrl(response.data.settings.logoUrl);
+      }
+    } catch (error) {
+      console.error('❌ Erreur chargement logo:', error);
+    }
+  };
 
   const fetchCampusLeaders = async () => {
     try {
@@ -48,7 +61,7 @@ function GJPage() {
         <div className="gj-hero-overlay"></div>
         <div className="gj-hero-content">
           <div className="gj-logo-circle">
-            <img src="/images/logo-gj.png" alt="Génération Josué" className="gj-logo-img" />
+            <img src={logoUrl} alt="Génération Josué" className="gj-logo-img" />
           </div>
           <h1 className="gj-hero-title">Génération Josué</h1>
           <p className="gj-hero-subtitle">
