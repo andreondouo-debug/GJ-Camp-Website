@@ -108,6 +108,10 @@ const DEFAULT_SETTINGS = {
   // Logo PWA (pour l'installation de l'application)
   pwaLogoUrl: '',
   pwaLogoPublicId: '', // ID Cloudinary pour supprimer l'ancienne version
+  
+  // Montants d'inscription au camp
+  registrationMinAmount: 20,  // Montant minimum en euros
+  registrationMaxAmount: 120, // Montant maximum en euros
 };
 
 /**

@@ -117,6 +117,10 @@ const SettingsPage = () => {
     carouselHeight: '500px',
     carouselAutoplayInterval: 6000,
     carouselTransitionDuration: 1000,
+    
+    // Montants d'inscription au camp
+    registrationMinAmount: 20,
+    registrationMaxAmount: 120,
   });
 
   const [loading, setLoading] = useState(false);
@@ -1100,6 +1104,12 @@ const SettingsPage = () => {
             onClick={() => setActiveTab('social')}
           >
             📱 Réseaux sociaux
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'registration' ? 'active' : ''}`}
+            onClick={() => setActiveTab('registration')}
+          >
+            🎫 Inscription
           </button>
         </div>
 
@@ -2986,6 +2996,98 @@ const SettingsPage = () => {
               ✅ Logo PWA actuel : {settings.pwaLogoUrl}
             </p>
           )}
+        </div>
+      )}
+
+      {/* Onglet Inscription au Camp */}
+      {activeTab === 'registration' && (
+        <div className="settings-section">
+          <h2>🎫 Paramètres d'Inscription au Camp</h2>
+          
+          <div style={{
+            background: '#fef3c7',
+            border: '2px solid #f59e0b',
+            borderRadius: '8px',
+            padding: '15px',
+            marginBottom: '20px'
+          }}>
+            <strong>⚠️ Important :</strong> Ces paramètres affectent directement les inscriptions et les paiements.
+            <br/>Utilisez un montant minimum de 1€ uniquement pour les tests en production.
+          </div>
+
+          <div className="settings-grid">
+            <div className="setting-item">
+              <label>
+                💰 Montant minimum (€)
+                <small style={{ display: 'block', marginTop: '5px', color: '#666' }}>
+                  Montant minimum que les utilisateurs peuvent payer
+                </small>
+              </label>
+              <input
+                type="number"
+                name="registrationMinAmount"
+                value={settings.registrationMinAmount || 20}
+                onChange={handleChange}
+                min="0.01"
+                step="0.01"
+                className="setting-input"
+              />
+            </div>
+
+            <div className="setting-item">
+              <label>
+                💳 Montant maximum (€)
+                <small style={{ display: 'block', marginTop: '5px', color: '#666' }}>
+                  Coût total de l'inscription au camp
+                </small>
+              </label>
+              <input
+                type="number"
+                name="registrationMaxAmount"
+                value={settings.registrationMaxAmount || 120}
+                onChange={handleChange}
+                min="1"
+                step="1"
+                className="setting-input"
+              />
+            </div>
+
+            <div className="setting-item full-width">
+              <div style={{
+                background: '#e0f2fe',
+                border: '2px solid #0284c7',
+                borderRadius: '8px',
+                padding: '15px'
+              }}>
+                <h4 style={{ marginBottom: '10px', color: '#0369a1' }}>📊 Configuration actuelle</h4>
+                <p><strong>Montant minimum :</strong> {settings.registrationMinAmount || 20}€</p>
+                <p><strong>Montant maximum :</strong> {settings.registrationMaxAmount || 120}€</p>
+                <p style={{ marginTop: '10px', fontSize: '0.9em', color: '#666' }}>
+                  Les utilisateurs pourront payer entre {settings.registrationMinAmount || 20}€ et {settings.registrationMaxAmount || 120}€ lors de leur inscription.
+                </p>
+              </div>
+            </div>
+
+            <div className="setting-item full-width">
+              <div style={{
+                background: '#d1fae5',
+                border: '2px solid #10b981',
+                borderRadius: '8px',
+                padding: '15px'
+              }}>
+                <h4 style={{ marginBottom: '10px', color: '#065f46' }}>💡 Cas d'usage</h4>
+                <ul style={{ marginLeft: '20px', color: '#064e3b' }}>
+                  <li><strong>Production normale :</strong> Min 20€, Max 120€</li>
+                  <li><strong>Test production :</strong> Min 1€, Max 120€ (pour tester avec peu de frais)</li>
+                  <li><strong>Test sandbox :</strong> Garder 20€-120€ (montants fictifs)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <button className="btn-save" onClick={handleSave}>
+            💾 Enregistrer les paramètres d'inscription
+          </button>
         </div>
       )}
 

@@ -1,6 +1,7 @@
 const Registration = require('../models/Registration');
 const User = require('../models/User');
 const TransactionLog = require('../models/TransactionLog');
+const Settings = require('../models/Settings');
 const paypalService = require('../services/paypalService');
 const payoutService = require('../services/payoutService');
 const { sendCampRegistrationConfirmation } = require('../config/email');
@@ -41,10 +42,15 @@ exports.createRegistration = async (req, res) => {
       return res.status(400).json({ message: 'Veuillez sélectionner un sexe valide (M ou F).' });
     }
 
+    // Récupérer les montants min/max depuis les paramètres
+    const settings = await Settings.findOne();
+    const minAmount = settings?.settings?.registrationMinAmount || 20;
+    const maxAmount = settings?.settings?.registrationMaxAmount || 120;
+
     // Validation du montant payé
     const paid = parseFloat(amountPaid);
-    if (isNaN(paid) || paid < 20 || paid > 120) {
-      return res.status(400).json({ message: 'Le montant doit être entre 20€ et 120€.' });
+    if (isNaN(paid) || paid < minAmount || paid > maxAmount) {
+      return res.status(400).json({ message: `Le montant doit être entre ${minAmount}€ et ${maxAmount}€.` });
     }
 
     // Calcul du reste à payer
