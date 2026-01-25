@@ -33,6 +33,32 @@ const CampRegistrationNewPage = () => {
   const [formValidated, setFormValidated] = useState(false);
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
   const [checkingRegistration, setCheckingRegistration] = useState(true);
+  const [minAmount, setMinAmount] = useState(20);
+  const [maxAmount, setMaxAmount] = useState(120);
+
+  // Charger les montants min/max depuis les paramètres
+  useEffect(() => {
+    const fetchRegistrationSettings = async () => {
+      try {
+        const response = await axios.get('/api/settings');
+        if (response.data.settings) {
+          const min = response.data.settings.registrationMinAmount || 20;
+          const max = response.data.settings.registrationMaxAmount || 120;
+          setMinAmount(min);
+          setMaxAmount(max);
+          // Mettre à jour le montant initial si nécessaire
+          if (form.amountPaid < min) {
+            setForm(prev => ({ ...prev, amountPaid: min }));
+          }
+          console.log(`💰 Montants chargés: Min ${min}€, Max ${max}€`);
+        }
+      } catch (err) {
+        console.error('⚠️ Erreur chargement montants, utilisation des valeurs par défaut:', err);
+      }
+    };
+
+    fetchRegistrationSettings();
+  }, []);
 
   // Vérifier si l'utilisateur est déjà inscrit
   useEffect(() => {
@@ -71,8 +97,8 @@ const CampRegistrationNewPage = () => {
       }));
     }
   }, [user]);
-
-  const handleChange = (e) => {
+minAmount || form.amountPaid > maxAmount) {
+        setError(`Le montant doit être entre ${minAmount}€ et ${maxAmount}€`
     const { name, value, type, checked } = e.target;
     if (type === 'checkbox') {
       setForm(prev => ({ ...prev, [name]: checked }));
@@ -510,7 +536,7 @@ const CampRegistrationNewPage = () => {
             <div className="new-input-group">
               <label>Montant à payer maintenant</label>
               <div className="new-payment-options">
-                {[20, 60, 80, 120].map(amount => (
+                {[minAmount, 60, 80, maxAmount].map(amount => (
                   <button
                     key={amount}
                     type="button"
@@ -518,8 +544,8 @@ const CampRegistrationNewPage = () => {
                     onClick={() => setForm(prev => ({ ...prev, amountPaid: amount }))}
                   >
                     <span className="amount">{amount}€</span>
-                    {amount === 20 && <span className="label">Minimum</span>}
-                    {amount === 120 && <span className="label">Total</span>}
+                    {amount === minAmount && <span className="label">Minimum</span>}
+                    {amount === maxAmount && <span className="label">Total</span>}
                   </button>
                 ))}
               </div>
@@ -532,14 +558,14 @@ const CampRegistrationNewPage = () => {
                     name="amountPaid"
                     value={form.amountPaid}
                     onChange={handleChange}
-                    min="20"
-                    max="120"
+                    min={minAmount}
+                    max={maxAmount}
                     step="1"
-                    placeholder="Montant (20-120€)"
+                    placeholder={`Montant (${minAmount}-${maxAmount}€)`}
                   />
                   <span className="currency">€</span>
                 </div>
-                <p className="new-hint">Montant minimum : 20€ • Maximum : 120€</p>
+                <p className="new-hint">Montant minimum : {minAmount}€ • Maximum : {maxAmount}€</p>
               </div>
             </div>
 
