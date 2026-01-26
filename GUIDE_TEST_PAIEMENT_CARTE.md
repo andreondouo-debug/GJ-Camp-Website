@@ -24,26 +24,26 @@ PayPal fournit des **cartes de test** qui fonctionnent uniquement en mode Sandbo
 
 | Numéro de carte | Date d'expiration | CVV | Résultat attendu |
 |-----------------|-------------------|-----|------------------|
-| **4032 0398 4780 9776** | 12/2027 | 123 | ✅ Paiement réussi |
-| **4111 1111 1111 1111** | 12/2027 | 123 | ✅ Paiement réussi |
-| **4005 5192 0000 0004** | 12/2027 | 123 | ✅ Paiement réussi |
-| **4000 0566 5566 5556** | 12/2027 | 123 | ⚠️ 3D Secure requis |
+| **4032031916506424** | 01/2028 | 123 | ✅ Paiement réussi (RECOMMANDÉ) |
+| **4111111111111111** | 01/2028 | 123 | ✅ Paiement réussi |
+| **4005519200000004** | 01/2028 | 123 | ✅ Paiement réussi |
+| **4000056655665556** | 01/2028 | 123 | ⚠️ 3D Secure requis |
 
 ### 🟢 Cartes Mastercard (Test)
 
 | Numéro de carte | Date d'expiration | CVV | Résultat attendu |
 |-----------------|-------------------|-----|------------------|
-| **5555 5555 5555 4444** | 12/2027 | 123 | ✅ Paiement réussi |
-| **5105 1051 0510 5100** | 12/2027 | 123 | ✅ Paiement réussi |
-| **2223 0000 4841 0010** | 12/2027 | 123 | ✅ Paiement réussi |
+| **5555555555554444** | 01/2028 | 123 | ✅ Paiement réussi (RECOMMANDÉ) |
+| **5105105105105100** | 01/2028 | 123 | ✅ Paiement réussi |
+| **2223000048410010** | 01/2028 | 123 | ✅ Paiement réussi |
 
 ### 🔴 Cartes pour tester les ERREURS
 
 | Numéro de carte | Date d'expiration | CVV | Résultat attendu |
 |-----------------|-------------------|-----|------------------|
-| **4000 0000 0000 0002** | 12/2027 | 123 | ❌ Carte refusée (fonds insuffisants) |
-| **4000 0000 0000 0010** | 12/2027 | 123 | ❌ CVV invalide |
-| **4000 0000 0000 0028** | 12/2027 | 123 | ❌ Carte expirée |
+| **4000000000000002** | 01/2028 | 123 | ❌ Carte refusée (fonds insuffisants) |
+| **4000000000000010** | 01/2028 | 123 | ❌ CVV invalide |
+| **4000000000000028** | 01/2028 | 123 | ❌ Carte expirée |
 
 ---
 
@@ -82,12 +82,12 @@ Une popup PayPal s'ouvre avec le formulaire de carte :
 ┌─────────────────────────────────────────────────┐
 │ Numéro de carte                                 │
 │ ┌─────────────────────────────────────────────┐ │
-│ │ 4032 0398 4780 9776                         │ │
+│ │ 4032031916506424                            │ │
 │ └─────────────────────────────────────────────┘ │
 │                                                  │
 │ Date d'expiration                    CVV        │
 │ ┌──────────┐ ┌──────────┐   ┌──────────────┐   │
-│ │ 12       │ │ 2027     │   │ 123          │   │
+│ │ 01       │ │ 2028     │   │ 123          │   │
 │ └──────────┘ └──────────┘   └──────────────┘   │
 │                                                  │
 │ Nom sur la carte                                │
@@ -110,8 +110,8 @@ Une popup PayPal s'ouvre avec le formulaire de carte :
 ```
 
 **Valeurs de test recommandées** :
-- **Carte** : `4032 0398 4780 9776`
-- **Expiration** : `12/2027`
+- **Carte** : `4032031916506424` (Visa) ou `5555555555554444` (Mastercard)
+- **Expiration** : `01/2028`
 - **CVV** : `123`
 - **Nom** : `Jean Test`
 - **Adresse** : `123 Rue Test`
@@ -154,7 +154,7 @@ Inscription au camp enregistrée avec succès !
 
 Pour tester que le système gère bien les erreurs :
 
-1. Utiliser la carte **4000 0000 0000 0002** (fonds insuffisants)
+1. Utiliser la carte **4000000000000002** (fonds insuffisants)
 2. Remplir le formulaire
 3. Cliquer sur "Payer"
 
@@ -197,7 +197,7 @@ Chaque paiement test est enregistré avec :
 - [ ] Badge "🧪 Mode TEST" visible sur la page d'inscription
 - [ ] Bouton "Carte de crédit ou de débit" cliquable
 - [ ] Formulaire de carte s'affiche dans popup PayPal
-- [ ] Carte test acceptée (4032 0398 4780 9776)
+- [ ] Carte test acceptée (4032031916506424 ou 5555555555554444)
 - [ ] Paiement validé avec message de succès
 - [ ] Inscription visible dans dashboard utilisateur
 - [ ] Badge 🧪 Test visible dans dashboard admin
@@ -220,8 +220,8 @@ Chaque paiement test est enregistré avec :
 ### La carte de test est refusée
 
 **Vérifications** :
-1. Numéro de carte exact : `4032 0398 4780 9776` (pas d'espaces supplémentaires)
-2. Date d'expiration future : `12/2027`
+1. Numéro de carte exact : `4032031916506424` ou `5555555555554444` (SANS espaces)
+2. Date d'expiration future : `01/2028`
 3. CVV : `123`
 4. Mode Sandbox activé
 
