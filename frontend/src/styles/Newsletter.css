@@ -1192,7 +1192,7 @@
 
 .emoji-picker-wrapper {
   position: absolute;
-  z-index: 10;
+  z-index: 10000 !important;
   top: 100%;
   left: 0;
   margin-top: 0.5rem;
