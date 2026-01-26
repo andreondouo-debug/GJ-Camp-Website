@@ -1191,25 +1191,20 @@
 }
 
 .emoji-picker-wrapper {
-  position: fixed !important;
+  position: absolute !important;
   z-index: 99999 !important;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
   border-radius: 16px;
-  overflow: visible !important;
+  overflow: hidden;
   animation: slideDown 0.3s ease;
-  background: white;
 }
 
-/* Forcer TOUS les éléments enfants de l'emoji picker au premier plan */
-.emoji-picker-wrapper * {
+/* S'assurer que le composant emoji-picker-react a le bon z-index */
+.emoji-picker-wrapper aside {
   z-index: 99999 !important;
-}
-
-.emoji-picker-wrapper aside,
-.emoji-picker-wrapper aside *,
-.emoji-picker-wrapper [class*="EmojiPicker"] {
-  z-index: 99999 !important;
-  position: relative !important;
 }
 
 @keyframes slideDown {
