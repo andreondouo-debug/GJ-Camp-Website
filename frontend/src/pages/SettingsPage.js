@@ -129,6 +129,7 @@ const SettingsPage = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [activeTab, setActiveTab] = useState('colors');
+  const [originalPaypalMode, setOriginalPaypalMode] = useState(null); // 🔐 Track PayPal mode original
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState('');
   const [crptLogoFile, setCrptLogoFile] = useState(null);
@@ -252,6 +253,9 @@ const SettingsPage = () => {
         });
         if (response.data.settings) {
           setSettings(response.data.settings);
+          // 🔐 Sauvegarder le mode PayPal initial
+          setOriginalPaypalMode(response.data.settings.paypalMode);
+          console.log(`🔐 Mode PayPal initial: ${response.data.settings.paypalMode?.toUpperCase()}`);
         }
       } catch (error) {
         console.log('Paramètres par défaut utilisés');
@@ -314,6 +318,15 @@ const SettingsPage = () => {
     
     try {
       let updatedSettings = { ...settings };
+      
+      // 🚨 DÉTECTER le changement de mode PayPal AVANT la sauvegarde
+      const paypalModeChanged = originalPaypalMode && originalPaypalMode !== updatedSettings.paypalMode;
+      const oldMode = originalPaypalMode;
+      const newMode = updatedSettings.paypalMode;
+      
+      if (paypalModeChanged) {
+        console.log(`🔄 Changement de mode PayPal détecté: ${oldMode?.toUpperCase()} → ${newMode?.toUpperCase()}`);
+      }
       
       // Si un nouveau logo GJ a été uploadé, l'envoyer d'abord
       if (logoFile) {
@@ -394,7 +407,17 @@ const SettingsPage = () => {
       window.dispatchEvent(new Event('logoUpdated'));
       
       setMessage('✅ Paramètres sauvegardés avec succès !');
-      setTimeout(() => setMessage(''), 3000);
+      
+      // 🚨 CRITIQUE : Si le mode PayPal a changé, recharger la page
+      if (paypalModeChanged) {
+        console.log('🔄 Rechargement de la page pour appliquer le nouveau mode PayPal...');
+        setMessage(`✅ Mode PayPal changé vers ${newMode?.toUpperCase()} ! Rechargement de la page...`);
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500); // Délai pour afficher le message
+      } else {
+        setTimeout(() => setMessage(''), 3000);
+      }
     } catch (error) {
       setMessage(`❌ Erreur lors de la sauvegarde: ${error.response?.data?.message || error.message}`);
       console.error('❌ Erreur sauvegarde:', error);
