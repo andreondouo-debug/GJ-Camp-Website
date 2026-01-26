@@ -121,6 +121,9 @@ const SettingsPage = () => {
     // Montants d'inscription au camp
     registrationMinAmount: 20,
     registrationMaxAmount: 120,
+    
+    // Configuration PayPal
+    paypalMode: 'sandbox', // 'sandbox' ou 'live'
   });
 
   const [loading, setLoading] = useState(false);
@@ -1068,6 +1071,12 @@ const SettingsPage = () => {
             onClick={() => setActiveTab('effects')}
           >
             ✨ Effets
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'payments' ? 'active' : ''}`}
+            onClick={() => setActiveTab('payments')}
+          >
+            💳 Paiements
           </button>
           <button
             className={`tab-btn ${activeTab === 'advanced' ? 'active' : ''}`}
@@ -2996,6 +3005,136 @@ const SettingsPage = () => {
               ✅ Logo PWA actuel : {settings.pwaLogoUrl}
             </p>
           )}
+        </div>
+      )}
+
+      {/* Onglet Paiements */}
+      {activeTab === 'payments' && (
+        <div className="settings-section">
+          <h2>💳 Configuration des Paiements</h2>
+          
+          <div style={{
+            background: '#fee2e2',
+            border: '2px solid #ef4444',
+            borderRadius: '8px',
+            padding: '15px',
+            marginBottom: '20px'
+          }}>
+            <strong>⚠️ ATTENTION :</strong> Le mode LIVE utilise de vraies transactions avec de l'argent réel.
+            <br/>Utilisez le mode SANDBOX pour les tests sans frais réels.
+          </div>
+
+          <div className="settings-grid">
+            <div className="setting-item full-width">
+              <label style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px', display: 'block' }}>
+                🔄 Mode PayPal
+              </label>
+              
+              <div style={{
+                display: 'flex',
+                gap: '20px',
+                marginBottom: '20px'
+              }}>
+                <button
+                  onClick={() => setSettings({ ...settings, paypalMode: 'sandbox' })}
+                  style={{
+                    flex: 1,
+                    padding: '20px',
+                    borderRadius: '12px',
+                    border: settings.paypalMode === 'sandbox' ? '3px solid #0284c7' : '2px solid #d1d5db',
+                    background: settings.paypalMode === 'sandbox' ? '#e0f2fe' : '#f9fafb',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    textAlign: 'center'
+                  }}
+                >
+                  <div style={{ fontSize: '40px', marginBottom: '10px' }}>🧪</div>
+                  <div style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '5px' }}>SANDBOX</div>
+                  <div style={{ fontSize: '14px', color: '#666' }}>Mode test - Transactions fictives</div>
+                  {settings.paypalMode === 'sandbox' && (
+                    <div style={{ marginTop: '10px', color: '#0284c7', fontWeight: 'bold' }}>✓ Actif</div>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setSettings({ ...settings, paypalMode: 'live' })}
+                  style={{
+                    flex: 1,
+                    padding: '20px',
+                    borderRadius: '12px',
+                    border: settings.paypalMode === 'live' ? '3px solid #dc2626' : '2px solid #d1d5db',
+                    background: settings.paypalMode === 'live' ? '#fee2e2' : '#f9fafb',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    textAlign: 'center'
+                  }}
+                >
+                  <div style={{ fontSize: '40px', marginBottom: '10px' }}>🔴</div>
+                  <div style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '5px' }}>LIVE</div>
+                  <div style={{ fontSize: '14px', color: '#666' }}>Mode production - Argent réel</div>
+                  {settings.paypalMode === 'live' && (
+                    <div style={{ marginTop: '10px', color: '#dc2626', fontWeight: 'bold' }}>✓ Actif</div>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="setting-item full-width">
+              <div style={{
+                background: settings.paypalMode === 'sandbox' ? '#e0f2fe' : '#fee2e2',
+                border: `2px solid ${settings.paypalMode === 'sandbox' ? '#0284c7' : '#dc2626'}`,
+                borderRadius: '8px',
+                padding: '15px'
+              }}>
+                <h4 style={{ marginBottom: '10px', color: settings.paypalMode === 'sandbox' ? '#0369a1' : '#991b1b' }}>
+                  📊 Configuration actuelle
+                </h4>
+                <p><strong>Mode PayPal :</strong> {settings.paypalMode === 'sandbox' ? '🧪 SANDBOX (Test)' : '🔴 LIVE (Production)'}</p>
+                <p style={{ marginTop: '10px', fontSize: '0.9em', color: '#666' }}>
+                  {settings.paypalMode === 'sandbox' 
+                    ? 'Les paiements sont fictifs. Utilisez les cartes de test PayPal.'
+                    : '⚠️ ATTENTION : Les paiements sont réels avec de l\'argent réel !'}
+                </p>
+              </div>
+            </div>
+
+            <div className="setting-item full-width">
+              <div style={{
+                background: '#fef3c7',
+                border: '2px solid #f59e0b',
+                borderRadius: '8px',
+                padding: '15px'
+              }}>
+                <h4 style={{ marginBottom: '10px', color: '#92400e' }}>💡 Guide d'utilisation</h4>
+                <ul style={{ marginLeft: '20px', color: '#78350f' }}>
+                  <li><strong>Mode SANDBOX :</strong> Pour tester les paiements sans frais réels. Utilisez les identifiants de test PayPal.</li>
+                  <li><strong>Mode LIVE :</strong> Pour accepter de vraies transactions. Assurez-vous que vos identifiants PayPal de production sont configurés.</li>
+                  <li><strong>⚠️ Important :</strong> Vérifiez que les identifiants PayPal correspondent au mode sélectionné dans les variables d'environnement.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="setting-item full-width">
+              <div style={{
+                background: '#d1fae5',
+                border: '2px solid #10b981',
+                borderRadius: '8px',
+                padding: '15px'
+              }}>
+                <h4 style={{ marginBottom: '10px', color: '#065f46' }}>🔐 Sécurité</h4>
+                <ul style={{ marginLeft: '20px', color: '#064e3b' }}>
+                  <li>✅ Aucune donnée bancaire n'est stockée sur nos serveurs</li>
+                  <li>✅ PayPal gère 100% du processus de paiement</li>
+                  <li>✅ Connexion HTTPS sécurisée obligatoire</li>
+                  <li>✅ Toutes les transactions sont tracées dans TransactionLog</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <button className="btn-save" onClick={handleSave}>
+            💾 Enregistrer la configuration PayPal
+          </button>
         </div>
       )}
 

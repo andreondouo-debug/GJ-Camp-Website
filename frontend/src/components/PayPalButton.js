@@ -1,13 +1,36 @@
 import React, { useEffect, useRef, useState } from 'react';
+import axios from 'axios';
+import { getApiUrl } from '../config/api';
+
+const API_URL = getApiUrl();
 
 const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
   const paypalRef = useRef(null);
   const [sdkReady, setSdkReady] = useState(false);
   const [error, setError] = useState(null);
+  const [paypalMode, setPaypalMode] = useState('sandbox');
   const buttonRendered = useRef(false);
+
+  // Charger le mode PayPal depuis les settings
+  useEffect(() => {
+    const fetchPayPalMode = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/settings`);
+        const mode = response.data.settings?.paypalMode || 'sandbox';
+        setPaypalMode(mode);
+        console.log(`💳 Mode PayPal : ${mode.toUpperCase()}`);
+      } catch (err) {
+        console.error('❌ Erreur chargement mode PayPal, utilisation sandbox par défaut:', err);
+        setPaypalMode('sandbox');
+      }
+    };
+    fetchPayPalMode();
+  }, []);
 
   // Charger le SDK PayPal une seule fois
   useEffect(() => {
+    if (!paypalMode) return; // Attendre que le mode soit chargé
+    
     const clientId = process.env.REACT_APP_PAYPAL_CLIENT_ID;
     
     if (!clientId) {
@@ -39,7 +62,7 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
     };
     
     document.body.appendChild(script);
-  }, []);
+  }, [paypalMode]);
 
   // Rendre les boutons PayPal quand le SDK est prêt
   useEffect(() => {
@@ -96,34 +119,50 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
       });
   }, [sdkReady, amount, onSuccess, onError, onCancel]);
 
-  if (error) {
-    return (
-      <div style={{
-        padding: '1rem',
-        background: '#fee',
-        border: '1px solid #fcc',
-        borderRadius: '8px',
-        color: '#c00',
-        textAlign: 'center'
-      }}>
-        {error}
-      </div>
-    );
-  }
+  return (
+    <div>
+      {paypalMode && (
+        <div style={{
+          textAlign: 'center',
+          padding: '10px',
+          marginBottom: '10px',
+          borderRadius: '8px',
+          background: paypalMode === 'sandbox' ? '#e0f2fe' : '#fee2e2',
+          border: `2px solid ${paypalMode === 'sandbox' ? '#0284c7' : '#dc2626'}`,
+          fontSize: '14px',
+          fontWeight: 'bold',
+          color: paypalMode === 'sandbox' ? '#0369a1' : '#991b1b'
+        }}>
+          {paypalMode === 'sandbox' ? '🧪 Mode TEST (Sandbox)' : '🔴 Mode PRODUCTION (Live)'}
+        </div>
+      )}
+      
+      {error && (
+        <div style={{
+          padding: '1rem',
+          background: '#fee',
+          border: '1px solid #fcc',
+          borderRadius: '8px',
+          color: '#c00',
+          textAlign: 'center'
+        }}>
+          {error}
+        </div>
+      )}
 
-  if (!sdkReady) {
-    return (
-      <div style={{
-        padding: '2rem',
-        textAlign: 'center',
-        color: '#667eea'
-      }}>
-        ⏳ Chargement de PayPal...
-      </div>
-    );
-  }
-
-  return <div ref={paypalRef}></div>;
+      {!sdkReady && !error && (
+        <div style={{
+          padding: '2rem',
+          textAlign: 'center',
+          color: '#667eea'
+        }}>
+          ⏳ Chargement de PayPal...
+        </div>
+      )}
+      
+      <div ref={paypalRef}></div>
+    </div>
+  );
 };
 
 export default PayPalButton;

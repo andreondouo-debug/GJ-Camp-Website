@@ -112,6 +112,9 @@ const DEFAULT_SETTINGS = {
   // Montants d'inscription au camp
   registrationMinAmount: 20,  // Montant minimum en euros
   registrationMaxAmount: 120, // Montant maximum en euros
+  
+  // Configuration PayPal
+  paypalMode: 'sandbox', // 'sandbox' ou 'live'
 };
 
 /**
