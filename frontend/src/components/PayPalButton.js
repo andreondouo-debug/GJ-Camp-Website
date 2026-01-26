@@ -41,21 +41,25 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
       return;
     }
 
-    // Si le SDK est déjà chargé
-    if (window.paypal) {
-      console.log('✅ SDK PayPal déjà disponible');
-      setSdkReady(true);
-      return;
+    // 🚨 SÉCURITÉ CRITIQUE : Toujours supprimer l'ancien SDK avant d'en charger un nouveau
+    // Cela empêche l'utilisation de credentials Sandbox en mode Live
+    const existingScript = document.querySelector('script[src*="paypal.com/sdk/js"]');
+    if (existingScript) {
+      console.log('🔄 Suppression ancien SDK PayPal pour rechargement avec nouveau mode');
+      existingScript.remove();
+      delete window.paypal; // Supprimer l'objet global
     }
 
-    // Charger le SDK
-    console.log('📥 Chargement du SDK PayPal...');
+    // Charger le SDK avec le bon Client ID
+    console.log(`📥 Chargement SDK PayPal en mode ${paypalMode.toUpperCase()}...`);
+    console.log(`🔑 Client ID utilisé: ${clientId.substring(0, 20)}...`);
+    
     const script = document.createElement('script');
     script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR`;
     script.async = true;
     
     script.onload = () => {
-      console.log('✅ SDK PayPal chargé');
+      console.log(`✅ SDK PayPal chargé en mode ${paypalMode.toUpperCase()}`);
       setSdkReady(true);
     };
     
@@ -65,6 +69,9 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
     };
     
     document.body.appendChild(script);
+    
+    // Réinitialiser le flag de rendu des boutons
+    buttonRendered.current = false;
   }, [paypalMode]);
 
   // Rendre les boutons PayPal quand le SDK est prêt
@@ -73,7 +80,12 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
       return;
     }
 
-    console.log('🎨 Rendu des boutons PayPal pour', amount, '€');
+    // 🔄 Nettoyer le conteneur avant de rendre les nouveaux boutons
+    if (paypalRef.current) {
+      paypalRef.current.innerHTML = '';
+    }
+
+    console.log(`🎨 Rendu des boutons PayPal en mode ${paypalMode.toUpperCase()} pour`, amount, '€');
 
     window.paypal.Buttons({
       style: {
@@ -134,16 +146,37 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
       {paypalMode && (
         <div style={{
           textAlign: 'center',
-          padding: '10px',
-          marginBottom: '10px',
+          padding: '15px',
+          marginBottom: '15px',
           borderRadius: '8px',
           background: paypalMode === 'sandbox' ? '#e0f2fe' : '#fee2e2',
-          border: `2px solid ${paypalMode === 'sandbox' ? '#0284c7' : '#dc2626'}`,
-          fontSize: '14px',
+          border: `3px solid ${paypalMode === 'sandbox' ? '#0284c7' : '#dc2626'}`,
+          fontSize: '16px',
           fontWeight: 'bold',
           color: paypalMode === 'sandbox' ? '#0369a1' : '#991b1b'
         }}>
-          {paypalMode === 'sandbox' ? '🧪 Mode TEST (Sandbox)' : '🔴 Mode PRODUCTION (Live)'}
+          {paypalMode === 'sandbox' ? (
+            <>🧪 Mode TEST (Sandbox) - Aucun argent réel ne sera débité</>
+          ) : (
+            <>🔴 MODE PRODUCTION (Live) - PAIEMENTS RÉELS EN COURS</>
+          )}
+        </div>
+      )}
+      
+      {/* 🚨 AVERTISSEMENT CRITIQUE EN MODE LIVE */}
+      {paypalMode === 'live' && (
+        <div style={{
+          padding: '15px',
+          marginBottom: '15px',
+          borderRadius: '8px',
+          background: '#fef3c7',
+          border: '3px solid #f59e0b',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          color: '#92400e'
+        }}>
+          ⚠️ <strong>ATTENTION :</strong> Ce paiement sera débité de votre compte bancaire réel.
+          <br />Ne PAS utiliser de compte test Sandbox !
         </div>
       )}
       
@@ -166,7 +199,7 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
           textAlign: 'center',
           color: '#667eea'
         }}>
-          ⏳ Chargement de PayPal...
+          ⏳ Chargement de PayPal en mode {paypalMode?.toUpperCase()}...
         </div>
       )}
       
