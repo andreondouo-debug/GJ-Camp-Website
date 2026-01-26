@@ -6,9 +6,6 @@ const Settings = require('../models/Settings');
  * Utilise le mode configuré dans Settings (sandbox ou live)
  */
 async function paypalClient() {
-  const clientId = process.env.PAYPAL_CLIENT_ID;
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-  
   // Récupérer le mode depuis Settings
   let paypalMode = 'sandbox'; // Mode par défaut
   try {
@@ -18,6 +15,15 @@ async function paypalClient() {
   } catch (err) {
     console.error('⚠️ Erreur récupération mode PayPal, utilisation sandbox:', err.message);
   }
+  
+  // Utiliser les bonnes credentials selon le mode
+  const clientId = paypalMode === 'live'
+    ? process.env.PAYPAL_LIVE_CLIENT_ID
+    : process.env.PAYPAL_SANDBOX_CLIENT_ID;
+    
+  const clientSecret = paypalMode === 'live'
+    ? process.env.PAYPAL_LIVE_CLIENT_SECRET
+    : process.env.PAYPAL_SANDBOX_CLIENT_SECRET;
   
   const environment = paypalMode === 'live'
     ? new paypal.core.LiveEnvironment(clientId, clientSecret)

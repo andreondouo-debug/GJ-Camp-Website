@@ -45,3 +45,6 @@ backend/uploads/*
 
 # Docker volumes
 mongodb_data/
+
+# PayPal credentials local (ne pas commiter)
+.paypal-credentials.local

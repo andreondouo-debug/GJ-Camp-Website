@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💳 Guide Test Paiement Carte - GJ Camp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h2 {
+            color: #667eea;
+            font-size: 24px;
+            margin: 20px 0 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .status-sandbox {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .test-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .test-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .test-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+        
+        .card-type {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .card-number {
+            font-size: 20px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            margin: 15px 0;
+        }
+        
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .steps {
+            counter-reset: step;
+        }
+        
+        .step {
+            background: #f9fafb;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            position: relative;
+            padding-left: 60px;
+        }
+        
+        .step::before {
+            counter-increment: step;
+            content: counter(step);
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .step-desc {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .info-box strong {
+            color: #1e40af;
+        }
+        
+        .warning-box {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .warning-box strong {
+            color: #92400e;
+        }
+        
+        .link-section {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .link-btn {
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .link-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .config-item {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .config-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+        
+        .config-value {
+            font-family: 'Courier New', monospace;
+            color: #111827;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>
+                💳 Guide de Test des Paiements par Carte Bancaire
+            </h1>
+            <span class="status-badge status-sandbox">MODE SANDBOX (TEST)</span>
+            
+            <div class="info-box">
+                <strong>ℹ️ Information :</strong> Ce guide vous permet de tester les paiements PayPal avec des cartes bancaires virtuelles en toute sécurité.
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🔧 Configuration Actuelle</h2>
+            <div class="config-grid">
+                <div class="config-item">
+                    <div class="config-label">Mode PayPal</div>
+                    <div class="config-value">SANDBOX</div>
+                </div>
+                <div class="config-item">
+                    <div class="config-label">Frontend</div>
+                    <div class="config-value">localhost:3000</div>
+                </div>
+                <div class="config-item">
+                    <div class="config-label">Backend</div>
+                    <div class="config-value">localhost:5000</div>
+                </div>
+                <div class="config-item">
+                    <div class="config-label">Montant Test</div>
+                    <div class="config-value">20€ - 120€</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>💳 Cartes de Test PayPal</h2>
+            <p style="margin-bottom: 20px; color: #666;">Utilisez ces cartes pour simuler des paiements. Elles ne fonctionnent qu'en mode sandbox.</p>
+            
+            <div class="test-cards">
+                <div class="test-card">
+                    <div class="card-type">Visa</div>
+                    <div class="card-number" id="visa-number">4032 0398 4780 9776</div>
+                    <div class="card-details">
+                        <div>
+                            <div style="font-size: 12px; opacity: 0.8;">CVV</div>
+                            <div style="font-size: 18px;">123</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; opacity: 0.8;">EXPIRATION</div>
+                            <div style="font-size: 18px;">12/2028</div>
+                        </div>
+                    </div>
+                    <button class="copy-btn" onclick="copyToClipboard('4032039847809776', this)">📋 Copier le numéro</button>
+                </div>
+
+                <div class="test-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <div class="card-type">Mastercard</div>
+                    <div class="card-number" id="mc-number">5425 2334 3010 9903</div>
+                    <div class="card-details">
+                        <div>
+                            <div style="font-size: 12px; opacity: 0.8;">CVV</div>
+                            <div style="font-size: 18px;">123</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; opacity: 0.8;">EXPIRATION</div>
+                            <div style="font-size: 18px;">12/2028</div>
+                        </div>
+                    </div>
+                    <button class="copy-btn" onclick="copyToClipboard('5425233430109903', this)">📋 Copier le numéro</button>
+                </div>
+
+                <div class="test-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <div class="card-type">American Express</div>
+                    <div class="card-number" id="amex-number">3782 822463 10005</div>
+                    <div class="card-details">
+                        <div>
+                            <div style="font-size: 12px; opacity: 0.8;">CVV</div>
+                            <div style="font-size: 18px;">1234</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; opacity: 0.8;">EXPIRATION</div>
+                            <div style="font-size: 18px;">12/2028</div>
+                        </div>
+                    </div>
+                    <button class="copy-btn" onclick="copyToClipboard('378282246310005', this)">📋 Copier le numéro</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 Procédure de Test</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-title">Démarrez les serveurs</div>
+                    <div class="step-desc">
+                        Exécutez <code>./test-paiement-carte.sh</code> ou démarrez manuellement le backend et le frontend
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">Accédez à l'application</div>
+                    <div class="step-desc">
+                        Ouvrez <a href="http://localhost:3000" target="_blank">http://localhost:3000</a> dans votre navigateur
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">Connectez-vous</div>
+                    <div class="step-desc">
+                        Utilisez un compte utilisateur existant ou créez-en un nouveau
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">Accédez à l'inscription au camp</div>
+                    <div class="step-desc">
+                        Cliquez sur "Inscription au Camp" dans le menu
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">Remplissez le formulaire</div>
+                    <div class="step-desc">
+                        Complétez toutes les informations requises (nom, prénom, date de naissance, etc.)
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">Cliquez sur PayPal</div>
+                    <div class="step-desc">
+                        Une popup PayPal s'ouvre avec le montant à payer (minimum 20€)
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">Sélectionnez "Payer par carte"</div>
+                    <div class="step-desc">
+                        Dans la popup PayPal, cliquez sur "Payer par carte de crédit ou débit"
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">Utilisez une carte de test</div>
+                    <div class="step-desc">
+                        Copiez un des numéros de carte ci-dessus et remplissez le formulaire PayPal
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">Validez le paiement</div>
+                    <div class="step-desc">
+                        Confirmez le paiement et attendez la redirection
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">Vérifiez le résultat</div>
+                    <div class="step-desc">
+                        Vous devriez voir un message de succès et être redirigé vers votre dashboard
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>✅ Points de Vérification</h2>
+            <div class="info-box">
+                <strong>Dans le Frontend :</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Message de succès affiché</li>
+                    <li>Redirection automatique vers le dashboard</li>
+                    <li>Inscription visible dans "Mes Inscriptions"</li>
+                </ul>
+            </div>
+            
+            <div class="info-box">
+                <strong>Dans les Logs Backend :</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>✅ Paiement réussi: { id: 'PAYID-...', status: 'COMPLETED' }</li>
+                    <li>Transaction enregistrée en base de données</li>
+                </ul>
+            </div>
+            
+            <div class="info-box">
+                <strong>Dans la Base de Données :</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Status: 'partial' ou 'completed' selon le montant</li>
+                    <li>paymentMethod: 'paypal'</li>
+                    <li>paypalTransactionId: renseigné</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>⚠️ Avertissements</h2>
+            <div class="warning-box">
+                <strong>🔴 IMPORTANT :</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Ces cartes ne fonctionnent QU'EN MODE SANDBOX</li>
+                    <li>Ne jamais utiliser de vraies cartes en mode test</li>
+                    <li>Ne jamais partager vos clés PayPal de production</li>
+                    <li>Vérifier que vous êtes bien en mode SANDBOX avant de tester</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🔗 Liens Utiles</h2>
+            <div class="link-section">
+                <a href="http://localhost:3000" class="link-btn" target="_blank">🌐 Frontend Local</a>
+                <a href="http://localhost:5000/api/health" class="link-btn" target="_blank">🔧 Backend Health</a>
+                <a href="https://developer.paypal.com/dashboard" class="link-btn" target="_blank">💼 PayPal Developer</a>
+                <a href="https://developer.paypal.com/docs/api-basics/sandbox/" class="link-btn" target="_blank">📚 Documentation</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ Copié !';
+                button.style.background = 'rgba(34, 197, 94, 0.3)';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = 'rgba(255, 255, 255, 0.2)';
+                }, 2000);
+            }).catch(err => {
+                console.error('Erreur de copie:', err);
+                alert('Erreur lors de la copie: ' + text);
+            });
+        }
+    </script>
+</body>
+</html>
