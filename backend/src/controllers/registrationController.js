@@ -834,24 +834,13 @@ exports.validateCashPayment = async (req, res) => {
       .filter(p => p.status === 'validated')
       .reduce((sum, p) => sum + p.amount, 0);
 
-    // 🐛 FIX CRITIQUE : paymentDetails ne contient PAS amountPaid
-    // On doit calculer le montant PayPal en soustrayant le cash du amountPaid INITIAL
-    // SAUF si c'est une inscription 100% cash (paymentMethod === 'cash')
-    let totalPayPal = 0;
-    if (registration.paymentMethod === 'paypal' || registration.paymentMethod === 'mixed') {
-      // Si on a un orderID PayPal, on a eu un paiement PayPal
-      if (registration.paymentDetails?.orderID) {
-        // Le montant PayPal = amountPaid AVANT qu'on ajoute le cash
-        // On le retrouve en regardant l'historique ou en calculant
-        totalPayPal = registration.amountPaid - registration.cashPayments
-          .filter(p => p.status === 'validated')
-          .filter(p => p.validatedAt < new Date()) // Paiements déjà validés avant
-          .reduce((sum, p) => sum + p.amount, 0);
-        
-        // Sécurité : si négatif, c'est qu'il n'y avait pas de PayPal avant
-        if (totalPayPal < 0) totalPayPal = 0;
-      }
-    }
+    // 🐛 FIX CRITIQUE : Utiliser paymentDetails.amountPaid (montant PayPal sauvegardé)
+    const totalPayPal = registration.paymentDetails?.amountPaid || 0;
+    
+    console.log('💰 Calcul paiement:');
+    console.log('   - PayPal:', totalPayPal, '€');
+    console.log('   - Cash validé:', totalCashValidated, '€');
+    console.log('   - Total:', totalPayPal + totalCashValidated, '€');
     
     const newTotalPaid = totalCashValidated + totalPayPal;
     
