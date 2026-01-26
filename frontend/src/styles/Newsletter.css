@@ -1191,15 +1191,25 @@
 }
 
 .emoji-picker-wrapper {
-  position: absolute;
-  z-index: 10000 !important;
-  top: 100%;
-  left: 0;
-  margin-top: 0.5rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  position: fixed !important;
+  z-index: 99999 !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible !important;
   animation: slideDown 0.3s ease;
+  background: white;
+}
+
+/* Forcer TOUS les éléments enfants de l'emoji picker au premier plan */
+.emoji-picker-wrapper * {
+  z-index: 99999 !important;
+}
+
+.emoji-picker-wrapper aside,
+.emoji-picker-wrapper aside *,
+.emoji-picker-wrapper [class*="EmojiPicker"] {
+  z-index: 99999 !important;
+  position: relative !important;
 }
 
 @keyframes slideDown {
@@ -1214,8 +1224,8 @@
 }
 
 .emoji-picker-comment {
-  left: auto;
-  right: 0;
+  left: auto !important;
+  right: 0 !important;
 }
 
 /* Sondages - Affichage dans les posts */
