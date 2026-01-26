@@ -111,6 +111,9 @@ Une popup PayPal s'ouvre avec le formulaire de carte :
 
 **Valeurs de test recommandées** :
 - **Carte** : `4032031916506424` (Visa) ou `5555555555554444` (Mastercard)
+  - ⚠️ **Important** : Entre les chiffres normalement, PayPal ajoutera **automatiquement** les espaces pour la lisibilité
+  - Tu taperas : `4032031916506424`
+  - PayPal affichera : `4032 0319 1650 6424` (c'est normal !)
 - **Expiration** : `01/2028`
 - **CVV** : `123`
 - **Nom** : `Jean Test`
@@ -220,7 +223,9 @@ Chaque paiement test est enregistré avec :
 ### La carte de test est refusée
 
 **Vérifications** :
-1. Numéro de carte exact : `4032031916506424` ou `5555555555554444` (SANS espaces)
+1. Numéro de carte exact : `4032031916506424` ou `5555555555554444`
+   - ✅ Entre les chiffres d'un coup (PayPal ajoute les espaces automatiquement)
+   - ✅ Le formulaire affichera : `4032 0319 1650 6424` - c'est normal !
 2. Date d'expiration future : `01/2028`
 3. CVV : `123`
 4. Mode Sandbox activé
