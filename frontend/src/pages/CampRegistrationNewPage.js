@@ -97,8 +97,8 @@ const CampRegistrationNewPage = () => {
       }));
     }
   }, [user]);
-minAmount || form.amountPaid > maxAmount) {
-        setError(`Le montant doit être entre ${minAmount}€ et ${maxAmount}€`
+
+  const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === 'checkbox') {
       setForm(prev => ({ ...prev, [name]: checked }));
@@ -121,8 +121,8 @@ minAmount || form.amountPaid > maxAmount) {
       }
 
       // Valider le montant
-      if (form.amountPaid < 20 || form.amountPaid > 120) {
-        setError('Le montant doit être entre 20€ et 120€');
+      if (form.amountPaid < minAmount || form.amountPaid > maxAmount) {
+        setError(`Le montant doit être entre ${minAmount}€ et ${maxAmount}€`);
         setLoading(false);
         return;
       }
