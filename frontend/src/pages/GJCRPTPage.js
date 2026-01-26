@@ -372,56 +372,7 @@ function GJCRPTPage() {
           </div>
         </section>
 
-        {/* Génération Josué Section */}
-        <section className="gjcrpt-gj" style={{ 
-          background: `linear-gradient(135deg, ${settings.generationJosue?.backgroundColor || '#667eea'} 0%, ${settings.generationJosue?.gradientColor || '#764ba2'} 100%)` 
-        }}>
-          <div className="gjcrpt-container">
-            <div className="gjcrpt-gj-content">
-              <div className="gjcrpt-gj-left">
-                <div className="gjcrpt-section-badge light" style={{ 
-                  background: settings.generationJosue?.badgeColor || '#ffffff',
-                  color: settings.generationJosue?.backgroundColor || '#667eea'
-                }}>
-                  {settings.generationJosue?.badge || 'Notre Jeunesse'}
-                </div>
-                <h2 className="gjcrpt-gj-title" style={{ 
-                  fontSize: settings.generationJosue?.titleFontSize || '2.8rem',
-                  color: settings.generationJosue?.titleColor || '#ffffff'
-                }}>
-                  {settings.generationJosue?.title || 'Génération Josué'}
-                </h2>
-                <p className="gjcrpt-gj-lead" style={{ 
-                  color: settings.generationJosue?.leadTextColor || '#f0f0f0'
-                }}>
-                  {settings.generationJosue?.leadText || 'Le mouvement jeunesse de la CRPT où les 15-30 ans peuvent grandir dans leur foi et avoir un impact pour le Royaume de Dieu.'}
-                </p>
-                <ul className="gjcrpt-gj-features">
-                  {(settings.generationJosue?.features || []).map((feature, index) => (
-                    <li key={index}>
-                      <span className="gjcrpt-feature-icon">{feature.icon}</span>
-                      <span>{feature.text}</span>
-                    </li>
-                  ))}
-                </ul>
-                <a href={settings.generationJosue?.buttonLink || '/'} className="gjcrpt-cta-btn">
-                  {settings.generationJosue?.buttonText || 'Découvrir Génération Josué'} →
-                </a>
-              </div>
-              <div className="gjcrpt-gj-right">
-                <div className="gjcrpt-gj-visual">
-                  <div className="gjcrpt-gj-circle">
-                    <span className="gjcrpt-gj-emoji">
-                      {settings.generationJosue?.visualEmoji || '🎯'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Contact CTA Section */}
+        {/* Contact CTA Section - Section Génération Josué supprimée car elle existe sur /generation-josue */}
         <section className="gjcrpt-cta" style={{ background: settings.styles.primaryColor }}>
           <div className="gjcrpt-container">
             <h2 style={{ color: 'white' }}>Rejoignez-nous !</h2>

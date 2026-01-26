@@ -1191,20 +1191,19 @@
 }
 
 .emoji-picker-wrapper {
-  position: absolute !important;
-  z-index: 99999 !important;
-  top: 100%;
-  left: 0;
-  margin-top: 0.5rem;
+  position: fixed !important;
+  z-index: 999999 !important;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
   border-radius: 16px;
   overflow: hidden;
   animation: slideDown 0.3s ease;
+  pointer-events: auto !important;
 }
 
 /* S'assurer que le composant emoji-picker-react a le bon z-index */
 .emoji-picker-wrapper aside {
-  z-index: 99999 !important;
+  z-index: 999999 !important;
+  pointer-events: auto !important;
 }
 
 @keyframes slideDown {
