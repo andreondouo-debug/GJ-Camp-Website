@@ -3,11 +3,12 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import PayPalButton from '../components/PayPalButton';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Pie } from 'react-chartjs-2';
 import { getApiUrl } from '../config/api';
 import '../styles/UserDashboard.css';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 // Icônes SVG
 const UserIcon = ({ size = 24, color = "#667eea" }) => (
@@ -331,6 +332,25 @@ const UserDashboard = () => {
           usePointStyle: true,
           pointStyle: 'circle'
         }
+      },
+      datalabels: {
+        color: '#ffffff',
+        font: {
+          size: 18,
+          weight: 'bold'
+        },
+        formatter: (value, context) => {
+          const total = context.dataset.data.reduce((a, b) => a + b, 0);
+          const percentage = ((value / total) * 100).toFixed(0);
+          return `${value}€\n${percentage}%`;
+        },
+        textAlign: 'center',
+        anchor: 'center',
+        align: 'center',
+        offset: 0,
+        padding: 6,
+        textShadowBlur: 4,
+        textShadowColor: 'rgba(0, 0, 0, 0.5)'
       },
       tooltip: {
         callbacks: {
