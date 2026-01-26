@@ -102,6 +102,10 @@ const CampRegistrationNewPage = () => {
     const { name, value, type, checked } = e.target;
     if (type === 'checkbox') {
       setForm(prev => ({ ...prev, [name]: checked }));
+    } else if (name === 'amountPaid') {
+      // S'assurer que le montant est toujours un nombre
+      const numericValue = parseFloat(value) || minAmount;
+      setForm(prev => ({ ...prev, [name]: numericValue }));
     } else {
       setForm(prev => ({ ...prev, [name]: value }));
     }

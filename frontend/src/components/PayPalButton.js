@@ -83,13 +83,20 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
         label: 'paypal'
       },
       createOrder: (data, actions) => {
+        // Convertir le montant en nombre pour éviter l'erreur "toFixed is not a function"
+        const numericAmount = parseFloat(amount);
+        if (isNaN(numericAmount) || numericAmount <= 0) {
+          console.error('❌ Montant invalide:', amount);
+          throw new Error('Montant invalide');
+        }
+        
         return actions.order.create({
           purchase_units: [{
             amount: {
               currency_code: 'EUR',
-              value: amount.toFixed(2)
+              value: numericAmount.toFixed(2)
             },
-            description: `Inscription Camp GJ 2025 - ${amount}€`
+            description: `Inscription Camp GJ 2025 - ${numericAmount}€`
           }]
         });
       },
