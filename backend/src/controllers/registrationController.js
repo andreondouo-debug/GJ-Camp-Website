@@ -46,6 +46,10 @@ exports.createRegistration = async (req, res) => {
     const settings = await Settings.findOne();
     const minAmount = settings?.settings?.registrationMinAmount || 20;
     const maxAmount = settings?.settings?.registrationMaxAmount || 120;
+    
+    // 🔐 Récupérer le mode PayPal actuel (sandbox ou live)
+    const paypalMode = settings?.settings?.paypalMode || 'sandbox';
+    console.log(`💳 Mode PayPal actuel: ${paypalMode.toUpperCase()}`);
 
     // Validation du montant payé
     const paid = parseFloat(amountPaid);
@@ -131,6 +135,7 @@ exports.createRegistration = async (req, res) => {
       amountPaid: verifiedAmount,
       amountRemaining: remaining,
       paymentStatus: status,
+      paypalMode: paypalMode, // 🔐 Enregistrer le mode PayPal utilisé (sandbox ou live)
       paymentDetails: {
         orderID: verification.orderID,
         payerID: paymentDetails.payerID,
@@ -703,6 +708,7 @@ exports.createCashRegistration = async (req, res) => {
       amountRemaining: totalPrice,
       paymentStatus: 'unpaid',
       paymentMethod: 'cash',
+      paypalMode: 'cash', // 🔐 Les paiements en espèces ne passent pas par PayPal
       cashPayments: [{
         amount: paid,
         status: 'pending',

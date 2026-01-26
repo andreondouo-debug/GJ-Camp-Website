@@ -73,6 +73,7 @@ const RegistrationDashboard = () => {
   const [filter, setFilter] = useState('all'); // all, paid, partial, unpaid
   const [refugeFilter, setRefugeFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all'); // all, today, week, month
+  const [paypalModeFilter, setPaypalModeFilter] = useState('all'); // all, sandbox, live, cash
   const [sortColumn, setSortColumn] = useState('');
   const [sortDirection, setSortDirection] = useState('asc'); // asc, desc
   const [searchQuery, setSearchQuery] = useState('');
@@ -246,6 +247,9 @@ const RegistrationDashboard = () => {
       
       // Filtre par date
       if (!filterByDate(reg)) return false;
+      
+      // 🔐 Filtre par mode PayPal (sandbox, live, cash)
+      if (paypalModeFilter !== 'all' && reg.paypalMode !== paypalModeFilter) return false;
 
       // Filtre par recherche
       if (searchQuery.length >= 2) {
@@ -519,6 +523,20 @@ const RegistrationDashboard = () => {
             <option value="month">Ce mois</option>
           </select>
         </div>
+
+        <div className="filter-group">
+          <label>💳 Mode Paiement:</label>
+          <select 
+            value={paypalModeFilter} 
+            onChange={(e) => setPaypalModeFilter(e.target.value)}
+            className="filter-select"
+          >
+            <option value="all">Tous les modes</option>
+            <option value="sandbox">🧪 Sandbox (Test)</option>
+            <option value="live">🔴 Live (Réel)</option>
+            <option value="cash">💵 Espèces</option>
+          </select>
+        </div>
       </div>
 
       {/* Tableau des inscriptions */}
@@ -550,13 +568,14 @@ const RegistrationDashboard = () => {
                 Reste <SortIcon column="amountRemaining" />
               </th>
               <th>Statut</th>
+              <th>💳 Mode</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredRegistrations.length === 0 ? (
               <tr>
-                <td colSpan="13" className="no-data">
+                <td colSpan="14" className="no-data">
                   Aucune inscription trouvée
                 </td>
               </tr>
@@ -603,6 +622,55 @@ const RegistrationDashboard = () => {
                       </span>
                     </td>
                     <td>
+                      {reg.paypalMode === 'sandbox' && (
+                        <span style={{ 
+                          padding: '4px 8px', 
+                          borderRadius: '4px', 
+                          background: '#e0f2fe', 
+                          color: '#0369a1',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          🧪 Test
+                        </span>
+                      )}
+                      {reg.paypalMode === 'live' && (
+                        <span style={{ 
+                          padding: '4px 8px', 
+                          borderRadius: '4px', 
+                          background: '#fee2e2', 
+                          color: '#991b1b',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          🔴 Réel
+                        </span>
+                      )}
+                      {reg.paypalMode === 'cash' && (
+                        <span style={{ 
+                          padding: '4px 8px', 
+                          borderRadius: '4px', 
+                          background: '#f0fdf4', 
+                          color: '#166534',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          💵 Espèces
+                        </span>
+                      )}
+                      {!reg.paypalMode && (
+                        <span style={{ 
+                          padding: '4px 8px', 
+                          borderRadius: '4px', 
+                          background: '#f3f4f6', 
+                          color: '#6b7280',
+                          fontSize: '12px'
+                        }}>
+                          ⚠️ N/A
+                        </span>
+                      )}
+                    </td>
+                    <td>
                       <button
                         className="delete-registration-btn"
                         onClick={() => handleDeleteRegistration(reg._id, reg.firstName, reg.lastName)}
@@ -616,7 +684,7 @@ const RegistrationDashboard = () => {
                 
                 {/* Ligne de totaux */}
                 <tr className="totals-row">
-                  <td colSpan="9" style={{ textAlign: 'right', fontWeight: 'bold' }}>
+                  <td colSpan="10" style={{ textAlign: 'right', fontWeight: 'bold' }}>
                     TOTAUX ({filteredRegistrations.length} inscriptions):
                   </td>
                   <td className="amount-cell" style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>

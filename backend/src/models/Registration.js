@@ -120,6 +120,12 @@ const registrationSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     }
+  },
+  paypalMode: {
+    type: String,
+    enum: ['sandbox', 'live', 'cash'],
+    default: 'sandbox',
+    index: true // Pour filtrer facilement les inscriptions par mode
   }
 }, {
   timestamps: true
