@@ -11,6 +11,7 @@ const Header = () => {
   const { isAuthenticated, user, logout, token } = useContext(AuthContext);
   const [isGestionOpen, setIsGestionOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingCashCount, setPendingCashCount] = useState(0); // 🔔 Nouveau: demandes espèces
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState('/images/logo-gj.png');
   const [crptLogoUrl, setCrptLogoUrl] = useState('/images/crpt-logo.png');
@@ -34,7 +35,7 @@ const Header = () => {
     }
   }, []);
 
-  // Récupérer le nombre de messages non lus
+  // Récupérer le nombre de messages non lus + demandes espèces en attente
   useEffect(() => {
     const fetchUnreadCount = async () => {
       if (isAuthenticated && token) {
@@ -52,20 +53,46 @@ const Header = () => {
       }
     };
 
+    const fetchPendingCashCount = async () => {
+      const normalizedRole = user?.role === 'user' ? 'utilisateur' : user?.role || 'utilisateur';
+      const canAccessCashPayments = ['referent', 'responsable', 'admin'].includes(normalizedRole);
+      
+      if (isAuthenticated && token && canAccessCashPayments) {
+        try {
+          const response = await axios.get('/api/registrations/cash/pending-count', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setPendingCashCount(response.data.pendingCount || 0);
+        } catch (error) {
+          console.error('Erreur récupération demandes espèces:', error);
+          setPendingCashCount(0);
+        }
+      } else {
+        setPendingCashCount(0);
+      }
+    };
+
     fetchUnreadCount();
+    fetchPendingCashCount();
     
     // Actualiser toutes les 30 secondes
-    const interval = setInterval(fetchUnreadCount, 30000);
+    const interval = setInterval(() => {
+      fetchUnreadCount();
+      fetchPendingCashCount();
+    }, 30000);
     
     // Écouter l'événement personnalisé pour rafraîchir immédiatement
     const handleRefreshMessages = () => fetchUnreadCount();
+    const handleRefreshCash = () => fetchPendingCashCount();
     window.addEventListener('messagesUpdated', handleRefreshMessages);
+    window.addEventListener('cashPaymentsUpdated', handleRefreshCash);
     
     return () => {
       clearInterval(interval);
       window.removeEventListener('messagesUpdated', handleRefreshMessages);
+      window.removeEventListener('cashPaymentsUpdated', handleRefreshCash);
     };
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, token, user]);
 
   // Récupérer les logos depuis les settings
   useEffect(() => {
@@ -168,6 +195,9 @@ const Header = () => {
                   aria-haspopup="true"
                 >
                   GESTION
+                  {(unreadCount > 0 || pendingCashCount > 0) && (
+                    <span className="gestion-badge">{unreadCount + pendingCashCount}</span>
+                  )}
                   <svg className="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="6 9 12 15 18 9"></polyline>
                   </svg>
@@ -202,7 +232,14 @@ const Header = () => {
                   {canAccessPayouts && (
                     <>
                       <li><Link to="/gestion/redistributions" onClick={closeMobileMenu}>Redistributions</Link></li>
-                      <li><Link to="/gestion/paiements-especes" onClick={closeMobileMenu}>Paiements espèces</Link></li>
+                      <li className="dropdown-messages-item">
+                        <Link to="/gestion/paiements-especes" onClick={closeMobileMenu}>
+                          Paiements espèces
+                          {pendingCashCount > 0 && (
+                            <span className="dropdown-message-badge">{pendingCashCount}</span>
+                          )}
+                        </Link>
+                      </li>
                     </>
                   )}
                   {canAccessUserAdmin && (

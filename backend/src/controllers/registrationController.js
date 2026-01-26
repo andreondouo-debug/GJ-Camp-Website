@@ -142,7 +142,8 @@ exports.createRegistration = async (req, res) => {
         status: verification.status,
         verifiedAt: new Date(),
         payerEmail: verification.payerEmail,
-        isDevelopmentMode: verification.isDevelopmentMode
+        isDevelopmentMode: verification.isDevelopmentMode,
+        amountPaid: verifiedAmount // 🐛 FIX: Sauvegarder le montant PayPal pour calculs futurs
       }
     });
 
@@ -356,6 +357,7 @@ exports.addAdditionalPayment = async (req, res) => {
       verifiedAt: new Date(),
       payerEmail: verification.payerEmail,
       isDevelopmentMode: verification.isDevelopmentMode,
+      amountPaid: registration.amountPaid, // 🐛 FIX: Sauvegarder montant total PayPal
       previousOrderID: registration.paymentDetails?.orderID // Garder trace du paiement initial
     };
 
@@ -832,7 +834,25 @@ exports.validateCashPayment = async (req, res) => {
       .filter(p => p.status === 'validated')
       .reduce((sum, p) => sum + p.amount, 0);
 
-    const totalPayPal = registration.paymentDetails?.amountPaid || 0;
+    // 🐛 FIX CRITIQUE : paymentDetails ne contient PAS amountPaid
+    // On doit calculer le montant PayPal en soustrayant le cash du amountPaid INITIAL
+    // SAUF si c'est une inscription 100% cash (paymentMethod === 'cash')
+    let totalPayPal = 0;
+    if (registration.paymentMethod === 'paypal' || registration.paymentMethod === 'mixed') {
+      // Si on a un orderID PayPal, on a eu un paiement PayPal
+      if (registration.paymentDetails?.orderID) {
+        // Le montant PayPal = amountPaid AVANT qu'on ajoute le cash
+        // On le retrouve en regardant l'historique ou en calculant
+        totalPayPal = registration.amountPaid - registration.cashPayments
+          .filter(p => p.status === 'validated')
+          .filter(p => p.validatedAt < new Date()) // Paiements déjà validés avant
+          .reduce((sum, p) => sum + p.amount, 0);
+        
+        // Sécurité : si négatif, c'est qu'il n'y avait pas de PayPal avant
+        if (totalPayPal < 0) totalPayPal = 0;
+      }
+    }
+    
     const newTotalPaid = totalCashValidated + totalPayPal;
     
     registration.amountPaid = newTotalPaid;
@@ -971,6 +991,29 @@ exports.getCashPaymentsStats = async (req, res) => {
     res.status(200).json(stats);
   } catch (error) {
     console.error('❌ Erreur stats espèces:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+// 🔔 Compter les demandes de paiement en espèces en attente (pour notification badge)
+exports.getPendingCashPaymentsCount = async (req, res) => {
+  try {
+    const registrations = await Registration.find({
+      'cashPayments': { $exists: true, $ne: [] }
+    });
+
+    let pendingCount = 0;
+    registrations.forEach(reg => {
+      const pending = reg.cashPayments.filter(p => p.status === 'pending');
+      pendingCount += pending.length;
+    });
+
+    res.status(200).json({ 
+      pendingCount,
+      message: `${pendingCount} demande(s) de paiement en attente`
+    });
+  } catch (error) {
+    console.error('❌ Erreur count espèces:', error);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 };

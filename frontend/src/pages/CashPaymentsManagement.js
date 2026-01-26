@@ -68,6 +68,9 @@ const CashPaymentsManagement = () => {
 
       setMessage(`✅ Paiement de ${amount}€ validé avec succès`);
       
+      // 🔔 Déclencher événement pour rafraîchir le badge Header
+      window.dispatchEvent(new Event('cashPaymentsUpdated'));
+      
       // Réinitialiser les champs
       setValidationAmount(prev => {
         const newState = { ...prev };
@@ -104,6 +107,9 @@ const CashPaymentsManagement = () => {
       );
 
       setMessage('❌ Paiement rejeté');
+      
+      // 🔔 Déclencher événement pour rafraîchir le badge Header
+      window.dispatchEvent(new Event('cashPaymentsUpdated'));
       
       // Réinitialiser le champ
       setRejectionReason(prev => {

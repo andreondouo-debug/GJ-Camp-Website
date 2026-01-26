@@ -23,6 +23,13 @@ router.get(
 	authorize('responsable', 'admin'),
 	registrationController.getCashPaymentsStats
 );
+router.get(
+	'/cash/pending-count',
+	auth,
+	requireVerifiedEmail,
+	authorize('referent', 'responsable', 'admin'),
+	registrationController.getPendingCashPaymentsCount
+);
 router.post('/:registrationId/cash-payment', auth, registrationController.addCashPayment);
 router.patch(
 	'/:registrationId/cash-payment/:paymentId/validate',
