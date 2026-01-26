@@ -54,25 +54,29 @@ const Header = () => {
     };
 
     const fetchPendingCashCount = async () => {
-      const normalizedRole = user?.role === 'user' ? 'utilisateur' : user?.role || 'utilisateur';
-      const canAccessCashPayments = ['referent', 'responsable', 'admin'].includes(normalizedRole);
+      if (!isAuthenticated || !token) {
+        console.log('🔔 Badge espèces: Non authentifié');
+        setPendingCashCount(0);
+        return;
+      }
       
-      console.log('🔔 fetchPendingCashCount - Role:', normalizedRole, 'Can access:', canAccessCashPayments);
+      console.log('🔔 Badge espèces: Tentative fetch pour role:', user?.role);
       
-      if (isAuthenticated && token && canAccessCashPayments) {
-        try {
-          const response = await axios.get('/api/registrations/cash/pending-count', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          console.log('🔔 Demandes espèces pending:', response.data.pendingCount);
-          setPendingCashCount(response.data.pendingCount || 0);
-        } catch (error) {
-          console.error('❌ Erreur récupération demandes espèces:', error);
+      try {
+        const response = await axios.get('/api/registrations/cash/pending-count', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log('✅ Badge espèces: Count reçu =', response.data.pendingCount);
+        setPendingCashCount(response.data.pendingCount || 0);
+      } catch (error) {
+        // Si 403/401 = pas de permission (utilisateur normal) → pas de badge
+        if (error.response?.status === 403 || error.response?.status === 401) {
+          console.log('🔒 Badge espèces: Pas de permission (normal si utilisateur)');
+          setPendingCashCount(0);
+        } else {
+          console.error('❌ Badge espèces: Erreur API:', error.response?.status, error.message);
           setPendingCashCount(0);
         }
-      } else {
-        console.log('🔔 Pas de fetch cash - Auth:', isAuthenticated, 'Token:', !!token, 'Can access:', canAccessCashPayments);
-        setPendingCashCount(0);
       }
     };
 
