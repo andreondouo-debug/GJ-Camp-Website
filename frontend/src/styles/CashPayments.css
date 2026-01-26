@@ -171,10 +171,10 @@
 
 .payment-card {
   background: white;
-  padding: 25px;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border-left: 5px solid #e5e7eb;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-left: 4px solid #e5e7eb;
   transition: all 0.3s ease;
   max-width: 100%;
   width: 100%;
@@ -184,8 +184,8 @@
 }
 
 .payment-card:hover {
-  transform: translateX(5px);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+  transform: translateX(3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .pending-card { border-left-color: #f59e0b; }
@@ -193,15 +193,13 @@
 .rejected-card { border-left-color: #ef4444; }
 
 .payment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #f3f4f6;
+  display: grid;
+  grid-template-columns: 1fr auto;
   gap: 15px;
-  flex-wrap: wrap;
-  max-width: 100%;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f3f4f6;
+  align-items: center;
 }
 
 .user-info {
@@ -211,22 +209,18 @@
 }
 
 .user-info h3 {
-  margin: 0 0 5px 0;
+  margin: 0 0 3px 0;
   color: #1f2937;
-  font-size: 20px;
+  font-size: 16px;
+  font-weight: 600;
   word-break: break-word;
-  overflow-wrap: break-word;
-  max-width: 100%;
-  hyphens: auto;
 }
 
 .user-info p {
   margin: 0;
   color: #6b7280;
-  font-size: 14px;
+  font-size: 13px;
   word-break: break-all;
-  overflow-wrap: break-word;
-  max-width: 100%;
 }
 
 .payment-amount {
@@ -236,18 +230,18 @@
 
 .payment-amount .amount {
   display: block;
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
   color: #667eea;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
   white-space: nowrap;
 }
 
 .payment-amount .label {
   display: inline-block;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
   font-weight: 600;
   background: #f3f4f6;
   color: #6b7280;
@@ -266,49 +260,41 @@
 
 .payment-details {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
   width: 100%;
 }
 
 .detail {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 3px;
   min-width: 0;
   width: 100%;
   overflow: visible;
 }
 
 .detail .label {
-  font-size: 13px;
+  font-size: 11px;
   color: #6b7280;
   font-weight: 500;
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-  word-wrap: break-word;
-  width: 100%;
-  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .detail .value {
-  font-size: 15px;
+  font-size: 14px;
   color: #1f2937;
   font-weight: 600;
   word-break: break-word;
-  overflow-wrap: break-word;
-  width: 100%;
-  white-space: normal;
-  display: block;
 }
 
 /* Section de validation */
 .validation-section {
   background: #f9fafb;
-  padding: 20px;
-  border-radius: 12px;
+  padding: 12px 15px;
+  border-radius: 8px;
   margin-top: 20px;
   max-width: 100%;
   box-sizing: border-box;
@@ -317,8 +303,8 @@
 .validation-inputs {
   display: grid;
   grid-template-columns: 1fr 2fr;
-  gap: 15px;
-  margin-bottom: 15px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 @media (max-width: 640px) {

@@ -57,17 +57,21 @@ const Header = () => {
       const normalizedRole = user?.role === 'user' ? 'utilisateur' : user?.role || 'utilisateur';
       const canAccessCashPayments = ['referent', 'responsable', 'admin'].includes(normalizedRole);
       
+      console.log('🔔 fetchPendingCashCount - Role:', normalizedRole, 'Can access:', canAccessCashPayments);
+      
       if (isAuthenticated && token && canAccessCashPayments) {
         try {
           const response = await axios.get('/api/registrations/cash/pending-count', {
             headers: { Authorization: `Bearer ${token}` }
           });
+          console.log('🔔 Demandes espèces pending:', response.data.pendingCount);
           setPendingCashCount(response.data.pendingCount || 0);
         } catch (error) {
-          console.error('Erreur récupération demandes espèces:', error);
+          console.error('❌ Erreur récupération demandes espèces:', error);
           setPendingCashCount(0);
         }
       } else {
+        console.log('🔔 Pas de fetch cash - Auth:', isAuthenticated, 'Token:', !!token, 'Can access:', canAccessCashPayments);
         setPendingCashCount(0);
       }
     };
