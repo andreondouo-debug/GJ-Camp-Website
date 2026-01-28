@@ -78,13 +78,13 @@
 /* ========== HEADER MODERNE ========== */
 .form-header {
   text-align: center;
-  margin-bottom: 48px;
+  margin-bottom: 56px;
   animation: slideDown 0.6s ease-out;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 32px;
 }
 
 .form-header-text {
@@ -92,7 +92,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 12px;
   width: 100%;
 }
 
@@ -170,13 +170,13 @@
 .camp-form {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 40px;
 }
 
 /* ========== SECTIONS COLORÉES ========== */
 .form-section {
   background: rgba(255, 255, 255, 0.03);
-  padding: 32px;
+  padding: 36px;
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: all 0.3s ease;
@@ -193,12 +193,12 @@
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--color-secondary);
-  margin: 0 0 24px 0;
+  margin: 0 0 32px 0;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 12px;
-  line-height: 1.4;
+  gap: 16px;
+  line-height: 1.5;
 }
 
 .section-title::before {
@@ -267,14 +267,14 @@
 .form-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: 24px;
+  margin-bottom: 24px;
 }
 
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
   width: 100%;
 }
 
@@ -330,8 +330,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 14px 24px;
+  gap: 12px;
+  padding: 16px 28px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.05);
   border: 2px solid rgba(255, 255, 255, 0.1);
@@ -365,13 +365,13 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 16px;
   cursor: pointer;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
-  padding: 12px 0;
+  padding: 16px 0;
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -385,12 +385,12 @@
 .payment-buttons {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  margin: 20px 0;
+  gap: 16px;
+  margin: 24px 0;
 }
 
 .payment-btn {
-  padding: 18px 24px;
+  padding: 20px 28px;
   font-size: 1.1rem;
   font-weight: 700;
   border-radius: 16px;
@@ -404,7 +404,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .payment-btn::before {
@@ -487,11 +487,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
+  padding: 14px 0;
   color: rgba(255, 255, 255, 0.8);
   font-size: 1.05rem;
-  line-height: 1.4;
-  gap: 16px;
+  line-height: 1.5;
+  gap: 20px;
 }
 
 .summary-row strong {
@@ -508,7 +508,7 @@
 
 /* ========== BOUTON SOUMISSION ========== */
 .form-actions {
-  margin-top: 40px;
+  margin-top: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
