@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import ModernLogo from '../components/ModernLogo';
 import './CampRegistrationPage.css';
 
 const CampRegistrationPage = () => {
@@ -87,9 +88,7 @@ const CampRegistrationPage = () => {
         <div className="registration-card">
         <div className="registration-card-inner">
           <div className="form-header">
-            <div className="form-logo">
-              <img src="/images/logo.jpg" alt="GJ Camp Logo" />
-            </div>
+            <ModernLogo variant={7} size="large" />
             <div className="form-header-text">
               <h1 className="form-title">Inscription</h1>
               <h2 className="form-subtitle-main">Camp GJ</h2>

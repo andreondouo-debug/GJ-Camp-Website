@@ -80,31 +80,16 @@
   text-align: center;
   margin-bottom: 48px;
   animation: slideDown 0.6s ease-out;
-}
-
-.form-logo {
-  margin-bottom: 24px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  gap: 24px;
 }
 
-.form-logo img {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-  box-shadow: 
-    0 0 0 4px rgba(212, 175, 55, 0.2),
-    0 20px 40px rgba(0, 0, 0, 0.3);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.form-logo img:hover {
-  transform: scale(1.05) rotate(5deg);
-  box-shadow: 
-    0 0 0 4px rgba(212, 175, 55, 0.4),
-    0 30px 60px rgba(0, 0, 0, 0.4);
+.form-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .form-title {
