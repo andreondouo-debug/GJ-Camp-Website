@@ -45,7 +45,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import PasswordResetManagementPage from './pages/PasswordResetManagementPage';
 import CampusLeadersManagement from './pages/CampusLeadersManagement';
 import GuardedRoute from './components/GuardedRoute';
-import CookieConsent from './components/CookieConsent';
+// import CookieConsent from './components/CookieConsent'; // Désactivé - acceptation implicite via politique
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import VersionBadge from './components/VersionBadge';
 import './styles/App.css';
@@ -254,7 +254,7 @@ function App() {
             <Route path="/acces-refuse" element={<AccessDeniedPage />} />
           </Routes>
           <Footer />
-          <CookieConsent />
+          {/* <CookieConsent /> - Désactivé: acceptation implicite par utilisation du site */}
           <VersionBadge />
         </div>
       </AuthProvider>

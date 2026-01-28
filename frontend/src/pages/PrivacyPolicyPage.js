@@ -145,13 +145,28 @@ const PrivacyPolicyPage = () => {
           </section>
 
           <section style={{ marginBottom: '30px' }}>
-            <h2 style={{ color: 'var(--color-red)', marginBottom: '15px' }}>9. Cookies</h2>
-            <p>
-              Nous utilisons des cookies strictement nécessaires au fonctionnement du site (token d'authentification). 
-              Aucun cookie publicitaire ou de tracking tiers n'est utilisé sans votre consentement préalable.
+            <h2 style={{ color: 'var(--color-red)', marginBottom: '15px' }}>9. Cookies et Acceptation Implicite</h2>
+            <p style={{ fontWeight: 'bold', marginBottom: '15px', color: 'var(--color-red)' }}>
+              ⚠️ En utilisant ce site, vous acceptez automatiquement l'utilisation des cookies nécessaires à son fonctionnement.
+            </p>
+            <p style={{ marginBottom: '10px' }}>
+              Nous utilisons uniquement des cookies strictement nécessaires au fonctionnement du site :
+            </p>
+            <ul style={{ marginLeft: '20px', marginBottom: '15px' }}>
+              <li><strong>Token d'authentification :</strong> pour maintenir votre session connectée de manière sécurisée</li>
+              <li><strong>Préférences utilisateur :</strong> pour mémoriser vos choix (paramètres, préférences)</li>
+              <li><strong>Données de session :</strong> pour assurer le bon fonctionnement de l'application</li>
+            </ul>
+            <p style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+              ✅ Aucun cookie publicitaire, de tracking tiers ou de profilage n'est utilisé sur ce site.
+            </p>
+            <p style={{ marginBottom: '10px' }}>
+              Ces cookies sont indispensables au fonctionnement du site et ne peuvent être désactivés sans compromettre votre expérience utilisateur. 
+              Ils ne collectent aucune donnée personnelle identifiable à des fins commerciales.
             </p>
             <p style={{ marginTop: '10px' }}>
-              Vous pouvez gérer vos préférences cookies dans les paramètres de votre navigateur.
+              Si vous souhaitez refuser ces cookies, vous pouvez configurer votre navigateur pour bloquer tous les cookies, 
+              mais cela rendra le site inutilisable (impossibilité de se connecter, perte des fonctionnalités, etc.).
             </p>
           </section>
 
