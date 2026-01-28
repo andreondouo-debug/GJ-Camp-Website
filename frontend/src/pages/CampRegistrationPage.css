@@ -173,6 +173,13 @@
   gap: 40px;
 }
 
+.form-subtitle {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
 /* ========== SECTIONS COLORÉES ========== */
 .form-section {
   background: rgba(255, 255, 255, 0.03);
@@ -283,7 +290,7 @@
 
 .form-field label {
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
   font-size: 1rem;
   letter-spacing: 0.01em;
   line-height: 1.4;
@@ -298,9 +305,9 @@
   width: 100%;
   padding: 16px 20px;
   font-size: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.15);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
   font-family: inherit;
   transition: all 0.3s ease;
@@ -311,14 +318,15 @@
 .form-field textarea:focus {
   outline: none;
   border-color: var(--color-secondary);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
   box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.15);
   transform: translateY(-2px);
 }
 
 .form-field input::placeholder,
 .form-field textarea::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
 }
 
 /* ========== RADIO BUTTONS MODERNES ========== */
@@ -341,7 +349,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   line-height: 1;
   margin: 0;
 }
@@ -371,7 +379,7 @@
   gap: 16px;
   cursor: pointer;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
   padding: 16px 0;
   margin: 0;
   line-height: 1.5;
@@ -399,7 +407,7 @@
   border-radius: 16px;
   border: 2px solid rgba(255, 255, 255, 0.15);
   background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.95);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -462,7 +470,7 @@
 
 .total-price {
   font-size: 1.3rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
   display: flex;
   align-items: baseline;
   justify-content: center;
@@ -491,7 +499,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 0;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 1.05rem;
   line-height: 1.5;
   gap: 20px;
