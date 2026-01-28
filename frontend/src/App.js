@@ -102,8 +102,8 @@ function App() {
             <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
             <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
             <Route path="/resend-verification" element={<ResendVerificationPage />} />
-            <Route path="/inscription-camp" element={<CampRegistrationPage />} />
-            <Route path="/inscription" element={<CampRegistrationNewPage />} />
+            <Route path="/inscription-camp" element={<CampRegistrationNewPage />} />
+            <Route path="/inscription" element={<CampRegistrationPage />} />
             <Route
               path="/inscription-invite"
               element={<GuardedRoute element={<GuestRegistrationPage />} />}
