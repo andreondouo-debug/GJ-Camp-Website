@@ -198,17 +198,20 @@
   align-items: center;
   justify-content: flex-start;
   gap: 16px;
-  line-height: 1.5;
+  line-height: 1;
+  padding: 0;
 }
 
 .section-title::before {
   content: '✨';
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
   flex-shrink: 0;
+  vertical-align: middle;
+  margin-top: -2px;
 }
 
 .form-section:nth-child(1) .section-title {
