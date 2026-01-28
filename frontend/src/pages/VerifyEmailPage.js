@@ -90,8 +90,8 @@ const VerifyEmailPage = () => {
                 <Link to="/login" className="btn-primary" style={{ display: 'inline-block', marginRight: '10px' }}>
                   Retour à la connexion
                 </Link>
-                <Link to="/signup" className="btn-primary" style={{ display: 'inline-block' }}>
-                  Créer un nouveau compte
+                <Link to="/inscription" className="btn-primary" style={{ display: 'inline-block' }}>
+                  🏕️ S'inscrire au camp
                 </Link>
               </div>
             </div>
