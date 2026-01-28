@@ -2,7 +2,7 @@
 // ✅ Gestion du cache par version pour forcer le rechargement de la dernière version
 
 const APP_VERSION = '0.1.1'; // Synchronisé avec package.json
-const BUILD_DATE = '2026-01-28-16h13'; // Format: YYYY-MM-DD
+const BUILD_DATE = '2026-01-28-16h39'; // Format: YYYY-MM-DD
 const CACHE_VERSION = `v${APP_VERSION}-${BUILD_DATE}`;
 const CACHE_NAME = `gj-camp-${CACHE_VERSION}`;
 const urlsToCache = [

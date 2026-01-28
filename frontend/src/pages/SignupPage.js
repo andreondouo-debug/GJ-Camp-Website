@@ -1,156 +1,59 @@
-import React, { useState, useContext } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/App.css';
 
+/**
+ * Page de redirection: Signup classique désactivé
+ * Redirige automatiquement vers l'inscription au camp
+ */
 const SignupPage = () => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    churchWebsite: '',
-  });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [emailChecking, setEmailChecking] = useState(false);
-  const { signup, loading, checkEmailAvailability } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  useEffect(() => {
+    // Redirection automatique après 3 secondes
+    const timer = setTimeout(() => {
+      navigate('/inscription');
+    }, 3000);
 
-  const handleEmailBlur = async () => {
-    if (formData.email && formData.email.includes('@')) {
-      setEmailChecking(true);
-      setEmailError('');
-      const result = await checkEmailAvailability(formData.email);
-      setEmailChecking(false);
-      
-      if (!result.available) {
-        setEmailError('❌ Cet email est déjà utilisé');
-      } else {
-        setEmailError('✅ Email disponible');
-      }
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    
-    // Validation côté client
-    if (formData.password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères');
-      return;
-    }
-
-    // Vérifier l'unicité de l'email avant l'inscription
-    if (emailError && emailError.includes('❌')) {
-      setError('Cet email est déjà utilisé. Veuillez en choisir un autre.');
-      return;
-    }
-    
-    const result = await signup(
-      formData.firstName,
-      formData.lastName,
-      formData.email,
-      formData.password,
-      formData.churchWebsite
-    );
-    if (result.success) {
-      setSuccess('✅ Inscription réussie ! Un email de vérification a été envoyé à ' + formData.email + '.');
-      // Rediriger vers la page d'accueil après 2 secondes
-      setTimeout(() => {
-        navigate('/', { state: { signupSuccess: true, email: formData.email } });
-      }, 2000);
-    } else {
-      setError(result.error);
-    }
-  };
+    return () => clearTimeout(timer);
+  }, [navigate]);
 
   return (
-    <div className="container">
-      <div className="hero" style={{ paddingTop: '60px' }}>
-        <div className="form-container">
-          <h2>S'INSCRIRE</h2>
-          {error && <div className="form-error">{error}</div>}
-          {success && <div className="form-success">{success}</div>}
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Prénom</label>
-              <input
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-              />
+    <div className="registration-page-wrapper">
+      <div className="registration-page">
+        <div className="registration-card" style={{maxWidth: '600px'}}>
+          <div className="registration-card-inner" style={{textAlign: 'center', padding: '3rem'}}>
+            <div style={{fontSize: '4rem', marginBottom: '1rem'}}>🏕️</div>
+            <h1 className="form-title" style={{marginBottom: '1rem'}}>
+              Inscription désactivée
+            </h1>
+            <p style={{fontSize: '1.1rem', color: '#666', marginBottom: '2rem', lineHeight: '1.6'}}>
+              La création de compte classique n'est plus disponible.
+              <br /><br />
+              <strong>Pour créer votre compte, inscrivez-vous au Camp GJ !</strong>
+              <br /><br />
+              Votre compte sera automatiquement créé après validation du paiement.
+            </p>
+            <div style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              padding: '1rem',
+              borderRadius: '12px',
+              marginBottom: '2rem'
+            }}>
+              ✨ Redirection automatique dans 3 secondes...
             </div>
-            <div className="form-group">
-              <label>Nom</label>
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                onBlur={handleEmailBlur}
-                required
-              />
-              {emailChecking && <small style={{color: '#666'}}>🔍 Vérification en cours...</small>}
-              {emailError && (
-                <small style={{color: emailError.includes('✅') ? '#27ae60' : '#e74c3c', fontWeight: 'bold'}}>
-                  {emailError}
-                </small>
-              )}
-            </div>
-            <div className="form-group">
-              <label>Mot de passe (minimum 6 caractères)</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                minLength={6}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Site web de l'église (optionnel)</label>
-              <input
-                type="url"
-                name="churchWebsite"
-                value={formData.churchWebsite}
-                onChange={handleChange}
-              />
-            </div>
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'Inscription en cours...' : 'S\'inscrire'}
+            <button 
+              className="btn-primary btn-large"
+              onClick={() => navigate('/inscription')}
+              style={{
+                background: 'linear-gradient(135deg, #d4af37, #f0d06f)',
+                color: '#001a4d'
+              }}
+            >
+              🏕️ Aller à l'inscription camp
             </button>
-          </form>
-          <p style={{ marginTop: '20px', textAlign: 'center' }}>
-            Déjà inscrit? <Link to="/login">Se connecter ici</Link>
-          </p>
-          <p style={{ marginTop: '10px', textAlign: 'center', fontSize: '14px' }}>
-            Email de vérification non reçu? <Link to="/resend-verification">Renvoyer l'email</Link>
-          </p>
+          </div>
         </div>
       </div>
     </div>

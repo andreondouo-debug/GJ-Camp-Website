@@ -65,7 +65,7 @@ const LoginPage = () => {
             </button>
           </form>
           <p style={{ marginTop: '20px', textAlign: 'center' }}>
-            Pas encore inscrit? <Link to="/signup">S'inscrire ici</Link>
+            Pas encore inscrit? <Link to="/inscription">🏕️ S'inscrire au camp</Link>
           </p>
           <p style={{ marginTop: '10px', textAlign: 'center', fontSize: '14px' }}>
             Email non vérifié? <Link to="/resend-verification">Renvoyer l'email de vérification</Link>
