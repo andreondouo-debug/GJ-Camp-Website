@@ -1,0 +1,302 @@
+const Registration = require('../models/Registration');
+const User = require('../models/User');
+const TransactionLog = require('../models/TransactionLog');
+const Settings = require('../models/Settings');
+const paypalService = require('../services/paypalService');
+const payoutService = require('../services/payoutService');
+const { sendCampRegistrationConfirmation } = require('../config/email');
+const pushService = require('../services/pushService');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+/**
+ * 🎯 NOUVELLE ROUTE: Inscription camp avec création automatique de compte
+ * 
+ * Workflow:
+ * 1. Valider les données du formulaire
+ * 2. Vérifier le paiement PayPal
+ * 3. SI paiement réussi → Créer compte User (ou lier si existe)
+ * 4. Créer inscription Registration
+ * 5. Connecter automatiquement l'utilisateur
+ * 
+ * SI paiement échoue → RIEN n'est créé, utilisateur peut réessayer
+ */
+exports.createCampRegistrationWithAccount = async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      password, // Nouveau: pour créer le compte
+      sex,
+      dateOfBirth,
+      address,
+      phone,
+      refuge,
+      hasAllergies,
+      allergyDetails,
+      amountPaid,
+      paymentDetails
+    } = req.body;
+
+    // ===== VALIDATION DES DONNÉES =====
+    console.log('📝 Nouvelle inscription camp avec création de compte pour:', email);
+
+    // Validation du refuge
+    const validRefuges = ['Lorient', 'Laval', 'Amiens', 'Nantes', 'Autres'];
+    if (!refuge || !validRefuges.includes(refuge)) {
+      return res.status(400).json({ message: 'Veuillez sélectionner un refuge CRPT valide.' });
+    }
+
+    // Validation du sexe
+    if (!sex || !['M', 'F'].includes(sex)) {
+      return res.status(400).json({ message: 'Veuillez sélectionner un sexe valide (M ou F).' });
+    }
+
+    // Validation email
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: 'Email invalide.' });
+    }
+
+    // Validation mot de passe (seulement si pas d'utilisateur existant)
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (!existingUser && (!password || password.length < 6)) {
+      return res.status(400).json({ 
+        message: 'Le mot de passe doit contenir au moins 6 caractères.' 
+      });
+    }
+
+    // Récupérer les paramètres
+    const settings = await Settings.findOne();
+    const minAmount = settings?.settings?.registrationMinAmount || 20;
+    const maxAmount = settings?.settings?.registrationMaxAmount || 120;
+    const paypalMode = settings?.settings?.paypalMode || 'sandbox';
+
+    // Validation du montant payé
+    const paid = parseFloat(amountPaid);
+    if (isNaN(paid) || paid < minAmount || paid > maxAmount) {
+      return res.status(400).json({ 
+        message: `Le montant doit être entre ${minAmount}€ et ${maxAmount}€.` 
+      });
+    }
+
+    // ===== VÉRIFICATION PAIEMENT PAYPAL =====
+    if (!paymentDetails || !paymentDetails.orderID) {
+      return res.status(400).json({ 
+        message: '❌ Détails de paiement PayPal manquants' 
+      });
+    }
+
+    // Vérifier transaction non dupliquée
+    try {
+      await paypalService.checkDuplicateTransaction(
+        paymentDetails.orderID, 
+        Registration
+      );
+    } catch (error) {
+      return res.status(409).json({ 
+        message: error.message
+      });
+    }
+
+    // ✅ VÉRIFIER LE PAIEMENT AUPRÈS DE PAYPAL
+    console.log('🔍 Vérification PayPal pour orderID:', paymentDetails.orderID);
+    const verification = await paypalService.verifyPayment(
+      paymentDetails.orderID
+    );
+
+    console.log('📋 Résultat vérification:', verification);
+
+    if (!verification.verified) {
+      console.error('❌ Paiement non vérifié:', verification.error);
+      return res.status(400).json({ 
+        message: '❌ Paiement invalide ou non complété. Aucun compte créé.',
+        error: verification.error,
+        details: verification
+      });
+    }
+
+    // Vérifier montant
+    if (!verification.isDevelopmentMode && verification.amount !== paid) {
+      console.error('❌ Montant incohérent:', {
+        claimed: paid,
+        actual: verification.amount
+      });
+      return res.status(400).json({ 
+        message: `❌ Le montant payé ne correspond pas (PayPal: ${verification.amount}€, Formulaire: ${paid}€)`
+      });
+    }
+
+    const verifiedAmount = verification.isDevelopmentMode ? paid : verification.amount;
+    const totalPrice = 120;
+    const remaining = totalPrice - verifiedAmount;
+    const status = remaining === 0 ? 'paid' : (verifiedAmount > 0 ? 'partial' : 'unpaid');
+
+    // ===== 🎉 PAIEMENT RÉUSSI → CRÉER/RÉCUPÉRER LE COMPTE USER =====
+    let user;
+    let newToken = null;
+    let isNewUser = false;
+
+    if (existingUser) {
+      // Utilisateur existe déjà → lier l'inscription
+      console.log('👤 Utilisateur existe déjà:', email);
+      user = existingUser;
+      
+      // Mettre à jour les infos si nécessaires
+      if (!user.phoneNumber) user.phoneNumber = phone;
+      if (!user.ministryRole) user.ministryRole = refuge;
+      await user.save();
+      
+    } else {
+      // 🆕 CRÉER UN NOUVEAU COMPTE
+      console.log('✨ Création d\'un nouveau compte pour:', email);
+      isNewUser = true;
+
+      // Hasher le mot de passe
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      user = new User({
+        firstName,
+        lastName,
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        role: 'utilisateur',
+        phoneNumber: phone,
+        ministryRole: refuge,
+        isEmailVerified: true, // ✅ Email vérifié automatiquement (paiement réussi)
+        emailVerifiedAt: new Date(),
+        isActive: true
+      });
+
+      await user.save();
+      console.log('✅ Compte créé avec succès pour:', user.email);
+
+      // Générer un token JWT pour connexion automatique
+      newToken = jwt.sign(
+        { 
+          userId: user._id, 
+          role: user.role,
+          isEmailVerified: user.isEmailVerified,
+          firstName: user.firstName,
+          lastName: user.lastName
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+    }
+
+    // ===== CRÉER L'INSCRIPTION =====
+    const registration = new Registration({
+      user: user._id,
+      firstName: firstName || user.firstName,
+      lastName: lastName || user.lastName,
+      email: email || user.email,
+      sex,
+      dateOfBirth,
+      address,
+      phone,
+      refuge,
+      hasAllergies: !!hasAllergies,
+      allergyDetails: hasAllergies ? allergyDetails : null,
+      totalPrice,
+      amountPaid: verifiedAmount,
+      amountRemaining: remaining,
+      paymentStatus: status,
+      paypalMode: paypalMode,
+      paymentDetails: {
+        orderID: verification.orderID,
+        payerID: paymentDetails.payerID,
+        status: verification.status,
+        verifiedAt: new Date(),
+        payerEmail: verification.payerEmail,
+        isDevelopmentMode: verification.isDevelopmentMode,
+        amountPaid: verifiedAmount
+      }
+    });
+
+    await registration.save();
+    console.log('✅ Inscription créée:', registration._id);
+
+    // ===== LOGGER LA TRANSACTION =====
+    try {
+      await TransactionLog.create({
+        orderID: verification.orderID,
+        userId: user._id,
+        registrationId: registration._id,
+        amount: verifiedAmount,
+        currency: 'EUR',
+        status: verification.status,
+        payerEmail: verification.payerEmail,
+        payerName: verification.payerName,
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        verificationResult: verification,
+        isDevelopmentMode: verification.isDevelopmentMode
+      });
+      console.log('✅ Transaction loggée:', verification.orderID);
+    } catch (logError) {
+      console.error('⚠️ Erreur logging transaction:', logError.message);
+    }
+
+    // ===== ENVOYER EMAIL DE CONFIRMATION =====
+    try {
+      await sendCampRegistrationConfirmation(
+        registration.email,
+        registration.firstName,
+        registration
+      );
+      console.log('✅ Email de confirmation envoyé à:', registration.email);
+    } catch (emailError) {
+      console.error('⚠️ Erreur email:', emailError.message);
+    }
+
+    // ===== CRÉER PAYOUT POUR REDISTRIBUTION =====
+    try {
+      const payout = await payoutService.createPayoutForRegistration(registration._id, user._id);
+      console.log('✅ Payout créé:', payout);
+    } catch (payoutError) {
+      console.error('⚠️ Erreur payout:', payoutError.message);
+    }
+
+    // ===== NOTIFICATION PUSH =====
+    pushService.notifyRegistrationUpdate(user._id, 'confirmed').catch(err => {
+      console.error('❌ Erreur notification push:', err);
+    });
+
+    // ===== RÉPONSE SUCCÈS =====
+    const responseData = {
+      message: isNewUser 
+        ? '🎉 Compte créé et inscription réussie !' 
+        : '✅ Inscription réussie !',
+      registration: {
+        id: registration._id,
+        amountPaid: registration.amountPaid,
+        amountRemaining: registration.amountRemaining,
+        status: registration.paymentStatus
+      },
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified
+      }
+    };
+
+    // Ajouter token si nouveau compte (connexion automatique)
+    if (isNewUser && newToken) {
+      responseData.token = newToken;
+      responseData.message = '🎉 Compte créé et inscription réussie ! Vous êtes maintenant connecté.';
+    }
+
+    res.status(201).json(responseData);
+
+  } catch (error) {
+    console.error('❌ Erreur inscription camp avec compte:', error);
+    res.status(500).json({ 
+      message: 'Erreur lors de l\'inscription',
+      error: error.message 
+    });
+  }
+};

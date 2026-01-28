@@ -5,6 +5,9 @@ const registrationController = require('../controllers/registrationController');
 const authorize = require('../middleware/authorize');
 const requireVerifiedEmail = require('../middleware/requireVerifiedEmail');
 
+// Route publique pour inscription camp avec création automatique de compte
+router.post('/camp-with-account', registrationController.createCampRegistrationWithAccount);
+
 // Routes protégées (utilisateur connecté)
 router.post('/', auth, requireVerifiedEmail, registrationController.createRegistration);
 router.get('/mes-inscriptions', auth, registrationController.getUserRegistrations);

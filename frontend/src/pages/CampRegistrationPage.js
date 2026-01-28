@@ -5,13 +5,15 @@ import { AuthContext } from '../context/AuthContext';
 import '../styles/App.css';
 
 const CampRegistrationPage = () => {
-  const { token, user } = useContext(AuthContext);
+  const { token, user, login } = useContext(AuthContext);
   const navigate = useNavigate();
   
   const [form, setForm] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     email: user?.email || '',
+    password: '', // Nouveau: mot de passe pour créer compte
+    confirmPassword: '', // Nouveau: confirmation mot de passe
     sex: '',
     dateOfBirth: '',
     address: '',
@@ -42,21 +44,34 @@ const CampRegistrationPage = () => {
     setError(null);
 
     try {
-      if (!token) {
-        setError('Vous devez être connecté pour vous inscrire au camp.');
-        setLoading(false);
-        return;
+      // Validation mot de passe (seulement si pas déjà connecté)
+      if (!user) {
+        if (form.password.length < 6) {
+          setError('Le mot de passe doit contenir au moins 6 caractères.');
+          setLoading(false);
+          return;
+        }
+        if (form.password !== form.confirmPassword) {
+          setError('Les mots de passe ne correspondent pas.');
+          setLoading(false);
+          return;
+        }
       }
 
-      const response = await axios.post('/api/registration', form, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await axios.post('/api/registrations/camp-with-account', form, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
 
       setMessage(response.data.message || 'Inscription réussie !');
       
+      // Si compte créé, connecter automatiquement
+      if (response.data.token && response.data.user) {
+        await login(response.data.user, response.data.token);
+      }
+      
       // Rediriger vers la page d'accueil après 2 secondes
       setTimeout(() => {
-        navigate('/');
+        navigate('/tableau-de-bord');
       }, 2000);
       
     } catch (err) {
@@ -65,24 +80,6 @@ const CampRegistrationPage = () => {
       setLoading(false);
     }
   };
-
-  if (!user) {
-    return (
-      <div className="registration-page-wrapper">
-        <div className="registration-page">
-          <div className="registration-card">
-            <div className="registration-card-inner">
-              <h1 className="form-title">Inscription Camp</h1>
-              <p className="form-subtitle">Vous devez être connecté pour vous inscrire.</p>
-              <button className="btn-primary" onClick={() => navigate('/login')}>
-                Se connecter
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="registration-page-wrapper">
@@ -208,6 +205,42 @@ const CampRegistrationPage = () => {
               </div>
             </div>
           </div>
+
+          {!user && (
+            <div className="form-section">
+              <h3 className="section-title">🔐 Créer votre compte</h3>
+              <p className="form-subtitle" style={{marginBottom: '1rem', color: '#666'}}>
+                Un compte sera créé automatiquement après validation du paiement
+              </p>
+              
+              <div className="form-row">
+                <div className="form-field">
+                  <label>Mot de passe * (min. 6 caractères)</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    required={!user}
+                    minLength="6"
+                  />
+                </div>
+                <div className="form-field">
+                  <label>Confirmer le mot de passe *</label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={form.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    required={!user}
+                    minLength="6"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="form-section">
             <h3 className="section-title">Refuge & Allergies</h3>

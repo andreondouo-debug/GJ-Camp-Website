@@ -102,9 +102,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
+  const login = async (emailOrUser, passwordOrToken) => {
     setLoading(true);
     try {
+      // Si user object passé avec token → connexion directe (après inscription camp)
+      if (typeof emailOrUser === 'object' && emailOrUser.email) {
+        const newUser = emailOrUser;
+        const newToken = passwordOrToken;
+        
+        setToken(newToken);
+        setUser(newUser);
+        localStorage.setItem('token', newToken);
+        localStorage.setItem('user', JSON.stringify(newUser));
+        
+        console.log('✅ Connexion automatique réussie');
+        setLoading(false);
+        return { success: true };
+      }
+      
+      // Sinon, login classique avec email/password
+      const email = emailOrUser;
+      const password = passwordOrToken;
+      
       const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
       const { token: newToken, user: newUser } = response.data;
       setToken(newToken);

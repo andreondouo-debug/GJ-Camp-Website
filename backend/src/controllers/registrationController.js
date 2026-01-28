@@ -6,6 +6,12 @@ const paypalService = require('../services/paypalService');
 const payoutService = require('../services/payoutService');
 const { sendCampRegistrationConfirmation } = require('../config/email');
 const pushService = require('../services/pushService');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+// Importer la fonction de création de compte avec inscription
+const { createCampRegistrationWithAccount } = require('./campRegistrationWithAccount');
+exports.createCampRegistrationWithAccount = createCampRegistrationWithAccount;
 
 // Créer une inscription au camp
 exports.createRegistration = async (req, res) => {

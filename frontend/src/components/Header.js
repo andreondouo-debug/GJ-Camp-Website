@@ -269,7 +269,7 @@ const Header = () => {
               ) : (
                 <>
                   <li><Link to="/login" onClick={closeMobileMenu}>🔑 Connexion</Link></li>
-                  <li><Link to="/signup" onClick={closeMobileMenu}><button className="btn-signup">S'INSCRIRE</button></Link></li>
+                  <li><Link to="/inscription" onClick={closeMobileMenu}><button className="btn-signup">🏕️ INSCRIPTION CAMP</button></Link></li>
                 </>
               )}
             </div>
@@ -302,8 +302,8 @@ const Header = () => {
               <Link to="/login" className="auth-link" title="Connexion">
                 <UserIcon size={24} color="#d4af37" />
               </Link>
-              <Link to="/signup">
-                <button className="btn-signup">S'INSCRIRE</button>
+              <Link to="/inscription">
+                <button className="btn-signup">🏕️ INSCRIPTION CAMP</button>
               </Link>
             </>
           )}

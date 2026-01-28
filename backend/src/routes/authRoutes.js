@@ -21,7 +21,13 @@ const loginValidation = [
 ];
 
 // Routes publiques
-router.post('/signup', signupValidation, authController.signup);
+// ❌ SIGNUP DÉSACTIVÉ: Utiliser l'inscription au camp pour créer un compte
+router.post('/signup', (req, res) => {
+  res.status(410).json({ 
+    message: '❌ La création de compte classique est désactivée. Veuillez vous inscrire au camp pour créer votre compte.',
+    redirectTo: '/inscription'
+  });
+});
 router.post('/login', loginValidation, authController.login);
 router.post('/check-email', authController.checkEmail);
 router.get('/verify-email/:token', authController.verifyEmail);
