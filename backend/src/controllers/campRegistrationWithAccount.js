@@ -242,6 +242,46 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
     await registration.save();
     console.log('✅ Inscription créée:', registration._id);
 
+    // ===== LOGGER LE CONSENTEMENT RGPD =====
+    try {
+      const ConsentLog = require('../models/ConsentLog');
+      
+      // Logger consentement traitement données personnelles
+      await ConsentLog.logConsent(
+        user._id,
+        'inscription',
+        true,
+        req.ip,
+        req.get('user-agent'),
+        { 
+          registrationId: registration._id.toString(),
+          paypalMode,
+          consentVersion: '1.1',
+          privacyPolicyAccepted: true
+        }
+      );
+      
+      // Logger consentement données de santé si allergies
+      if (hasAllergies && allergyDetails) {
+        await ConsentLog.logConsent(
+          user._id,
+          'donnees_sante',
+          true,
+          req.ip,
+          req.get('user-agent'),
+          { 
+            registrationId: registration._id.toString(),
+            allergyType: 'alimentaire'
+          }
+        );
+      }
+      
+      console.log('✅ Consentements RGPD loggés (Article 30)');
+    } catch (consentError) {
+      console.error('⚠️ Erreur logging consentement:', consentError.message);
+      // Ne pas bloquer l'inscription si logging échoue
+    }
+
     // ===== LOGGER LA TRANSACTION =====
     try {
       await TransactionLog.create({

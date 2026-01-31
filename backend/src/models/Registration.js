@@ -63,6 +63,39 @@ const registrationSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  // RGPD - Consentement parental pour mineurs <15 ans (Article 8 RGPD)
+  parentalConsent: {
+    isMinor: {
+      type: Boolean,
+      default: false,
+      comment: 'True si participant a moins de 15 ans à la date d\'inscription'
+    },
+    parentName: {
+      type: String,
+      trim: true,
+      comment: 'Nom complet du parent ou tuteur légal'
+    },
+    parentEmail: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      comment: 'Email du parent pour contact légal'
+    },
+    parentPhone: {
+      type: String,
+      trim: true,
+      comment: 'Téléphone du parent'
+    },
+    consentGivenAt: {
+      type: Date,
+      comment: 'Date et heure du consentement parental'
+    },
+    consentConfirmed: {
+      type: Boolean,
+      default: false,
+      comment: 'Parent a explicitement accepté le traitement des données'
+    }
+  },
   totalPrice: {
     type: Number,
     default: 120

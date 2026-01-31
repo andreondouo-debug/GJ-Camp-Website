@@ -12,7 +12,7 @@ const PrivacyPolicyPage = () => {
         
         <div style={{ lineHeight: '1.8', fontSize: '15px', textAlign: 'justify' }}>
           <p style={{ marginBottom: '20px', color: '#666' }}>
-            <strong>Dernière mise à jour :</strong> 28 novembre 2025 | <strong>Version :</strong> 1.0
+            <strong>Dernière mise à jour :</strong> 31 janvier 2026 | <strong>Version :</strong> 1.1
           </p>
 
           <section style={{ marginBottom: '30px' }}>
@@ -21,10 +21,13 @@ const PrivacyPolicyPage = () => {
               Le responsable du traitement des données personnelles collectées sur ce site est :
             </p>
             <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
-              <li><strong>Organisation :</strong> Génération Josué (GJ Camp)</li>
-              <li><strong>Email de contact :</strong> contact@gj-camp.fr</li>
-              <li><strong>Délégué à la protection des données (DPO) :</strong> dpo@gj-camp.fr</li>
+              <li><strong>Organisation :</strong> Génération Josué (GJ Camp) - Association cultuelle</li>
+              <li><strong>Email de contact RGPD :</strong> contact@gjsdecrpt.fr</li>
+              <li><strong>Responsable du traitement :</strong> Équipe GJ Camp</li>
             </ul>
+            <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+              <em>Note : En tant qu'association de petite taille (moins de 250 salariés), nous ne sommes pas tenus de désigner un Délégué à la Protection des Données (DPO). Pour toute question relative à vos données personnelles, contactez-nous à l'adresse ci-dessus.</em>
+            </p>
           </section>
 
           <section style={{ marginBottom: '30px' }}>
@@ -54,6 +57,9 @@ const PrivacyPolicyPage = () => {
               <li>Informations de santé (allergies alimentaires uniquement dans le cadre des inscriptions camp)</li>
               <li>Ces données ne sont collectées qu'avec votre consentement explicite et sont strictement nécessaires pour assurer votre sécurité</li>
             </ul>
+            <p style={{ marginTop: '10px', fontWeight: 'bold', color: 'var(--color-red)' }}>
+              ⚠️ Mineurs de moins de 15 ans : Le consentement d'un parent ou tuteur légal est obligatoire conformément à l'Article 8 du RGPD.
+            </p>
 
             <h3 style={{ fontSize: '16px', marginTop: '15px', marginBottom: '10px' }}>2.4 Données techniques</h3>
             <ul style={{ marginLeft: '20px' }}>
@@ -93,23 +99,36 @@ const PrivacyPolicyPage = () => {
             <ul style={{ marginLeft: '20px' }}>
               <li><strong>Comptes actifs :</strong> tant que votre compte est actif</li>
               <li><strong>Comptes non vérifiés :</strong> suppression automatique après 30 jours</li>
-              <li><strong>Inscriptions camp :</strong> 3 ans après la fin du camp (obligations comptables)</li>
-              <li><strong>Données de santé :</strong> suppression immédiate après le camp</li>
-              <li><strong>Logs de consentement :</strong> 3 ans (preuve de conformité RGPD)</li>
-              <li><strong>Comptes supprimés :</strong> anonymisation immédiate, conservation uniquement des données requises légalement</li>
+              <li><strong>Inscriptions camp :</strong> 3 ans après la fin du camp (obligations comptables et légales)</li>
+              <li><strong>Données de santé (allergies) :</strong> 1 an après la fin du camp (traçabilité en cas d'incident médical, puis suppression automatique)</li>
+              <li><strong>Logs de consentement :</strong> 3 ans (preuve de conformité RGPD, Article 30)</li>
+              <li><strong>Comptes supprimés :</strong> anonymisation immédiate des données personnelles, conservation uniquement des données requises légalement (comptabilité)</li>
+              <li><strong>Logs de sécurité :</strong> 6 mois maximum</li>
             </ul>
           </section>
 
           <section style={{ marginBottom: '30px' }}>
-            <h2 style={{ color: 'var(--color-red)', marginBottom: '15px' }}>6. Partage des données</h2>
+            <h2 style={{ color: 'var(--color-red)', marginBottom: '15px' }}>6. Partage des données et sous-traitants</h2>
             <p>Nous ne vendons jamais vos données personnelles. Vos données peuvent être partagées uniquement dans les cas suivants :</p>
-            <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
-              <li><strong>Prestataires techniques :</strong> hébergement (MongoDB Atlas), emails (Brevo), avec garanties contractuelles RGPD</li>
-              <li><strong>Autorités légales :</strong> sur réquisition judiciaire uniquement</li>
-              <li><strong>Organisateurs du camp :</strong> données strictement nécessaires à l'organisation (avec votre consentement)</li>
+            
+            <h3 style={{ fontSize: '16px', marginTop: '15px', marginBottom: '10px' }}>6.1 Sous-traitants techniques (conformes RGPD)</h3>
+            <ul style={{ marginLeft: '20px' }}>
+              <li><strong>MongoDB Atlas</strong> (hébergement base de données) - Localisation : UE ou USA avec clauses contractuelles types</li>
+              <li><strong>Brevo</strong> (envoi emails transactionnels) - Localisation : France (UE) ✅</li>
+              <li><strong>Cloudinary</strong> (stockage photos) - Localisation : USA avec garanties RGPD</li>
+              <li><strong>PayPal</strong> (traitement paiements) - Localisation : USA, Privacy Shield successeur</li>
+              <li><strong>Vercel</strong> (hébergement frontend) - Localisation : USA/UE avec garanties RGPD</li>
+              <li><strong>Render</strong> (hébergement backend) - Localisation : USA/UE avec clauses contractuelles types</li>
             </ul>
-            <p style={{ marginTop: '10px' }}>
-              Tous nos sous-traitants sont situés dans l'Union Européenne ou offrent des garanties équivalentes (clauses contractuelles types).
+            
+            <h3 style={{ fontSize: '16px', marginTop: '15px', marginBottom: '10px' }}>6.2 Autres destinataires</h3>
+            <ul style={{ marginLeft: '20px' }}>
+              <li><strong>Autorités légales :</strong> sur réquisition judiciaire uniquement</li>
+              <li><strong>Organisateurs du camp :</strong> données strictement nécessaires à l'organisation (prénom, nom, allergies)</li>
+            </ul>
+            
+            <p style={{ marginTop: '10px', fontWeight: 'bold' }}>
+              Tous nos sous-traitants ont signé des engagements de conformité RGPD (clauses contractuelles types de la Commission européenne pour transferts hors UE).
             </p>
           </section>
 
@@ -127,7 +146,10 @@ const PrivacyPolicyPage = () => {
               <li><strong>Droit de réclamation :</strong> déposer une plainte auprès de la CNIL</li>
             </ul>
             <p style={{ marginTop: '15px' }}>
-              Pour exercer vos droits, rendez-vous sur votre <Link to="/gestion-donnees" style={{ color: 'var(--color-red)' }}>page de gestion des données</Link> ou contactez-nous à : <strong>dpo@gj-camp.fr</strong>
+              Pour exercer vos droits, rendez-vous sur votre <Link to="/gestion-donnees" style={{ color: 'var(--color-red)' }}>page de gestion des données</Link> ou contactez-nous à : <strong>contact@gjsdecrpt.fr</strong>
+            </p>
+            <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+              <em>Nous nous engageons à répondre à vos demandes dans un délai maximum de 30 jours conformément à l'Article 12.3 du RGPD. En cas de demande complexe, ce délai peut être prolongé de 2 mois avec justification.</em>
             </p>
           </section>
 
@@ -173,8 +195,17 @@ const PrivacyPolicyPage = () => {
           <section style={{ marginBottom: '30px' }}>
             <h2 style={{ color: 'var(--color-red)', marginBottom: '15px' }}>10. Transferts de données hors UE</h2>
             <p>
-              Nos données sont hébergées sur MongoDB Atlas. En cas de transfert hors UE, nous nous assurons que des garanties 
-              appropriées sont en place (clauses contractuelles types de la Commission européenne).
+              Certains de nos prestataires peuvent stocker ou traiter vos données en dehors de l'Union Européenne :
+            </p>
+            <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
+              <li><strong>MongoDB Atlas :</strong> Données hébergées en UE par défaut, transferts hors UE possibles avec clauses contractuelles types</li>
+              <li><strong>Cloudinary (USA) :</strong> Stockage photos avec garanties RGPD et clauses contractuelles types</li>
+              <li><strong>PayPal (USA) :</strong> Traitement paiements avec mécanismes de transfert conformes (successeur Privacy Shield)</li>
+              <li><strong>Vercel/Render (USA/UE) :</strong> Hébergement avec clauses contractuelles types et certification ISO 27001</li>
+            </ul>
+            <p style={{ marginTop: '10px' }}>
+              Tous ces transferts sont encadrés par les <strong>clauses contractuelles types de la Commission européenne</strong> (Article 46 RGPD), 
+              garantissant un niveau de protection équivalent à celui de l'Union Européenne.
             </p>
           </section>
 
@@ -187,12 +218,20 @@ const PrivacyPolicyPage = () => {
           </section>
 
           <section style={{ marginBottom: '30px' }}>
-            <h2 style={{ color: 'var(--color-red)', marginBottom: '15px' }}>12. Contact</h2>
+            <h2 style={{ color: 'var(--color-red)', marginBottom: '15px' }}>12. Contact et réclamations</h2>
             <p>Pour toute question concernant cette politique de confidentialité ou vos données personnelles :</p>
             <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
-              <li><strong>Email DPO :</strong> dpo@gj-camp.fr</li>
-              <li><strong>Email général :</strong> contact@gj-camp.fr</li>
-              <li><strong>CNIL :</strong> <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-red)' }}>www.cnil.fr</a></li>
+              <li><strong>Email RGPD :</strong> contact@gjsdecrpt.fr (réponse sous 30 jours)</li>
+              <li><strong>Site web :</strong> <a href="https://gjsdecrpt.fr" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-red)' }}>gjsdecrpt.fr</a></li>
+            </ul>
+            <p style={{ marginTop: '15px' }}>
+              <strong>Droit de réclamation :</strong> Si vous estimez que vos droits ne sont pas respectés, vous pouvez déposer une réclamation auprès de la CNIL :
+            </p>
+            <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
+              <li><strong>CNIL</strong> (Commission Nationale de l'Informatique et des Libertés)</li>
+              <li>3 Place de Fontenoy - TSA 80715 - 75334 PARIS CEDEX 07</li>
+              <li>Téléphone : 01 53 73 22 22</li>
+              <li>Site : <a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-red)' }}>www.cnil.fr/fr/plaintes</a></li>
             </ul>
           </section>
 
