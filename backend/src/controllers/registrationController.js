@@ -1012,3 +1012,197 @@ exports.getPendingCashPaymentsCount = async (req, res) => {
     res.status(500).json({ message: 'Erreur serveur' });
   }
 };
+
+// 👤 Créer une inscription sans paiement (admin uniquement)
+exports.createRegistrationWithoutPayment = async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      sex,
+      dateOfBirth,
+      address,
+      phone,
+      refuge,
+      hasAllergies,
+      allergyDetails
+    } = req.body;
+
+    console.log('👤 Admin crée inscription sans paiement pour:', email);
+
+    // ===== VALIDATIONS =====
+    
+    // Validation du refuge
+    const validRefuges = ['Lorient', 'Laval', 'Amiens', 'Nantes', 'Autres'];
+    if (!refuge || !validRefuges.includes(refuge)) {
+      return res.status(400).json({ 
+        message: 'Veuillez sélectionner un refuge CRPT valide.' 
+      });
+    }
+
+    // Validation du sexe
+    if (!sex || !['M', 'F'].includes(sex)) {
+      return res.status(400).json({ 
+        message: 'Veuillez sélectionner un sexe valide (M ou F).' 
+      });
+    }
+
+    // Validation email
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: 'Email invalide.' });
+    }
+
+    // Vérifier si l'utilisateur existe déjà
+    let user = await User.findOne({ email: email.toLowerCase() });
+    
+    if (user) {
+      // Vérifier si l'utilisateur a déjà une inscription
+      const existingRegistration = await Registration.findOne({ 
+        user: user._id 
+      });
+      
+      if (existingRegistration) {
+        return res.status(400).json({ 
+          message: `❌ Cet utilisateur a déjà une inscription (${existingRegistration.status})` 
+        });
+      }
+    } else {
+      // Créer un nouveau compte utilisateur
+      
+      // Validation de force du mot de passe
+      if (!password) {
+        return res.status(400).json({ 
+          message: 'Le mot de passe est requis pour créer un compte.' 
+        });
+      }
+      
+      const passwordErrors = [];
+      if (password.length < 8) {
+        passwordErrors.push('au moins 8 caractères');
+      }
+      if (!/[A-Z]/.test(password)) {
+        passwordErrors.push('une lettre majuscule');
+      }
+      if (!/[a-z]/.test(password)) {
+        passwordErrors.push('une lettre minuscule');
+      }
+      if (!/[0-9]/.test(password)) {
+        passwordErrors.push('un chiffre');
+      }
+      if (!/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(password)) {
+        passwordErrors.push('un caractère spécial (!@#$%&*...)');
+      }
+      
+      if (passwordErrors.length > 0) {
+        return res.status(400).json({ 
+          message: `🔒 Mot de passe trop faible ! Il doit contenir : ${passwordErrors.join(', ')}.`
+        });
+      }
+
+      // Créer l'utilisateur
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      user = new User({
+        firstName,
+        lastName,
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        role: 'utilisateur',
+        isEmailVerified: true, // Auto-vérification pour admin
+        emailVerifiedAt: new Date()
+      });
+
+      await user.save();
+      console.log('✅ Compte utilisateur créé:', user._id);
+    }
+
+    // Récupérer les paramètres
+    const settings = await Settings.findOne();
+    const maxAmount = settings?.settings?.registrationMaxAmount || 120;
+
+    // ===== CRÉER L'INSCRIPTION (statut: pending, montant: 0) =====
+    const registration = new Registration({
+      user: user._id,
+      isGuest: false,
+      firstName,
+      lastName,
+      email: email.toLowerCase(),
+      sex,
+      dateOfBirth,
+      address,
+      phone,
+      refuge,
+      hasAllergies,
+      allergyDetails: hasAllergies ? allergyDetails : undefined,
+      amountPaid: 0,
+      amountRemaining: maxAmount,
+      paymentMethod: 'pending', // Statut spécial
+      status: 'pending', // En attente de paiement
+      consent: {
+        privacyPolicy: true,
+        photoRelease: true,
+        codeOfConduct: true
+      }
+    });
+
+    await registration.save();
+    console.log('✅ Inscription créée (sans paiement):', registration._id);
+
+    // Envoyer email de confirmation
+    try {
+      await sendCampRegistrationConfirmation(
+        email,
+        firstName,
+        {
+          registrationId: registration._id,
+          amountPaid: 0,
+          amountRemaining: maxAmount,
+          refuge,
+          sex,
+          dateOfBirth
+        }
+      );
+      console.log('✅ Email envoyé');
+    } catch (emailError) {
+      console.error('⚠️ Erreur envoi email:', emailError.message);
+      // Ne pas bloquer la création si email échoue
+    }
+
+    // Notification push (si activé)
+    try {
+      if (user.pushNotifications) {
+        await pushService.sendToUser(user._id, {
+          title: '🎉 Inscription créée !',
+          message: `Votre inscription au camp GJ a été créée. Rendez-vous dans votre espace pour effectuer le paiement.`,
+          data: { type: 'registration_created' }
+        });
+      }
+    } catch (pushError) {
+      console.error('⚠️ Erreur notification push:', pushError.message);
+    }
+
+    res.status(201).json({
+      message: '✅ Inscription créée avec succès ! L\'utilisateur peut maintenant payer via son espace personnel.',
+      registration: {
+        id: registration._id,
+        status: 'pending',
+        amountRemaining: maxAmount
+      },
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur création inscription sans paiement:', error);
+    res.status(500).json({ 
+      message: 'Erreur lors de la création de l\'inscription',
+      error: error.message 
+    });
+  }
+};

@@ -8,6 +8,14 @@ const requireVerifiedEmail = require('../middleware/requireVerifiedEmail');
 // Route publique pour inscription camp avec création automatique de compte
 router.post('/camp-with-account', registrationController.createCampRegistrationWithAccount);
 
+// Route admin pour créer inscription sans paiement
+router.post('/create-without-payment', 
+  auth, 
+  requireVerifiedEmail, 
+  authorize('responsable', 'admin'), 
+  registrationController.createRegistrationWithoutPayment
+);
+
 // Routes protégées (utilisateur connecté)
 router.post('/', auth, requireVerifiedEmail, registrationController.createRegistration);
 router.get('/mes-inscriptions', auth, registrationController.getUserRegistrations);

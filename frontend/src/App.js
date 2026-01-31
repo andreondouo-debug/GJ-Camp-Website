@@ -29,6 +29,7 @@ import GJCRPTPage from './pages/GJCRPTPage';
 import GJPage from './pages/GJPage';
 import NewsletterPageNew from './pages/NewsletterPageNew';
 import UserManagementPage from './pages/UserManagementPage';
+import CreateRegistrationPage from './pages/CreateRegistrationPage';
 import PayoutManagementPage from './pages/PayoutManagementPage';
 import CashPaymentsManagement from './pages/CashPaymentsManagement';
 import MessagesPage from './pages/MessagesPage';
@@ -158,6 +159,15 @@ function App() {
               element={
                 <GuardedRoute
                   element={<UserManagementPage />}
+                  roles={['responsable', 'admin']}
+                />
+              }
+            />
+            <Route
+              path="/inscription/creer"
+              element={
+                <GuardedRoute
+                  element={<CreateRegistrationPage />}
                   roles={['responsable', 'admin']}
                 />
               }

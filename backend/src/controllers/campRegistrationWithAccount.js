@@ -60,9 +60,34 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
 
     // Validation mot de passe (seulement si pas d'utilisateur existant)
     const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (!existingUser && (!password || password.length < 6)) {
+    if (!existingUser && password) {
+      // Validation de force du mot de passe
+      const passwordErrors = [];
+      
+      if (password.length < 8) {
+        passwordErrors.push('au moins 8 caractères');
+      }
+      if (!/[A-Z]/.test(password)) {
+        passwordErrors.push('une lettre majuscule');
+      }
+      if (!/[a-z]/.test(password)) {
+        passwordErrors.push('une lettre minuscule');
+      }
+      if (!/[0-9]/.test(password)) {
+        passwordErrors.push('un chiffre');
+      }
+      if (!/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(password)) {
+        passwordErrors.push('un caractère spécial (!@#$%&*...)');
+      }
+      
+      if (passwordErrors.length > 0) {
+        return res.status(400).json({ 
+          message: `🔒 Mot de passe trop faible ! Il doit contenir : ${passwordErrors.join(', ')}.`
+        });
+      }
+    } else if (!existingUser && !password) {
       return res.status(400).json({ 
-        message: 'Le mot de passe doit contenir au moins 6 caractères.' 
+        message: 'Le mot de passe est requis pour créer un compte.' 
       });
     }
 

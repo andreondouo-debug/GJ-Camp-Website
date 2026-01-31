@@ -228,6 +228,9 @@ const Header = () => {
                     <li><Link to="/gestion/utilisateurs" onClick={closeMobileMenu}>Utilisateurs</Link></li>
                   )}
                   {canAccessUserAdmin && (
+                    <li><Link to="/inscription/creer" onClick={closeMobileMenu}>➕ Créer inscription</Link></li>
+                  )}
+                  {canAccessUserAdmin && (
                     <li className="dropdown-messages-item">
                       <Link to="/gestion/messages" onClick={closeMobileMenu}>
                         Messages

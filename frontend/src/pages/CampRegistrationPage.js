@@ -38,6 +38,28 @@ const CampRegistrationPage = () => {
     }
   };
 
+  const validatePasswordStrength = (password) => {
+    const errors = [];
+    
+    if (password.length < 8) {
+      errors.push('au moins 8 caractères');
+    }
+    if (!/[A-Z]/.test(password)) {
+      errors.push('une lettre majuscule');
+    }
+    if (!/[a-z]/.test(password)) {
+      errors.push('une lettre minuscule');
+    }
+    if (!/[0-9]/.test(password)) {
+      errors.push('un chiffre');
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(password)) {
+      errors.push('un caractère spécial (!@#$%&*...)');
+    }
+    
+    return errors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -47,13 +69,16 @@ const CampRegistrationPage = () => {
     try {
       // Validation mot de passe (seulement si pas déjà connecté)
       if (!user) {
-        if (form.password.length < 6) {
-          setError('Le mot de passe doit contenir au moins 6 caractères.');
+        // Validation de force du mot de passe
+        const passwordErrors = validatePasswordStrength(form.password);
+        if (passwordErrors.length > 0) {
+          setError(`🔒 Mot de passe trop faible ! Il doit contenir : ${passwordErrors.join(', ')}.`);
           setLoading(false);
           return;
         }
+        
         if (form.password !== form.confirmPassword) {
-          setError('Les mots de passe ne correspondent pas.');
+          setError('❌ Les mots de passe ne correspondent pas.');
           setLoading(false);
           return;
         }
