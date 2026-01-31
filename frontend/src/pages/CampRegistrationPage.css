@@ -329,6 +329,24 @@
   font-style: italic;
 }
 
+/* ========== AIDE MOT DE PASSE ========== */
+.password-requirements {
+  display: block;
+  margin-top: 12px;
+  padding: 16px 20px;
+  background: rgba(59, 130, 246, 0.15);
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.password-requirements strong {
+  color: #60a5fa;
+  font-weight: 700;
+}
+
 /* ========== RADIO BUTTONS MODERNES ========== */
 .radio-group-inline {
   display: flex;

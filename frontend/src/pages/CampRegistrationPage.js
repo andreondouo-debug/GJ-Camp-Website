@@ -239,7 +239,7 @@ const CampRegistrationPage = () => {
               
               <div className="form-row">
                 <div className="form-field">
-                  <label>Mot de passe * (min. 6 caractères)</label>
+                  <label>Mot de passe *</label>
                   <input
                     type="password"
                     name="password"
@@ -247,8 +247,16 @@ const CampRegistrationPage = () => {
                     onChange={handleChange}
                     placeholder="••••••••"
                     required={!user}
-                    minLength="6"
+                    minLength="8"
                   />
+                  <small className="password-requirements">
+                    🔒 <strong>Mot de passe fort requis :</strong><br/>
+                    • Minimum 8 caractères<br/>
+                    • 1 majuscule (A-Z)<br/>
+                    • 1 minuscule (a-z)<br/>
+                    • 1 chiffre (0-9)<br/>
+                    • 1 caractère spécial (!@#$%&*...)
+                  </small>
                 </div>
                 <div className="form-field">
                   <label>Confirmer le mot de passe *</label>
