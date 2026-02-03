@@ -60,7 +60,7 @@ connectDB();
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/registration', registrationRoutes);
+app.use('/api/registrations', registrationRoutes);
 app.use('/api/activities', activitiesRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
