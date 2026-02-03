@@ -657,3 +657,77 @@
     padding: 20px 32px;
   }
 }
+/* ========== SECTION PAYPAL ========== */
+.paypal-section {
+  margin-top: 32px;
+  padding: 32px;
+  background: rgba(9, 23, 50, 0.55);
+  backdrop-filter: blur(15px);
+  border-radius: 24px;
+  border: 2px solid rgba(212, 175, 55, 0.35);
+  box-shadow: 
+    0 10px 50px rgba(0, 0, 0, 0.35),
+    inset 0 0 80px rgba(212, 175, 55, 0.08);
+  animation: fadeIn 0.5s ease-out;
+}
+
+.paypal-section h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-secondary);
+  margin-bottom: 16px;
+  text-align: center;
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.paypal-info {
+  font-size: 1.2rem;
+  color: rgba(247, 248, 252, 0.85);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.paypal-info strong {
+  color: var(--color-secondary);
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.paypal-hint {
+  font-size: 0.95rem;
+  color: rgba(247, 248, 252, 0.65);
+  text-align: center;
+  margin-bottom: 24px;
+  font-style: italic;
+}
+
+.paypal-button-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+@media (max-width: 768px) {
+  .paypal-section {
+    padding: 24px 20px;
+  }
+
+  .paypal-section h3 {
+    font-size: 1.5rem;
+  }
+
+  .paypal-info {
+    font-size: 1.1rem;
+  }
+
+  .paypal-info strong {
+    font-size: 1.4rem;
+  }
+
+  .paypal-button-container {
+    padding: 16px;
+  }
+}

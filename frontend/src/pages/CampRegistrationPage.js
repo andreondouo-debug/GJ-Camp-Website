@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import ModernLogo from '../components/ModernLogo';
+import PayPalButton from '../components/PayPalButton';
 import './CampRegistrationPage.css';
 
 const CampRegistrationPage = () => {
@@ -28,6 +29,8 @@ const CampRegistrationPage = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
+  const [showPayPal, setShowPayPal] = useState(false);
+  const [validatedForm, setValidatedForm] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -84,27 +87,71 @@ const CampRegistrationPage = () => {
         }
       }
 
-      const response = await axios.post('/api/registrations/camp-with-account', form, {
+      // ✅ Formulaire validé, afficher PayPal
+      console.log('✅ Formulaire validé, affichage PayPal');
+      setValidatedForm(form);
+      setShowPayPal(true);
+      setMessage('✅ Formulaire validé ! Procédez au paiement ci-dessous.');
+      setLoading(false);
+    } catch (err) {
+      console.error('❌ Erreur validation:', err);
+      setError(err.response?.data?.message || 'Erreur lors de la validation');
+      setLoading(false);
+    }
+  };
+
+  const handlePaymentSuccess = async (paymentDetails) => {
+    console.log('✅ Paiement réussi, envoi inscription:', paymentDetails);
+    setLoading(true);
+    setMessage(null);
+    setError(null);
+
+    try {
+      const dataToSend = {
+        ...validatedForm,
+        paymentDetails: {
+          orderID: paymentDetails.id,
+          payerID: paymentDetails.payer?.payer_id,
+          paymentID: paymentDetails.id
+        }
+      };
+
+      const response = await axios.post('/api/registrations/camp-with-account', dataToSend, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
 
-      setMessage(response.data.message || 'Inscription réussie !');
+      console.log('✅ Inscription créée:', response.data);
+      setMessage(response.data.message || '🎉 Inscription réussie !');
       
       // Si compte créé, connecter automatiquement
       if (response.data.token && response.data.user) {
         await login(response.data.user, response.data.token);
       }
       
-      // Rediriger vers la page d'accueil après 2 secondes
+      // Rediriger vers le tableau de bord après 2 secondes
       setTimeout(() => {
         navigate('/tableau-de-bord');
       }, 2000);
       
     } catch (err) {
+      console.error('❌ Erreur inscription:', err);
       setError(err.response?.data?.message || 'Erreur lors de l\'inscription');
-    } finally {
       setLoading(false);
     }
+  };
+
+  const handlePaymentError = (err) => {
+    console.error('❌ Erreur paiement PayPal:', err);
+    setError('❌ Erreur lors du paiement. Veuillez réessayer.');
+    setShowPayPal(false);
+    setValidatedForm(null);
+  };
+
+  const handlePaymentCancel = () => {
+    console.log('⚠️ Paiement annulé par l\'utilisateur');
+    setMessage('⚠️ Paiement annulé. Vous pouvez modifier votre inscription et réessayer.');
+    setShowPayPal(false);
+    setValidatedForm(null);
   };
 
   return (
@@ -368,12 +415,34 @@ const CampRegistrationPage = () => {
             </div>
           </div>
 
-          <div className="form-actions">
-            <button type="submit" className="btn-primary btn-large" disabled={loading}>
-              <span>{loading ? 'Inscription en cours...' : "S'inscrire"}</span>
-            </button>
-          </div>
+          {!showPayPal && (
+            <div className="form-actions">
+              <button type="submit" className="btn-primary btn-large" disabled={loading}>
+                <span>{loading ? '⏳ Validation en cours...' : '✅ Valider mon inscription'}</span>
+              </button>
+            </div>
+          )}
         </form>
+
+        {showPayPal && (
+          <div className="paypal-section">
+            <h3>💳 Finaliser le Paiement</h3>
+            <p className="paypal-info">
+              Montant à régler : <strong>{validatedForm?.amountPaid || 20}€</strong>
+            </p>
+            <p className="paypal-hint">
+              Vous pouvez payer avec votre compte PayPal ou par carte bancaire.
+            </p>
+            <div className="paypal-button-container">
+              <PayPalButton
+                amount={parseFloat(validatedForm?.amountPaid || 20)}
+                onSuccess={handlePaymentSuccess}
+                onError={handlePaymentError}
+                onCancel={handlePaymentCancel}
+              />
+            </div>
+          </div>
+        )}
         </div>
       </div>
     </div>
