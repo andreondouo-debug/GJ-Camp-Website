@@ -21,7 +21,7 @@ const CashPaymentsManagement = () => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/registration/cash/stats', {
+      const response = await axios.get('/api/registrations/cash/stats', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = response.data || {};
@@ -61,7 +61,7 @@ const CashPaymentsManagement = () => {
       const note = validationNote[paymentId] || '';
 
       const response = await axios.patch(
-        `/api/registration/${registrationId}/cash-payment/${paymentId}/validate`,
+        `/api/registrations/${registrationId}/cash-payment/${paymentId}/validate`,
         { amount: parseFloat(amount), note },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -101,7 +101,7 @@ const CashPaymentsManagement = () => {
       setError(null);
 
       await axios.patch(
-        `/api/registration/${registrationId}/cash-payment/${paymentId}/reject`,
+        `/api/registrations/${registrationId}/cash-payment/${paymentId}/reject`,
         { reason: rejectionReason[paymentId] },
         { headers: { Authorization: `Bearer ${token}` } }
       );

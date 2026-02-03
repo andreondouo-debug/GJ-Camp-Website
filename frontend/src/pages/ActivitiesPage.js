@@ -28,7 +28,7 @@ function ActivitiesPage() {
       }
 
       try {
-        const response = await axios.get(getApiUrl('/api/registration/my-registration'), {
+        const response = await axios.get(getApiUrl('/api/registrations/my-registration'), {
           headers: { Authorization: `Bearer ${token}` }
         });
         

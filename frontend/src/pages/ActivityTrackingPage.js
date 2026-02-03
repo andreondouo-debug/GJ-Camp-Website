@@ -38,7 +38,7 @@ const ActivityTrackingPage = () => {
       }
 
       try {
-        const response = await axios.get('/api/registration/my-registration', {
+        const response = await axios.get('/api/registrations/my-registration', {
           headers: { Authorization: `Bearer ${token}` }
         });
         

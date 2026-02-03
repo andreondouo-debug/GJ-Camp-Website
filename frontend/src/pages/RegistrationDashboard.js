@@ -84,7 +84,7 @@ const RegistrationDashboard = () => {
   const fetchRegistrations = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/registration/all', {
+      const response = await axios.get('/api/registrations/all', {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -158,7 +158,7 @@ const RegistrationDashboard = () => {
     }
 
     try {
-      await axios.delete(`/api/registration/${registrationId}`, {
+      await axios.delete(`/api/registrations/${registrationId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -175,7 +175,7 @@ const RegistrationDashboard = () => {
   const updatePaymentStatus = async (id, newStatus) => {
     try {
       await axios.patch(
-        `/api/registration/${id}/payment-status`,
+        `/api/registrations/${id}/payment-status`,
         { paymentStatus: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );

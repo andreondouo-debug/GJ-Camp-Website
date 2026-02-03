@@ -69,7 +69,7 @@ const CampRegistrationNewPage = () => {
       }
 
       try {
-        const response = await axios.get('/api/registration/mes-inscriptions', {
+        const response = await axios.get('/api/registrations/mes-inscriptions', {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -133,7 +133,7 @@ const CampRegistrationNewPage = () => {
 
       // Si paiement en espèces, enregistrer directement
       if (form.paymentMethod === 'cash') {
-        const response = await axios.post('/api/registration/cash', form, {
+        const response = await axios.post('/api/registrations/cash', form, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -181,7 +181,7 @@ const CampRegistrationNewPage = () => {
 
       console.log('📤 Envoi au backend:', registrationData);
 
-      const response = await axios.post('/api/registration', registrationData, {
+      const response = await axios.post('/api/registrations/', registrationData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

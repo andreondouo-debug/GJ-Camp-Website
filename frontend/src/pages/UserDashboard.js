@@ -114,7 +114,7 @@ const UserDashboard = () => {
   const fetchUserRegistration = async () => {
     try {
       console.log('🔍 Récupération des inscriptions avec token:', token ? 'présent' : 'absent');
-      const response = await axios.get('/api/registration/mes-inscriptions', {
+      const response = await axios.get('/api/registrations/mes-inscriptions', {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -136,7 +136,7 @@ const UserDashboard = () => {
 
   const fetchUserGuests = async () => {
     try {
-      const response = await axios.get('/api/registration/mes-invites', {
+      const response = await axios.get('/api/registrations/mes-invites', {
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log('👥 Invités récupérés:', response.data.guests);
@@ -210,7 +210,7 @@ const UserDashboard = () => {
     try {
       const targetRegistration = selectedGuest || registration;
       const response = await axios.put(
-        `/api/registration/${targetRegistration._id}/additional-payment`,
+        `/api/registrations/${targetRegistration._id}/additional-payment`,
         {
           additionalAmount: parseFloat(partialAmount),
           paymentDetails: {
@@ -262,7 +262,7 @@ const UserDashboard = () => {
     try {
       const targetRegistration = selectedGuest || registration;
       const response = await axios.post(
-        `/api/registration/${targetRegistration._id}/cash-payment`,
+        `/api/registrations/${targetRegistration._id}/cash-payment`,
         { amount: parseFloat(partialAmount) },
         { headers: { Authorization: `Bearer ${token}` } }
       );

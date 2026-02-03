@@ -25,7 +25,7 @@ function ProgrammePage() {
       }
 
       try {
-        const response = await axios.get('/api/registration/mes-inscriptions', {
+        const response = await axios.get('/api/registrations/mes-inscriptions', {
           headers: { Authorization: `Bearer ${token}` }
         });
         

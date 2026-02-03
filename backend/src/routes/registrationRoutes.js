@@ -19,6 +19,7 @@ router.post('/create-without-payment',
 // Routes protégées (utilisateur connecté)
 router.post('/', auth, requireVerifiedEmail, registrationController.createRegistration);
 router.get('/mes-inscriptions', auth, registrationController.getUserRegistrations);
+router.get('/my-registration', auth, registrationController.getMyRegistration);
 router.put('/:id/additional-payment', auth, registrationController.addAdditionalPayment);
 
 // Routes pour les invités

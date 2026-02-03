@@ -97,7 +97,7 @@ const GuestRegistrationPage = () => {
 
       console.log('📤 Envoi au backend:', registrationData);
 
-      const response = await axios.post('/api/registration/guest', registrationData, {
+      const response = await axios.post('/api/registrations/guest', registrationData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

@@ -283,6 +283,27 @@ exports.updatePaymentStatus = async (req, res) => {
   }
 };
 
+// Récupérer l'inscription de l'utilisateur connecté
+exports.getMyRegistration = async (req, res) => {
+  try {
+    const registration = await Registration.findOne({ 
+      user: req.user.userId,
+      isGuest: false  // Exclure les invités
+    })
+    .populate('user', 'firstName lastName email')
+    .sort({ createdAt: -1 });  // La plus récente
+
+    if (!registration) {
+      return res.status(404).json({ message: 'Aucune inscription trouvée' });
+    }
+
+    res.status(200).json(registration);
+  } catch (error) {
+    console.error('❌ Erreur récupération inscription:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
 // Ajouter un paiement supplémentaire (pour payer le solde)
 exports.addAdditionalPayment = async (req, res) => {
   try {
