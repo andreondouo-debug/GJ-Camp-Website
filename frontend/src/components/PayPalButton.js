@@ -4,12 +4,18 @@ import { getApiUrl } from '../config/api';
 
 const API_URL = getApiUrl();
 
+// 🌍 ÉTAT GLOBAL : Un seul script PayPal pour toute l'app
+let paypalScriptLoading = false;
+let paypalScriptLoaded = false;
+let paypalCurrentMode = null;
+
 const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
   const paypalRef = useRef(null);
   const [sdkReady, setSdkReady] = useState(false);
   const [error, setError] = useState(null);
-  const [paypalMode, setPaypalMode] = useState('sandbox');
+  const [paypalMode, setPaypalMode] = useState(null);
   const buttonRendered = useRef(false);
+  const checkInterval = useRef(null);
 
   // Charger le mode PayPal depuis les settings
   useEffect(() => {
@@ -27,66 +33,103 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
     fetchPayPalMode();
   }, []);
 
-  // Charger le SDK PayPal une seule fois
+  // Charger le SDK PayPal une seule fois GLOBALEMENT
   useEffect(() => {
     if (!paypalMode) return; // Attendre que le mode soit chargé
     
-    // 🔄 RÉINITIALISER l'état avant tout changement
-    setSdkReady(false);
+    // Si le script est déjà chargé avec le même mode, on l'utilise
+    if (paypalScriptLoaded && paypalCurrentMode === paypalMode && window.paypal?.Buttons) {
+      console.log(`✅ SDK PayPal déjà chargé en mode ${paypalMode.toUpperCase()}`);
+      setSdkReady(true);
+      return;
+    }
+
+    // Si le mode a changé, on doit recharger
+    if (paypalScriptLoaded && paypalCurrentMode !== paypalMode) {
+      console.log(`🔄 Changement de mode: ${paypalCurrentMode} → ${paypalMode}, rechargement requis...`);
+      paypalScriptLoaded = false;
+      paypalScriptLoading = false;
+      paypalCurrentMode = null;
+      
+      // Nettoyer les anciens scripts
+      const existingScripts = document.querySelectorAll('script[src*="paypal.com"]');
+      existingScripts.forEach(script => script.remove());
+      if (window.paypal) delete window.paypal;
+    }
+
+    // Si le script est en cours de chargement, attendre
+    if (paypalScriptLoading) {
+      console.log('⏳ Script PayPal déjà en cours de chargement, attente...');
+      const waitInterval = setInterval(() => {
+        if (paypalScriptLoaded && window.paypal?.Buttons) {
+          console.log('✅ Script chargé, prêt à l\'utiliser');
+          setSdkReady(true);
+          clearInterval(waitInterval);
+        }
+      }, 100);
+      
+      return () => clearInterval(waitInterval);
+    }
+
+    // Charger le script pour la première fois
+    paypalScriptLoading = true;
     buttonRendered.current = false;
     setError(null);
     
-    // Utiliser le bon Client ID selon le mode
     const clientId = paypalMode === 'live' 
       ? process.env.REACT_APP_PAYPAL_LIVE_CLIENT_ID
       : process.env.REACT_APP_PAYPAL_SANDBOX_CLIENT_ID;
     
     if (!clientId) {
       setError('Client ID PayPal non configuré');
+      paypalScriptLoading = false;
       return;
     }
 
-    // 🚨 NETTOYAGE COMPLET : Supprimer TOUS les scripts PayPal existants
-    const existingScripts = document.querySelectorAll('script[src*="paypal.com"]');
-    if (existingScripts.length > 0) {
-      console.log(`🔄 Suppression de ${existingScripts.length} script(s) PayPal existant(s)`);
-      existingScripts.forEach(script => script.remove());
-    }
+    console.log(`📥 Chargement SDK PayPal en mode ${paypalMode.toUpperCase()}...`);
+    console.log(`🔑 Client ID: ${clientId.substring(0, 20)}...`);
     
-    // Supprimer l'objet global PayPal
-    if (window.paypal) {
-      console.log('🗑️ Nettoyage objet window.paypal');
-      delete window.paypal;
-    }
-
-    // ⏳ ATTENDRE un peu pour que le navigateur nettoie complètement
-    const loadDelay = setTimeout(() => {
-      console.log(`📥 Chargement SDK PayPal en mode ${paypalMode.toUpperCase()}...`);
-      console.log(`🔑 Client ID utilisé: ${clientId.substring(0, 20)}...`);
-      
-      const script = document.createElement('script');
-      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR`;
-      script.async = true;
-      script.setAttribute('data-namespace', 'paypal'); // Forcer un namespace propre
-      
-      script.onload = () => {
-        console.log(`✅ SDK PayPal chargé en mode ${paypalMode.toUpperCase()}`);
-        setSdkReady(true);
-      };
-      
-      script.onerror = () => {
-        console.error('❌ Erreur de chargement du SDK PayPal');
-        setError('Erreur de chargement PayPal');
-        setSdkReady(false);
-      };
-      
-      document.body.appendChild(script);
-    }, 100); // Délai de 100ms pour le nettoyage
+    const script = document.createElement('script');
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR`;
+    script.async = true;
+    script.id = 'paypal-sdk-script'; // ID unique pour éviter les doublons
     
-    // Cleanup function
-    return () => {
-      clearTimeout(loadDelay);
+    script.onload = () => {
+      console.log(`✅ SDK PayPal chargé en mode ${paypalMode.toUpperCase()}`);
+      paypalScriptLoaded = true;
+      paypalScriptLoading = false;
+      paypalCurrentMode = paypalMode;
+      
+      // Attendre que window.paypal.Buttons soit vraiment disponible
+      const checkReady = setInterval(() => {
+        if (window.paypal?.Buttons) {
+          console.log('✅ window.paypal.Buttons disponible');
+          setSdkReady(true);
+          clearInterval(checkReady);
+        }
+      }, 50);
+      
+      // Timeout de sécurité
+      setTimeout(() => {
+        clearInterval(checkReady);
+        if (!window.paypal?.Buttons) {
+          console.error('⏱️ Timeout: window.paypal.Buttons non disponible');
+          setError('SDK PayPal non initialisé correctement');
+          paypalScriptLoaded = false;
+          paypalScriptLoading = false;
+        }
+      }, 3000);
     };
+    
+    script.onerror = () => {
+      console.error('❌ Erreur de chargement du SDK PayPal');
+      setError('Erreur de chargement PayPal');
+      paypalScriptLoaded = false;
+      paypalScriptLoading = false;
+      setSdkReady(false);
+    };
+    
+    document.body.appendChild(script);
   }, [paypalMode]);
 
   // Rendre les boutons PayPal quand le SDK est prêt
@@ -98,8 +141,24 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
     // ✅ VÉRIFICATION CRITIQUE : S'assurer que window.paypal.Buttons existe
     if (!window.paypal || typeof window.paypal.Buttons !== 'function') {
       console.error('❌ window.paypal.Buttons n\'est pas disponible');
-      setError('SDK PayPal non initialisé correctement');
-      setSdkReady(false); // Forcer un rechargement
+      
+      // Réessayer après un délai
+      checkInterval.current = setInterval(() => {
+        if (window.paypal?.Buttons) {
+          console.log('✅ window.paypal.Buttons maintenant disponible');
+          setSdkReady(true); // Forcer un re-render
+          clearInterval(checkInterval.current);
+        }
+      }, 100);
+      
+      // Timeout après 5 secondes
+      setTimeout(() => {
+        if (checkInterval.current) {
+          clearInterval(checkInterval.current);
+          setError('SDK PayPal non initialisé correctement');
+        }
+      }, 5000);
+      
       return;
     }
 
@@ -162,7 +221,14 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
         console.error('❌ Erreur rendu:', err);
         setError('Erreur lors du rendu des boutons');
       });
-  }, [sdkReady, amount, onSuccess, onError, onCancel]);
+    
+    // Cleanup
+    return () => {
+      if (checkInterval.current) {
+        clearInterval(checkInterval.current);
+      }
+    };
+  }, [sdkReady, amount, onSuccess, onError, onCancel, paypalMode]);
 
   return (
     <div>
