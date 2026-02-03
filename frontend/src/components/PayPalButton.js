@@ -232,28 +232,25 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
 
   return (
     <div>
-      {paypalMode && (
+      {/* Badge mode sandbox uniquement */}
+      {paypalMode === 'sandbox' && (
         <div style={{
           textAlign: 'center',
           padding: '15px',
           marginBottom: '15px',
           borderRadius: '8px',
-          background: paypalMode === 'sandbox' ? '#e0f2fe' : '#fee2e2',
-          border: `3px solid ${paypalMode === 'sandbox' ? '#0284c7' : '#dc2626'}`,
+          background: '#e0f2fe',
+          border: '3px solid #0284c7',
           fontSize: '16px',
           fontWeight: 'bold',
-          color: paypalMode === 'sandbox' ? '#0369a1' : '#991b1b'
+          color: '#0369a1'
         }}>
-          {paypalMode === 'sandbox' ? (
-            <>🧪 Mode TEST (Sandbox) - Aucun argent réel ne sera débité</>
-          ) : (
-            <>🔴 MODE PRODUCTION (Live) - PAIEMENTS RÉELS EN COURS</>
-          )}
+          🧪 Mode TEST (Sandbox) - Aucun argent réel ne sera débité
         </div>
       )}
       
-      {/* 🚨 AVERTISSEMENT CRITIQUE EN MODE LIVE */}
-      {paypalMode === 'live' && (
+      {/* Pas d'avertissement en mode live - retiré pour ne pas inquiéter les utilisateurs */}
+      {false && paypalMode === 'live' && (
         <div style={{
           padding: '15px',
           marginBottom: '15px',
