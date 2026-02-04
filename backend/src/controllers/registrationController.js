@@ -974,32 +974,54 @@ exports.getCashPaymentsStats = async (req, res) => {
     };
 
     registrations.forEach(reg => {
-      reg.cashPayments.forEach(payment => {
-        const paymentInfo = {
-          registrationId: reg._id,
-          paymentId: payment._id,
-          userName: `${reg.firstName} ${reg.lastName}`,
-          userEmail: reg.email,
-          refuge: reg.refuge,
-          amount: payment.amount,
-          submittedAt: payment.submittedAt,
-          validatedAt: payment.validatedAt,
-          note: payment.note
-        };
-
-        if (payment.status === 'pending') {
+      // Si inscription avec paymentMethod='cash' mais sans paiements soumis
+      if (reg.paymentMethod === 'cash' && (!reg.cashPayments || reg.cashPayments.length === 0)) {
+        // Afficher comme paiement en attente si paymentStatus = 'unpaid' ou 'partial'
+        if (reg.paymentStatus === 'unpaid' || reg.paymentStatus === 'partial') {
+          const paymentInfo = {
+            registrationId: reg._id,
+            paymentId: null, // Pas de sous-document payment
+            userName: `${reg.firstName} ${reg.lastName}`,
+            userEmail: reg.email,
+            refuge: reg.refuge,
+            amount: reg.amountRemaining || 120,
+            submittedAt: reg.createdAt,
+            note: 'Paiement en espèces au camp (inscription directe)',
+            isPendingRegistration: true // Flag pour distinguer
+          };
           stats.pendingPayments.push(paymentInfo);
-          stats.totalPending += payment.amount;
-        } else if (payment.status === 'validated') {
-          stats.validatedPayments.push(paymentInfo);
-          stats.totalValidated += payment.amount;
-        } else if (payment.status === 'rejected') {
-          stats.rejectedPayments.push(paymentInfo);
-          stats.totalRejected += payment.amount;
+          stats.totalPending += paymentInfo.amount;
+          stats.totalCashRegistrations++;
         }
-      });
+      }
+      
+      // Traiter les paiements espèces soumis (ancien système)
+      if (reg.cashPayments && reg.cashPayments.length > 0) {
+        reg.cashPayments.forEach(payment => {
+          const paymentInfo = {
+            registrationId: reg._id,
+            paymentId: payment._id,
+            userName: `${reg.firstName} ${reg.lastName}`,
+            userEmail: reg.email,
+            refuge: reg.refuge,
+            amount: payment.amount,
+            submittedAt: payment.submittedAt,
+            validatedAt: payment.validatedAt,
+            note: payment.note
+          };
 
-      if (reg.cashPayments.length > 0) {
+          if (payment.status === 'pending') {
+            stats.pendingPayments.push(paymentInfo);
+            stats.totalPending += payment.amount;
+          } else if (payment.status === 'validated') {
+            stats.validatedPayments.push(paymentInfo);
+            stats.totalValidated += payment.amount;
+          } else if (payment.status === 'rejected') {
+            stats.rejectedPayments.push(paymentInfo);
+            stats.totalRejected += payment.amount;
+          }
+        });
+
         stats.totalCashRegistrations++;
       }
     });
@@ -1015,13 +1037,27 @@ exports.getCashPaymentsStats = async (req, res) => {
 exports.getPendingCashPaymentsCount = async (req, res) => {
   try {
     const registrations = await Registration.find({
-      'cashPayments': { $exists: true, $ne: [] }
+      $or: [
+        { paymentMethod: 'cash' },
+        { paymentMethod: 'mixed' }
+      ]
     });
 
     let pendingCount = 0;
+    
     registrations.forEach(reg => {
-      const pending = reg.cashPayments.filter(p => p.status === 'pending');
-      pendingCount += pending.length;
+      // Compter inscriptions cash sans paiement (unpaid/partial)
+      if (reg.paymentMethod === 'cash' && (!reg.cashPayments || reg.cashPayments.length === 0)) {
+        if (reg.paymentStatus === 'unpaid' || reg.paymentStatus === 'partial') {
+          pendingCount++;
+        }
+      }
+      
+      // Compter paiements espèces soumis en attente (ancien système)
+      if (reg.cashPayments && reg.cashPayments.length > 0) {
+        const pending = reg.cashPayments.filter(p => p.status === 'pending');
+        pendingCount += pending.length;
+      }
     });
 
     res.status(200).json({ 
