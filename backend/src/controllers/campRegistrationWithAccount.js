@@ -197,8 +197,14 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
       console.log('✨ Création d\'un nouveau compte pour:', email);
       isNewUser = true;
 
+      console.log('🔐 Hashing mot de passe...');
+      console.log('   - Password reçu:', password);
+      console.log('   - Longueur:', password.length);
+      
       // Hasher le mot de passe
       const hashedPassword = await bcrypt.hash(password, 10);
+      console.log('   - Hash généré:', hashedPassword.substring(0, 20) + '...');
+      console.log('   - Longueur hash:', hashedPassword.length);
 
       user = new User({
         firstName,
@@ -215,6 +221,12 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
 
       await user.save();
       console.log('✅ Compte créé avec succès pour:', user.email);
+      console.log('📋 Détails compte:');
+      console.log('   - ID:', user._id);
+      console.log('   - Email:', user.email);
+      console.log('   - Password hash:', user.password.substring(0, 20) + '...');
+      console.log('   - Email vérifié:', user.isEmailVerified);
+      console.log('   - Role:', user.role);
 
       // Générer un token JWT pour connexion automatique
       newToken = jwt.sign(

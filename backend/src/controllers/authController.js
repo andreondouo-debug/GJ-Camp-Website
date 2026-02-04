@@ -136,23 +136,41 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Email et mot de passe requis' });
     }
 
-    // Rechercher l'utilisateur
-    const user = await User.findOne({ email }).select('+password');
+    console.log('🔑 Tentative de connexion:', email);
+
+    // Rechercher l'utilisateur (insensible à la casse)
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
 
     if (!user) {
+      console.log('❌ Aucun utilisateur trouvé pour:', email.toLowerCase());
       return res.status(401).json({ 
         message: 'Aucun compte trouvé avec cet email. Veuillez vérifier votre email ou créer un compte.' 
       });
     }
 
+    console.log('👤 Utilisateur trouvé:', {
+      id: user._id,
+      email: user.email,
+      hasPassword: !!user.password,
+      passwordLength: user.password?.length,
+      passwordStarts: user.password?.substring(0, 10),
+      isEmailVerified: user.isEmailVerified,
+      role: user.role
+    });
+
     // Vérifier le mot de passe
+    console.log('🔐 Vérification mot de passe...');
     const isPasswordCorrect = await user.comparePassword(password);
+    console.log('🔐 Résultat comparaison:', isPasswordCorrect);
 
     if (!isPasswordCorrect) {
+      console.log('❌ Mot de passe incorrect pour:', email);
       return res.status(401).json({ 
         message: 'Mot de passe incorrect. Veuillez réessayer.' 
       });
     }
+
+    console.log('✅ Mot de passe correct pour:', email);
 
     // Vérifier si le compte est suspendu
     if (user.isActive === false) {
