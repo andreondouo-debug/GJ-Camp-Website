@@ -32,6 +32,27 @@ const CampRegistrationPage = () => {
   const [error, setError] = useState(null);
   const [showPayPal, setShowPayPal] = useState(false);
   const [validatedForm, setValidatedForm] = useState(null);
+  const [minAmount, setMinAmount] = useState(20);
+  const [maxAmount, setMaxAmount] = useState(120);
+
+  // Charger les paramètres d'inscription au montage
+  React.useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await axios.get('/api/settings');
+        const settings = response.data.settings;
+        const min = settings?.registrationMinAmount || 20;
+        const max = settings?.registrationMaxAmount || 120;
+        setMinAmount(min);
+        setMaxAmount(max);
+        // Mettre à jour le montant par défaut si nécessaire
+        setForm(prev => ({ ...prev, amountPaid: min }));
+      } catch (err) {
+        console.error('⚠️ Erreur chargement paramètres:', err);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -410,7 +431,7 @@ const CampRegistrationPage = () => {
           <div className="form-section payment-section">
             <h3 className="section-title">Frais d'inscription</h3>
             <div className="payment-info">
-              <p className="total-price">Total : <strong>120€</strong></p>
+              <p className="total-price">Total : <strong>{maxAmount}€</strong></p>
             </div>
             
             <div className="form-field">
@@ -438,46 +459,46 @@ const CampRegistrationPage = () => {
               <div className="payment-buttons">
                 <button
                   type="button"
-                  className={`payment-btn ${form.amountPaid === 20 ? 'active' : ''}`}
-                  onClick={() => setForm(prev => ({ ...prev, amountPaid: 20 }))}
+                  className={`payment-btn ${form.amountPaid === minAmount ? 'active' : ''}`}
+                  onClick={() => setForm(prev => ({ ...prev, amountPaid: minAmount }))}
                 >
-                  <span>20€</span>
+                  <span>{minAmount}€</span>
                 </button>
                 <button
                   type="button"
-                  className={`payment-btn ${form.amountPaid === 60 ? 'active' : ''}`}
-                  onClick={() => setForm(prev => ({ ...prev, amountPaid: 60 }))}
+                  className={`payment-btn ${form.amountPaid === Math.floor(maxAmount / 2) ? 'active' : ''}`}
+                  onClick={() => setForm(prev => ({ ...prev, amountPaid: Math.floor(maxAmount / 2) }))}
                 >
-                  <span>60€</span>
+                  <span>{Math.floor(maxAmount / 2)}€</span>
                 </button>
                 <button
                   type="button"
-                  className={`payment-btn ${form.amountPaid === 80 ? 'active' : ''}`}
-                  onClick={() => setForm(prev => ({ ...prev, amountPaid: 80 }))}
+                  className={`payment-btn ${form.amountPaid === Math.floor(maxAmount * 0.67) ? 'active' : ''}`}
+                  onClick={() => setForm(prev => ({ ...prev, amountPaid: Math.floor(maxAmount * 0.67) }))}
                 >
-                  <span>80€</span>
+                  <span>{Math.floor(maxAmount * 0.67)}€</span>
                 </button>
                 <button
                   type="button"
-                  className={`payment-btn ${form.amountPaid === 120 ? 'active' : ''}`}
-                  onClick={() => setForm(prev => ({ ...prev, amountPaid: 120 }))}
+                  className={`payment-btn ${form.amountPaid === maxAmount ? 'active' : ''}`}
+                  onClick={() => setForm(prev => ({ ...prev, amountPaid: maxAmount }))}
                 >
-                  <span>120€ (Total)</span>
+                  <span>{maxAmount}€ (Total)</span>
                 </button>
               </div>
               
               <div className="custom-amount-field">
-                <label htmlFor="customAmount">Ou entrez un montant personnalisé (20-120€) :</label>
+                <label htmlFor="customAmount">Ou entrez un montant personnalisé ({minAmount}-{maxAmount}€) :</label>
                 <input
                   type="number"
                   id="customAmount"
                   name="amountPaid"
                   value={form.amountPaid}
                   onChange={handleChange}
-                  min="20"
-                  max="120"
+                  min={minAmount}
+                  max={maxAmount}
                   step="1"
-                  placeholder="Ex: 50"
+                  placeholder={`Ex: ${Math.floor((minAmount + maxAmount) / 2)}`}
                 />
               </div>
             </div>
@@ -489,7 +510,7 @@ const CampRegistrationPage = () => {
               </div>
               <div className="summary-row remaining">
                 <span>Reste à payer :</span>
-                <strong>{120 - form.amountPaid}€</strong>
+                <strong>{maxAmount - form.amountPaid}€</strong>
               </div>
             </div>
           </div>
