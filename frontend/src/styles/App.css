@@ -2928,8 +2928,17 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   border-radius: 5px;
   font-size: 14px;
   font-family: inherit;
-  color: #333333;
-  background-color: #ffffff;
+  color: #333333 !important;
+  background-color: #ffffff !important;
+}
+
+/* Spécifique pour email et password */
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="text"] {
+  color: #333333 !important;
+  background-color: #ffffff !important;
+  -webkit-text-fill-color: #333333 !important;
 }
 
 .form-group select {
@@ -2939,8 +2948,8 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   border-radius: 5px;
   font-size: 14px;
   font-family: inherit;
-  background-color: #ffffff;
-  color: #333333;
+  background-color: #ffffff !important;
+  color: #333333 !important;
   cursor: pointer;
 }
 
