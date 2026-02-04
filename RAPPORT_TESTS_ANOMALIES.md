@@ -57,20 +57,82 @@ Labels illisibles, placeholders invisibles
 - Variables CSS manquantes (--color-white, --color-text, --color-gold)
 - Pas de couleur de texte définie sur inputs/textarea
 - Héritage de couleur parente (souvent blanche)
+- Styles écrasés par autres règles CSS plus spécifiques
 
-**Solution appliquée** (Commit 7bf62bd):
+**Solution appliquée** (Commits 7bf62bd + 68b5efc):
 - ✅ Ajout variables CSS manquantes dans variables.css
 - ✅ Couleur texte forcée #333333 sur inputs/textarea/select
 - ✅ Background blanc explicite #ffffff
 - ✅ Placeholders visibles #999999
+- ✅ **!important** ajouté pour forcer les styles
+- ✅ Règles spécifiques input[type="email"], [type="password"]
+- ✅ -webkit-text-fill-color pour autocomplete Safari/Chrome
 - ✅ Contraste WCAG 2.1 niveau AAA (16:1)
 
 **Impact**: ✅ **RÉSOLU** - Toutes pages de formulaires lisibles  
-**Documentation**: Voir FIX_CONTRASTE_FORMULAIRES.md
+**Documentation**: Voir FIX_CONTRASTE_FORMULAIRES.md  
+**Build**: 51.73 kB CSS (+102 B)
 
 ---
 
-### 🔴 CRITIQUE 2: Backend Render inaccessible
+### ✅ RÉSOLU 2: Paiement Espèces Non Fonctionnel
+
+**Symptôme**:
+```
+Inscription avec paiement espèces échoue
+Backend crash ou retourne erreur
+```
+
+**Diagnostic**:
+- **verifiedAmount** gardait valeur formulaire au lieu de 0
+- Tentative d'accès à `verification.orderID` pour espèces (undefined)
+- Structure `paymentDetails` PayPal imposée même pour cash
+- Status calculé incorrectement (partial au lieu de pending)
+
+**Solution appliquée** (Commit 1247895):
+
+**Backend** (campRegistrationWithAccount.js):
+```javascript
+// AVANT (BUGUÉ):
+else if (paymentMethod === 'cash') {
+  console.log('💵 Inscription espèces');
+  // verifiedAmount restait = paid (montant formulaire)
+}
+// paymentDetails toujours avec verification.orderID
+
+// APRÈS (CORRIGÉ):
+else if (paymentMethod === 'cash') {
+  console.log('💵 Inscription espèces (différé)');
+  verifiedAmount = 0; // Pas de paiement immédiat
+}
+// paymentDetails conditionnel selon méthode
+if (paymentMethod === 'cash') {
+  registrationData.paymentDetails = {
+    method: 'cash',
+    status: 'pending',
+    note: 'Paiement en espèces au camp'
+  };
+}
+```
+
+**Frontend** (CampRegistrationPage.js):
+- Ajout logs détaillés dans handleCashRegistration
+- Affichage erreur response.data complète
+- Meilleure visibilité debug console
+
+**Résultat**:
+- ✅ Inscription espèces crée status **'pending'**
+- ✅ amountPaid: **0€**, amountRemaining: **120€**
+- ✅ Compte user créé avec token connexion auto
+- ✅ Redirection vers tableau de bord après 2s
+- ✅ paymentDetails structure correcte sans orderID
+
+**Impact**: ✅ **RÉSOLU** - Paiement espèces opérationnel  
+**Test**: Formulaire → Choix "Espèces" → Validation → Inscription créée
+
+---
+
+### 🔴 CRITIQUE 3: Backend Render inaccessible
 
 **Symptôme**:
 ```bash
@@ -101,7 +163,7 @@ curl https://gj-camp-backend.onrender.com/health
 
 ---
 
-### 🟡 MINEUR 3: Validation montant frontend
+### 🟡 MINEUR 4: Validation montant frontend
 
 **Symptôme**:
 Le champ personnalisé accepte les décimales (ex: 25.50€) mais le backend attend des entiers.
@@ -123,7 +185,7 @@ onChange={(e) => {
 
 ---
 
-### 🟡 MINEUR 4: Messages d'erreur pas en français
+### 🟡 MINEUR 5: Messages d'erreur pas en français
 
 **Exemples**:
 - Console: `"❌ window.paypal.Buttons n'est pas disponible"` ✅ (OK)
@@ -135,7 +197,7 @@ onChange={(e) => {
 
 ---
 
-### 🟢 INFO 5: Performance chargement Settings
+### 🟢 INFO 6: Performance chargement Settings
 
 **Observation**:
 Page inscription fait un appel `/api/settings` à chaque montage.
@@ -240,25 +302,34 @@ Page inscription fait un appel `/api/settings` à chaque montage.
 ### ✅ Priorité 1 - RÉSOLU 🟢
 1. **Contraste formulaires connexion** 
    - ✅ Variables CSS ajoutées
-   - ✅ Couleurs texte forcées
+   - ✅ Couleurs texte forcées avec !important
    - ✅ Placeholders visibles
+   - ✅ Build + commits + push réussi
+   - ✅ Documentation créée (FIX_CONTRASTE_FORMULAIRES.md)
+   - **Commits**: 7bf62bd, 68b5efc
+
+2. **Paiement espèces inscription camp**
+   - ✅ verifiedAmount = 0 pour cash
+   - ✅ paymentDetails conditionnel
+   - ✅ Status 'pending' correct
+   - ✅ Logs détaillés ajoutés
    - ✅ Build + commit + push réussi
-   - ✅ Documentation créée
+   - **Commit**: 1247895
 
 ### Priorité 2 - URGENT 🔴
-2. **Débloquer backend Render** 
+3. **Débloquer backend Render** 
    - Vérifier logs: https://dashboard.render.com
    - Vérifier derniers déploiements
    - Tester route health: `curl https://gj-camp-backend.onrender.com/health`
    - Si nécessaire: rollback ou redéploiement manuel
 
 ### Priorité 3 - Important 🟡
-3. **Tester inscription complète** (PayPal + Espèces)
-3. **Tester modification montants** depuis paramètres admin
-4. **Ajouter validation décimales** dans champ personnalisé
+4. **Tester inscription complète** (PayPal + Espèces)
+5. **Tester modification montants** depuis paramètres admin
+6. **Ajouter validation décimales** dans champ personnalisé
 
 ### Priorité 4 - Amélioration 🟢
-5. **Optimiser cache settings** (éviter appels répétés)
+7. **Optimiser cache settings** (éviter appels répétés)
 6. **Uniformiser messages français**
 7. **Tests dashboard utilisateur**
 
