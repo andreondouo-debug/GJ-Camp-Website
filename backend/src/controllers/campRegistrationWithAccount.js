@@ -36,6 +36,7 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
       hasAllergies,
       allergyDetails,
       amountPaid,
+      paymentMethod, // 'paypal' ou 'cash'
       paymentDetails
     } = req.body;
 
