@@ -465,6 +465,21 @@ const CampRegistrationPage = () => {
                   <span>120€ (Total)</span>
                 </button>
               </div>
+              
+              <div className="custom-amount-field">
+                <label htmlFor="customAmount">Ou entrez un montant personnalisé (20-120€) :</label>
+                <input
+                  type="number"
+                  id="customAmount"
+                  name="amountPaid"
+                  value={form.amountPaid}
+                  onChange={handleChange}
+                  min="20"
+                  max="120"
+                  step="1"
+                  placeholder="Ex: 50"
+                />
+              </div>
             </div>
 
             <div className="payment-summary">

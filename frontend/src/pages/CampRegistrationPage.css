@@ -446,6 +446,61 @@
   opacity: 0.15;
 }
 
+/* ========== CHAMP MONTANT PERSONNALISÉ ========== */
+.custom-amount-field {
+  margin-top: 24px;
+  padding: 20px;
+  background: rgba(59, 130, 246, 0.12);
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.custom-amount-field label {
+  display: block;
+  margin-bottom: 12px;
+  color: rgba(247, 248, 252, 0.85);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.custom-amount-field input[type="number"] {
+  width: 100%;
+  padding: 16px 20px;
+  background: rgba(9, 23, 50, 0.6);
+  border: 2px solid rgba(212, 175, 55, 0.3);
+  border-radius: 12px;
+  color: #f7f8fc;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.custom-amount-field input[type="number"]:focus {
+  outline: none;
+  border-color: var(--color-secondary);
+  background: rgba(9, 23, 50, 0.8);
+  box-shadow: 
+    0 0 0 4px rgba(212, 175, 55, 0.15),
+    0 8px 20px rgba(212, 175, 55, 0.25);
+}
+
+.custom-amount-field input[type="number"]::placeholder {
+  color: rgba(247, 248, 252, 0.4);
+}
+
+/* Supprimer les flèches du input number */
+.custom-amount-field input[type="number"]::-webkit-inner-spin-button,
+.custom-amount-field input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.custom-amount-field input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 /* ========== CHECKBOX MODERNE ========== */
 .checkbox-label {
   display: flex;
