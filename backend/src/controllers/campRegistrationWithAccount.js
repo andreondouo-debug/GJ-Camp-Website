@@ -106,6 +106,9 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
     }
 
     // ===== VÉRIFICATION PAIEMENT =====
+    let verifiedAmount = paid;
+    let verification = null;
+    
     // Si paiement PayPal, vérifier les détails
     if (paymentMethod === 'paypal') {
       if (!paymentDetails || !paymentDetails.orderID) {
@@ -128,7 +131,7 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
 
       // ✅ VÉRIFIER LE PAIEMENT AUPRÈS DE PAYPAL
       console.log('🔍 Vérification PayPal pour orderID:', paymentDetails.orderID);
-      const verification = await paypalService.verifyPayment(
+      verification = await paypalService.verifyPayment(
         paymentDetails.orderID
       );
 
@@ -153,6 +156,10 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
           message: `❌ Montant incohérent : ${paid}€ reçu mais ${verification.amount}€ payé`
         });
       }
+      
+      // Utiliser le montant vérifié
+      verifiedAmount = verification.isDevelopmentMode ? paid : verification.amount;
+      
     } else if (paymentMethod === 'cash') {
       // Paiement espèces : pas de vérification PayPal
       console.log('💵 Inscription avec paiement espèces (différé)');
@@ -162,16 +169,10 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
       });
     }
 
-    // Continuer avec la création du compte et de l'inscription
-    // (Le code existant continue ici...) 
-        message: `❌ Le montant payé ne correspond pas (PayPal: ${verification.amount}€, Formulaire: ${paid}€)`
-      });
-    }
-
-    const verifiedAmount = verification.isDevelopmentMode ? paid : verification.amount;
+    // ===== CALCUL DU STATUT =====
     const totalPrice = 120;
     const remaining = totalPrice - verifiedAmount;
-    const status = remaining === 0 ? 'paid' : (verifiedAmount > 0 ? 'partial' : 'unpaid');
+    const status = remaining === 0 ? 'completed' : (verifiedAmount > 0 ? 'partial' : 'pending');
 
     // ===== 🎉 PAIEMENT RÉUSSI → CRÉER/RÉCUPÉRER LE COMPTE USER =====
     let user;
