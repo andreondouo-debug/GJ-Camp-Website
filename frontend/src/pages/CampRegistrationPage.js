@@ -196,6 +196,14 @@ const CampRegistrationPage = () => {
         paymentDetails: null // Pas de détails PayPal pour paiement espèces
       };
 
+      console.log('📤 Envoi données inscription espèces:', {
+        firstName: dataToSend.firstName,
+        lastName: dataToSend.lastName,
+        email: dataToSend.email,
+        paymentMethod: dataToSend.paymentMethod,
+        amountPaid: dataToSend.amountPaid
+      });
+
       const response = await axios.post('/api/registrations/camp-with-account', dataToSend, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
@@ -205,7 +213,9 @@ const CampRegistrationPage = () => {
       
       // Si compte créé, connecter automatiquement
       if (response.data.token && response.data.user) {
+        console.log('🔐 Connexion automatique avec token...');
         await login(response.data.user, response.data.token);
+        console.log('✅ Connexion automatique réussie');
       }
       
       // Rediriger vers le tableau de bord après 2 secondes
@@ -214,6 +224,7 @@ const CampRegistrationPage = () => {
       }, 2000);
     } catch (err) {
       console.error('❌ Erreur inscription espèces:', err);
+      console.error('❌ Détails erreur:', err.response?.data);
       setError(err.response?.data?.message || 'Erreur lors de l\'inscription.');
       setLoading(false);
     }

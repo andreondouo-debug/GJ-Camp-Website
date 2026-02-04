@@ -161,8 +161,9 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
       verifiedAmount = verification.isDevelopmentMode ? paid : verification.amount;
       
     } else if (paymentMethod === 'cash') {
-      // Paiement espèces : pas de vérification PayPal
+      // Paiement espèces : montant = 0 (sera payé au camp)
       console.log('💵 Inscription avec paiement espèces (différé)');
+      verifiedAmount = 0; // Pas de paiement immédiat
     } else {
       return res.status(400).json({ 
         message: '❌ Mode de paiement invalide. Utilisez "paypal" ou "cash".' 
@@ -228,7 +229,7 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
     }
 
     // ===== CRÉER L'INSCRIPTION =====
-    const registration = new Registration({
+    const registrationData = {
       user: user._id,
       firstName: firstName || user.firstName,
       lastName: lastName || user.lastName,
@@ -244,8 +245,12 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
       amountPaid: verifiedAmount,
       amountRemaining: remaining,
       paymentStatus: status,
-      paypalMode: paypalMode,
-      paymentDetails: {
+      paypalMode: paypalMode
+    };
+
+    // Ajouter les détails PayPal uniquement si paiement PayPal
+    if (paymentMethod === 'paypal' && verification) {
+      registrationData.paymentDetails = {
         orderID: verification.orderID,
         payerID: paymentDetails.payerID,
         status: verification.status,
@@ -253,8 +258,18 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
         payerEmail: verification.payerEmail,
         isDevelopmentMode: verification.isDevelopmentMode,
         amountPaid: verifiedAmount
-      }
-    });
+      };
+    } else if (paymentMethod === 'cash') {
+      // Pour paiement espèces, marquer comme tel
+      registrationData.paymentMethod = 'cash';
+      registrationData.paymentDetails = {
+        method: 'cash',
+        status: 'pending',
+        note: 'Paiement en espèces au camp'
+      };
+    }
+
+    const registration = new Registration(registrationData);
 
     await registration.save();
     console.log('✅ Inscription créée:', registration._id);
