@@ -174,7 +174,8 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
     // ===== CALCUL DU STATUT =====
     const totalPrice = 120;
     const remaining = totalPrice - verifiedAmount;
-    const status = remaining === 0 ? 'completed' : (verifiedAmount > 0 ? 'partial' : 'pending');
+    // Status selon enum du modèle: 'unpaid', 'partial', 'paid'
+    const status = remaining === 0 ? 'paid' : (verifiedAmount > 0 ? 'partial' : 'unpaid');
 
     // ===== 🎉 PAIEMENT RÉUSSI → CRÉER/RÉCUPÉRER LE COMPTE USER =====
     let user;
