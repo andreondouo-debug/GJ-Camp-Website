@@ -38,6 +38,11 @@
   --text-secondary: #666666;
   --text-light: #999999;
   --text-white: #ffffff;
+  
+  /* Alias pour compatibilité */
+  --color-text: #333333;
+  --color-white: #ffffff;
+  --color-gold: #d4af37;
 
   /* Bordures */
   --border-color: #e0e0e0;

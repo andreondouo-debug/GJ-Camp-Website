@@ -2928,10 +2928,25 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   border-radius: 5px;
   font-size: 14px;
   font-family: inherit;
+  color: #333333;
+  background-color: #ffffff;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: inherit;
+  background-color: #ffffff;
+  color: #333333;
+  cursor: pointer;
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
   outline: none;
   border-color: var(--color-gold);
   box-shadow: 0 0 5px rgba(212, 175, 55, 0.3);
@@ -2941,6 +2956,26 @@ p  { font-size: 1rem; line-height: 1.75; color: var(--color-text); }
   display: block;
   margin-top: 5px;
   font-size: 12px;
+  color: #666666;
+}
+
+/* Placeholders visibles */
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #999999;
+  opacity: 1;
+}
+
+.form-group input::-webkit-input-placeholder,
+.form-group textarea::-webkit-input-placeholder {
+  color: #999999;
+  opacity: 1;
+}
+
+.form-group input:-ms-input-placeholder,
+.form-group textarea:-ms-input-placeholder {
+  color: #999999;
+  opacity: 1;
 }
 
 .form-error {
