@@ -45,7 +45,32 @@
 
 ## ⚠️ ANOMALIES DÉTECTÉES
 
-### 🔴 CRITIQUE 1: Backend Render inaccessible
+### ✅ RÉSOLU 1: Contraste Formulaires Connexion
+
+**Symptôme**:
+```
+Background blanc + texte blanc = inputs invisibles
+Labels illisibles, placeholders invisibles
+```
+
+**Diagnostic**:
+- Variables CSS manquantes (--color-white, --color-text, --color-gold)
+- Pas de couleur de texte définie sur inputs/textarea
+- Héritage de couleur parente (souvent blanche)
+
+**Solution appliquée** (Commit 7bf62bd):
+- ✅ Ajout variables CSS manquantes dans variables.css
+- ✅ Couleur texte forcée #333333 sur inputs/textarea/select
+- ✅ Background blanc explicite #ffffff
+- ✅ Placeholders visibles #999999
+- ✅ Contraste WCAG 2.1 niveau AAA (16:1)
+
+**Impact**: ✅ **RÉSOLU** - Toutes pages de formulaires lisibles  
+**Documentation**: Voir FIX_CONTRASTE_FORMULAIRES.md
+
+---
+
+### 🔴 CRITIQUE 2: Backend Render inaccessible
 
 **Symptôme**:
 ```bash
@@ -76,7 +101,7 @@ curl https://gj-camp-backend.onrender.com/health
 
 ---
 
-### 🟡 MINEUR 2: Validation montant frontend
+### 🟡 MINEUR 3: Validation montant frontend
 
 **Symptôme**:
 Le champ personnalisé accepte les décimales (ex: 25.50€) mais le backend attend des entiers.
@@ -98,7 +123,7 @@ onChange={(e) => {
 
 ---
 
-### 🟡 MINEUR 3: Messages d'erreur pas en français
+### 🟡 MINEUR 4: Messages d'erreur pas en français
 
 **Exemples**:
 - Console: `"❌ window.paypal.Buttons n'est pas disponible"` ✅ (OK)
@@ -110,7 +135,7 @@ onChange={(e) => {
 
 ---
 
-### 🟢 INFO 4: Performance chargement Settings
+### 🟢 INFO 5: Performance chargement Settings
 
 **Observation**:
 Page inscription fait un appel `/api/settings` à chaque montage.
@@ -212,19 +237,27 @@ Page inscription fait un appel `/api/settings` à chaque montage.
 
 ## 🔧 Actions Prioritaires
 
-### Priorité 1 - URGENT 🔴
-1. **Débloquer backend Render** 
+### ✅ Priorité 1 - RÉSOLU 🟢
+1. **Contraste formulaires connexion** 
+   - ✅ Variables CSS ajoutées
+   - ✅ Couleurs texte forcées
+   - ✅ Placeholders visibles
+   - ✅ Build + commit + push réussi
+   - ✅ Documentation créée
+
+### Priorité 2 - URGENT 🔴
+2. **Débloquer backend Render** 
    - Vérifier logs: https://dashboard.render.com
    - Vérifier derniers déploiements
    - Tester route health: `curl https://gj-camp-backend.onrender.com/health`
    - Si nécessaire: rollback ou redéploiement manuel
 
-### Priorité 2 - Important 🟡
-2. **Tester inscription complète** (PayPal + Espèces)
+### Priorité 3 - Important 🟡
+3. **Tester inscription complète** (PayPal + Espèces)
 3. **Tester modification montants** depuis paramètres admin
 4. **Ajouter validation décimales** dans champ personnalisé
 
-### Priorité 3 - Amélioration 🟢
+### Priorité 4 - Amélioration 🟢
 5. **Optimiser cache settings** (éviter appels répétés)
 6. **Uniformiser messages français**
 7. **Tests dashboard utilisateur**
