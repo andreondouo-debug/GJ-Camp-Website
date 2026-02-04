@@ -23,6 +23,7 @@ const CampRegistrationPage = () => {
     refuge: '',
     hasAllergies: false,
     allergyDetails: '',
+    paymentMethod: 'paypal', // Mode de paiement par défaut
     amountPaid: 20
   });
   
@@ -87,12 +88,19 @@ const CampRegistrationPage = () => {
         }
       }
 
-      // ✅ Formulaire validé, afficher PayPal
-      console.log('✅ Formulaire validé, affichage PayPal');
-      setValidatedForm(form);
-      setShowPayPal(true);
-      setMessage('✅ Formulaire validé ! Procédez au paiement ci-dessous.');
-      setLoading(false);
+      // ✅ Formulaire validé
+      if (form.paymentMethod === 'paypal') {
+        // Afficher PayPal pour paiement en ligne
+        console.log('✅ Formulaire validé, affichage PayPal');
+        setValidatedForm(form);
+        setShowPayPal(true);
+        setMessage('✅ Formulaire validé ! Procédez au paiement ci-dessous.');
+        setLoading(false);
+      } else {
+        // Paiement espèces : envoyer directement sans PayPal
+        console.log('✅ Formulaire validé, inscription espèces');
+        await handleCashRegistration();
+      }
     } catch (err) {
       console.error('❌ Erreur validation:', err);
       setError(err.response?.data?.message || 'Erreur lors de la validation');
@@ -152,6 +160,42 @@ const CampRegistrationPage = () => {
     setMessage('⚠️ Paiement annulé. Vous pouvez modifier votre inscription et réessayer.');
     setShowPayPal(false);
     setValidatedForm(null);
+  };
+
+  const handleCashRegistration = async () => {
+    console.log('💵 Inscription avec paiement espèces');
+    setLoading(true);
+    setMessage(null);
+    setError(null);
+
+    try {
+      const dataToSend = {
+        ...form,
+        paymentMethod: 'cash',
+        paymentDetails: null // Pas de détails PayPal pour paiement espèces
+      };
+
+      const response = await axios.post('/api/registrations/camp-with-account', dataToSend, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+
+      console.log('✅ Inscription espèces créée:', response.data);
+      setMessage(response.data.message || '🎉 Inscription réussie ! Vous pourrez payer au camp.');
+      
+      // Si compte créé, connecter automatiquement
+      if (response.data.token && response.data.user) {
+        await login(response.data.user, response.data.token);
+      }
+      
+      // Rediriger vers le tableau de bord après 2 secondes
+      setTimeout(() => {
+        navigate('/tableau-de-bord');
+      }, 2000);
+    } catch (err) {
+      console.error('❌ Erreur inscription espèces:', err);
+      setError(err.response?.data?.message || 'Erreur lors de l\'inscription.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -367,6 +411,26 @@ const CampRegistrationPage = () => {
             <h3 className="section-title">Frais d'inscription</h3>
             <div className="payment-info">
               <p className="total-price">Total : <strong>120€</strong></p>
+            </div>
+            
+            <div className="form-field">
+              <label>Mode de paiement *</label>
+              <div className="payment-method-buttons">
+                <button
+                  type="button"
+                  className={`payment-method-btn ${form.paymentMethod === 'paypal' ? 'active' : ''}`}
+                  onClick={() => setForm(prev => ({ ...prev, paymentMethod: 'paypal' }))}
+                >
+                  💳 PayPal / Carte bancaire
+                </button>
+                <button
+                  type="button"
+                  className={`payment-method-btn ${form.paymentMethod === 'cash' ? 'active' : ''}`}
+                  onClick={() => setForm(prev => ({ ...prev, paymentMethod: 'cash' }))}
+                >
+                  💵 Espèces (payer au camp)
+                </button>
+              </div>
             </div>
             
             <div className="form-field">

@@ -105,49 +105,65 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
       });
     }
 
-    // ===== VÉRIFICATION PAIEMENT PAYPAL =====
-    if (!paymentDetails || !paymentDetails.orderID) {
-      return res.status(400).json({ 
-        message: '❌ Détails de paiement PayPal manquants' 
-      });
-    }
+    // ===== VÉRIFICATION PAIEMENT =====
+    // Si paiement PayPal, vérifier les détails
+    if (paymentMethod === 'paypal') {
+      if (!paymentDetails || !paymentDetails.orderID) {
+        return res.status(400).json({ 
+          message: '❌ Détails de paiement PayPal manquants' 
+        });
+      }
 
-    // Vérifier transaction non dupliquée
-    try {
-      await paypalService.checkDuplicateTransaction(
-        paymentDetails.orderID, 
-        Registration
+      // Vérifier transaction non dupliquée
+      try {
+        await paypalService.checkDuplicateTransaction(
+          paymentDetails.orderID, 
+          Registration
+        );
+      } catch (error) {
+        return res.status(409).json({ 
+          message: error.message
+        });
+      }
+
+      // ✅ VÉRIFIER LE PAIEMENT AUPRÈS DE PAYPAL
+      console.log('🔍 Vérification PayPal pour orderID:', paymentDetails.orderID);
+      const verification = await paypalService.verifyPayment(
+        paymentDetails.orderID
       );
-    } catch (error) {
-      return res.status(409).json({ 
-        message: error.message
+
+      console.log('📋 Résultat vérification:', verification);
+
+      if (!verification.verified) {
+        console.error('❌ Paiement non vérifié:', verification.error);
+        return res.status(400).json({ 
+          message: '❌ Paiement invalide ou non complété. Aucun compte créé.',
+          error: verification.error,
+          details: verification
+        });
+      }
+
+      // Vérifier montant
+      if (!verification.isDevelopmentMode && verification.amount !== paid) {
+        console.error('❌ Montant incohérent:', {
+          claimed: paid,
+          actual: verification.amount
+        });
+        return res.status(400).json({ 
+          message: `❌ Montant incohérent : ${paid}€ reçu mais ${verification.amount}€ payé`
+        });
+      }
+    } else if (paymentMethod === 'cash') {
+      // Paiement espèces : pas de vérification PayPal
+      console.log('💵 Inscription avec paiement espèces (différé)');
+    } else {
+      return res.status(400).json({ 
+        message: '❌ Mode de paiement invalide. Utilisez "paypal" ou "cash".' 
       });
     }
 
-    // ✅ VÉRIFIER LE PAIEMENT AUPRÈS DE PAYPAL
-    console.log('🔍 Vérification PayPal pour orderID:', paymentDetails.orderID);
-    const verification = await paypalService.verifyPayment(
-      paymentDetails.orderID
-    );
-
-    console.log('📋 Résultat vérification:', verification);
-
-    if (!verification.verified) {
-      console.error('❌ Paiement non vérifié:', verification.error);
-      return res.status(400).json({ 
-        message: '❌ Paiement invalide ou non complété. Aucun compte créé.',
-        error: verification.error,
-        details: verification
-      });
-    }
-
-    // Vérifier montant
-    if (!verification.isDevelopmentMode && verification.amount !== paid) {
-      console.error('❌ Montant incohérent:', {
-        claimed: paid,
-        actual: verification.amount
-      });
-      return res.status(400).json({ 
+    // Continuer avec la création du compte et de l'inscription
+    // (Le code existant continue ici...) 
         message: `❌ Le montant payé ne correspond pas (PayPal: ${verification.amount}€, Formulaire: ${paid}€)`
       });
     }

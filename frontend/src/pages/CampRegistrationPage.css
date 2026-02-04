@@ -389,6 +389,63 @@
   font-weight: 700;
 }
 
+/* ========== BOUTONS MODE DE PAIEMENT ========== */
+.payment-method-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.payment-method-btn {
+  padding: 20px 16px;
+  border: 2px solid rgba(212, 175, 55, 0.28);
+  background: rgba(9, 23, 50, 0.55);
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #f7f8fc;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.payment-method-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.85), rgba(239, 91, 135, 0.7));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.payment-method-btn:hover {
+  border-color: var(--color-secondary);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 
+    0 10px 30px rgba(212, 175, 55, 0.28),
+    0 0 40px rgba(239, 91, 135, 0.22);
+}
+
+.payment-method-btn.active {
+  border-color: var(--color-secondary);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(239, 91, 135, 0.18));
+  color: var(--color-secondary);
+  box-shadow: 
+    0 8px 24px rgba(212, 175, 55, 0.22),
+    inset 0 0 25px rgba(212, 175, 55, 0.12);
+}
+
+.payment-method-btn.active::before {
+  opacity: 0.15;
+}
+
 /* ========== CHECKBOX MODERNE ========== */
 .checkbox-label {
   display: flex;
