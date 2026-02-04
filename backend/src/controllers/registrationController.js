@@ -959,7 +959,8 @@ exports.getCashPaymentsStats = async (req, res) => {
     const registrations = await Registration.find({
       $or: [
         { paymentMethod: 'cash' },
-        { paymentMethod: 'mixed' }
+        { paymentMethod: 'mixed' },
+        { 'cashPayments.0': { $exists: true } } // Au moins 1 paiement espèces
       ]
     }).populate('user', 'firstName lastName email');
 
@@ -974,28 +975,7 @@ exports.getCashPaymentsStats = async (req, res) => {
     };
 
     registrations.forEach(reg => {
-      // Si inscription avec paymentMethod='cash' mais sans paiements soumis
-      if (reg.paymentMethod === 'cash' && (!reg.cashPayments || reg.cashPayments.length === 0)) {
-        // Afficher comme paiement en attente si paymentStatus = 'unpaid' ou 'partial'
-        if (reg.paymentStatus === 'unpaid' || reg.paymentStatus === 'partial') {
-          const paymentInfo = {
-            registrationId: reg._id,
-            paymentId: null, // Pas de sous-document payment
-            userName: `${reg.firstName} ${reg.lastName}`,
-            userEmail: reg.email,
-            refuge: reg.refuge,
-            amount: reg.amountRemaining || 120,
-            submittedAt: reg.createdAt,
-            note: 'Paiement en espèces au camp (inscription directe)',
-            isPendingRegistration: true // Flag pour distinguer
-          };
-          stats.pendingPayments.push(paymentInfo);
-          stats.totalPending += paymentInfo.amount;
-          stats.totalCashRegistrations++;
-        }
-      }
-      
-      // Traiter les paiements espèces soumis (ancien système)
+      // Traiter les paiements espèces
       if (reg.cashPayments && reg.cashPayments.length > 0) {
         reg.cashPayments.forEach(payment => {
           const paymentInfo = {
@@ -1037,27 +1017,13 @@ exports.getCashPaymentsStats = async (req, res) => {
 exports.getPendingCashPaymentsCount = async (req, res) => {
   try {
     const registrations = await Registration.find({
-      $or: [
-        { paymentMethod: 'cash' },
-        { paymentMethod: 'mixed' }
-      ]
+      'cashPayments.0': { $exists: true }
     });
 
     let pendingCount = 0;
-    
     registrations.forEach(reg => {
-      // Compter inscriptions cash sans paiement (unpaid/partial)
-      if (reg.paymentMethod === 'cash' && (!reg.cashPayments || reg.cashPayments.length === 0)) {
-        if (reg.paymentStatus === 'unpaid' || reg.paymentStatus === 'partial') {
-          pendingCount++;
-        }
-      }
-      
-      // Compter paiements espèces soumis en attente (ancien système)
-      if (reg.cashPayments && reg.cashPayments.length > 0) {
-        const pending = reg.cashPayments.filter(p => p.status === 'pending');
-        pendingCount += pending.length;
-      }
+      const pending = reg.cashPayments.filter(p => p.status === 'pending');
+      pendingCount += pending.length;
     });
 
     res.status(200).json({ 

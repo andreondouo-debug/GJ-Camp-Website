@@ -262,8 +262,15 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
         amountPaid: verifiedAmount
       };
     } else if (paymentMethod === 'cash') {
-      // Pour paiement espèces, marquer comme tel
+      // Pour paiement espèces, créer une entrée dans cashPayments pour compatibilité
+      const requestedAmount = parseFloat(amountPaid); // Montant demandé par l'utilisateur
       registrationData.paymentMethod = 'cash';
+      registrationData.cashPayments = [{
+        amount: requestedAmount,
+        status: 'pending',
+        submittedAt: new Date(),
+        note: 'Paiement en espèces au camp (inscription directe)'
+      }];
       registrationData.paymentDetails = {
         method: 'cash',
         status: 'pending',
