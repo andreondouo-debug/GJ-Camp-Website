@@ -44,6 +44,13 @@ router.get(
 	registrationController.getPendingCashPaymentsCount
 );
 // 🆕 Routes pour PreRegistrations
+router.get(
+	'/pre-registrations/pending',
+	auth,
+	requireVerifiedEmail,
+	authorize('referent', 'responsable', 'admin'),
+	registrationController.getPendingPreRegistrations
+);
 router.patch(
 	'/pre-registration/:preRegistrationId/validate',
 	auth,

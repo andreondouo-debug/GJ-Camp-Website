@@ -1,11 +1,12 @@
 const Registration = require('../models/Registration');
 const PreRegistration = require('../models/PreRegistration');
 const User = require('../models/User');
+const Campus = require('../models/Campus');
 const TransactionLog = require('../models/TransactionLog');
 const Settings = require('../models/Settings');
 const paypalService = require('../services/paypalService');
 const payoutService = require('../services/payoutService');
-const { sendCampRegistrationConfirmation } = require('../config/email');
+const { sendCampRegistrationConfirmation, sendCashPaymentRequestToResponsable } = require('../config/email');
 const pushService = require('../services/pushService');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -764,6 +765,24 @@ exports.createCashRegistration = async (req, res) => {
       console.error('⚠️ Erreur email:', emailError.message);
     }
 
+    // 📧 Notifier le responsable du campus
+    try {
+      const campus = await Campus.findOne({ name: refuge }).populate('responsable');
+      if (campus && campus.responsable) {
+        await sendCashPaymentRequestToResponsable(
+          campus.responsable.email,
+          campus.responsable.firstName,
+          preRegistration,
+          campus.name
+        );
+        console.log('✅ Email envoyé au responsable:', campus.responsable.email);
+      } else {
+        console.log('⚠️ Aucun responsable trouvé pour le campus:', refuge);
+      }
+    } catch (emailError) {
+      console.error('⚠️ Erreur email responsable:', emailError.message);
+    }
+
     res.status(201).json({
       message: `⏳ Demande enregistrée ! Votre paiement de ${paid}€ en espèces doit être validé par un responsable de votre campus avant que votre inscription ne soit créée.`,
       preRegistration: {
@@ -1055,6 +1074,49 @@ exports.getCashPaymentsStats = async (req, res) => {
     res.status(200).json(stats);
   } catch (error) {
     console.error('❌ Erreur stats espèces:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+// 📋 Lister les PreRegistrations en attente (pour responsables)
+exports.getPendingPreRegistrations = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const userRole = req.user.role;
+    
+    let preRegistrations;
+    
+    // Admin voit tout
+    if (userRole === 'admin' || userRole === 'responsable') {
+      preRegistrations = await PreRegistration.find({ status: 'pending' })
+        .populate('user', 'firstName lastName email')
+        .sort({ submittedAt: -1 });
+    } else if (userRole === 'referent') {
+      // Referent ne voit que son campus
+      const responsableCampus = await Campus.find({ responsable: userId });
+      if (responsableCampus.length === 0) {
+        return res.status(403).json({ 
+          message: '❌ Vous devez être responsable d\'un campus' 
+        });
+      }
+      
+      const campusNames = responsableCampus.map(c => c.name);
+      preRegistrations = await PreRegistration.find({ 
+        status: 'pending',
+        refuge: { $in: campusNames }
+      })
+        .populate('user', 'firstName lastName email')
+        .sort({ submittedAt: -1 });
+    } else {
+      return res.status(403).json({ message: '❌ Accès non autorisé' });
+    }
+    
+    res.status(200).json({
+      count: preRegistrations.length,
+      preRegistrations
+    });
+  } catch (error) {
+    console.error('❌ Erreur liste PreRegistrations:', error);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 };

@@ -533,11 +533,131 @@ const sendCampRegistrationConfirmation = async (email, firstName, registration, 
   return await sendEmailViaBrevoAPI(email, subject, htmlContent, textContent);
 };
 
+/**
+ * Notifier un responsable d'une nouvelle demande de paiement espèces
+ * @param {string} responsableEmail - Email du responsable du campus
+ * @param {string} responsableFirstName - Prénom du responsable
+ * @param {object} preRegistration - PreRegistration créée
+ * @param {string} campusName - Nom du campus
+ */
+const sendCashPaymentRequestToResponsable = async (responsableEmail, responsableFirstName, preRegistration, campusName) => {
+  console.log('📧 Envoi notification responsable paiement espèces:', responsableEmail);
+  
+  const frontendUrl = getFrontendBaseUrl();
+  const validationLink = `${frontendUrl}/gestion/paiements-especes?highlight=${preRegistration._id}`;
+  
+  const subject = `💰 Nouvelle demande de paiement espèces - ${campusName} (${preRegistration.cashAmount}€)`;
+  
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #a01e1e; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+          .content { background-color: #f9f9f9; padding: 30px; border: 1px solid #ddd; }
+          .button { display: inline-block; background-color: #4caf50; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; font-size: 16px; }
+          .button:hover { background-color: #45a049; }
+          .info-box { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
+          .user-details { background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 20px 0; }
+          .footer { text-align: center; padding: 20px; color: #777; font-size: 12px; }
+          .highlight { color: #a01e1e; font-weight: bold; }
+          .amount { font-size: 28px; color: #4caf50; font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>💰 Nouvelle demande de paiement espèces</h1>
+          </div>
+          <div class="content">
+            <p>Bonjour <strong>${responsableFirstName}</strong>,</p>
+            
+            <p>Une nouvelle demande de paiement en espèces a été enregistrée pour votre campus <span class="highlight">${campusName}</span>.</p>
+            
+            <div class="info-box">
+              <p class="amount">${preRegistration.cashAmount}€ en espèces</p>
+              <p><strong>Statut :</strong> ⏳ En attente de votre validation</p>
+            </div>
+            
+            <div class="user-details">
+              <h3>📋 Informations du participant</h3>
+              <p><strong>Nom :</strong> ${preRegistration.firstName} ${preRegistration.lastName}</p>
+              <p><strong>Email :</strong> ${preRegistration.email}</p>
+              <p><strong>Téléphone :</strong> ${preRegistration.phone}</p>
+              <p><strong>Campus :</strong> ${campusName}</p>
+              <p><strong>Date de demande :</strong> ${new Date(preRegistration.submittedAt).toLocaleString('fr-FR')}</p>
+            </div>
+            
+            <div class="info-box">
+              <h4>⚠️ Action requise</h4>
+              <p>Cette demande doit être validée pour créer l'inscription du participant au camp.</p>
+              <ul>
+                <li>Le participant doit vous remettre <strong>${preRegistration.cashAmount}€ en espèces</strong></li>
+                <li>Après réception du montant, validez le paiement dans le système</li>
+                <li>L'inscription sera créée automatiquement après validation</li>
+                <li>Le participant recevra un email de confirmation</li>
+              </ul>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${validationLink}" class="button">
+                ✅ Valider le paiement maintenant
+              </a>
+            </div>
+            
+            <p style="text-align: center; color: #666; font-size: 14px;">
+              Vous pouvez également accéder à la page de gestion des paiements depuis votre compte.
+            </p>
+          </div>
+          <div class="footer">
+            <p>Cet email est envoyé automatiquement par le système GJ Camp 2026.</p>
+            <p>Si vous avez des questions, contactez l'administration.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+  
+  const textContent = `
+    NOUVELLE DEMANDE DE PAIEMENT ESPÈCES
+    
+    Bonjour ${responsableFirstName},
+    
+    Une nouvelle demande de paiement en espèces a été enregistrée pour votre campus ${campusName}.
+    
+    MONTANT : ${preRegistration.cashAmount}€
+    STATUT : En attente de validation
+    
+    PARTICIPANT :
+    - Nom : ${preRegistration.firstName} ${preRegistration.lastName}
+    - Email : ${preRegistration.email}
+    - Téléphone : ${preRegistration.phone}
+    - Campus : ${campusName}
+    - Date : ${new Date(preRegistration.submittedAt).toLocaleString('fr-FR')}
+    
+    ACTION REQUISE :
+    1. Récupérez ${preRegistration.cashAmount}€ en espèces du participant
+    2. Validez le paiement dans le système
+    3. L'inscription sera créée automatiquement
+    
+    LIEN DE VALIDATION :
+    ${validationLink}
+    
+    Cordialement,
+    L'équipe GJ Camp
+  `;
+  
+  return await sendEmailViaBrevoAPI(responsableEmail, subject, htmlContent, textContent);
+};
+
 module.exports = {
   sendVerificationEmail,
   resendVerificationEmail,
   sendPasswordResetRequestEmail,
   sendPasswordResetEmail,
   sendCampRegistrationConfirmation,
+  sendCashPaymentRequestToResponsable,
   sendEmailViaBrevoAPI
 };
