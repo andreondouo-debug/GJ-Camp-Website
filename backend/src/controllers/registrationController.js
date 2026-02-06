@@ -719,6 +719,16 @@ exports.createCashRegistration = async (req, res) => {
     const remaining = totalPrice - paid;
     const status = remaining === 0 ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
 
+    // Convertir la date du format JJ/MM/AAAA en Date
+    let parsedDate;
+    if (dateOfBirth && typeof dateOfBirth === 'string' && dateOfBirth.includes('/')) {
+      const [day, month, year] = dateOfBirth.split('/');
+      parsedDate = new Date(year, month - 1, day); // Mois commence à 0
+      console.log('📅 Date convertie:', dateOfBirth, '→', parsedDate);
+    } else {
+      parsedDate = new Date(dateOfBirth);
+    }
+
     // 🚫 NE PAS créer l'inscription immédiatement pour les paiements espèces
     // ✅ Créer une PRE-REGISTRATION en attente de validation
     const preRegistration = new PreRegistration({
@@ -729,7 +739,7 @@ exports.createCashRegistration = async (req, res) => {
       lastName: lastName || user.lastName,
       email: email || user.email,
       sex,
-      dateOfBirth,
+      dateOfBirth: parsedDate,
       address,
       phone,
       refuge,

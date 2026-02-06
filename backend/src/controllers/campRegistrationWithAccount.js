@@ -282,6 +282,16 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
       
       const requestedAmount = parseFloat(amountPaid);
       
+      // Convertir la date du format JJ/MM/AAAA en Date
+      let parsedDate;
+      if (dateOfBirth && typeof dateOfBirth === 'string' && dateOfBirth.includes('/')) {
+        const [day, month, year] = dateOfBirth.split('/');
+        parsedDate = new Date(year, month - 1, day); // Mois commence à 0
+        console.log('📅 Date convertie:', dateOfBirth, '→', parsedDate);
+      } else {
+        parsedDate = new Date(dateOfBirth);
+      }
+      
       const preRegistration = new PreRegistration({
         user: user._id,
         isGuest: false,
@@ -289,7 +299,7 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
         lastName,
         email,
         sex,
-        dateOfBirth,
+        dateOfBirth: parsedDate,
         address,
         phone,
         refuge,
