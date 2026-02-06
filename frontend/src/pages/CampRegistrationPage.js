@@ -212,13 +212,22 @@ const CampRegistrationPage = () => {
 
       console.log('✅ Inscription espèces créée:', response.data);
       
-      // Afficher le message détaillé de l'API
+      // Afficher le message détaillé de l'API avec formatage
       const apiMessage = response.data.message || '🎉 Inscription réussie ! Vous pourrez payer au camp.';
       const instructions = response.data.instructions || {};
       
       let fullMessage = apiMessage;
       if (instructions.important) {
-        fullMessage = `${apiMessage}\n\n${instructions.important}\n${instructions.step1 || ''}\n${instructions.step2 || ''}\n${instructions.step3 || ''}\n${instructions.step4 || ''}\n\n${instructions.access || ''}`;
+        const messageParts = [
+          apiMessage,
+          instructions.important,
+          instructions.step1,
+          instructions.step2,
+          instructions.step3,
+          instructions.step4,
+          instructions.access
+        ].filter(Boolean);
+        fullMessage = messageParts.join('\n');
       }
       
       setMessage(fullMessage);
@@ -256,7 +265,11 @@ const CampRegistrationPage = () => {
             </div>
           </div>
 
-          {message && <div className="alert alert-success">{message}</div>}
+          {message && (
+            <div className="alert alert-success" style={{ whiteSpace: 'pre-line', textAlign: 'left' }}>
+              {message}
+            </div>
+          )}
           {error && <div className="alert alert-error">{error}</div>}
 
         <form className="camp-form" onSubmit={handleSubmit}>

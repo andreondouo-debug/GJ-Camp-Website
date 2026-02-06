@@ -1207,7 +1207,7 @@ exports.validatePreRegistration = async (req, res) => {
       console.error('⚠️ Erreur payout:', payoutError.message);
     }
 
-    // Envoyer email de confirmation
+    // Envoyer email de confirmation au participant
     try {
       await sendCampRegistrationConfirmation(
         registration.email,
@@ -1215,9 +1215,9 @@ exports.validatePreRegistration = async (req, res) => {
         registration,
         { cashPaymentValidated: true, validatedAmount }
       );
-      console.log('✅ Email de confirmation envoyé');
+      console.log('✅ Email de confirmation envoyé au participant:', registration.email);
     } catch (emailError) {
-      console.error('⚠️ Erreur email:', emailError.message);
+      console.error('⚠️ Erreur email participant:', emailError.message);
     }
 
     // Notification push

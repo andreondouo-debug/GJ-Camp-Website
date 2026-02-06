@@ -138,11 +138,21 @@ const CampRegistrationNewPage = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        // Afficher le message détaillé de l'API
+        // Afficher le message détaillé de l'API avec formatage HTML
         const apiMessage = response.data.message || '';
         const instructions = response.data.instructions || {};
         
-        const fullMessage = `${apiMessage}\n\n${instructions.important || ''}\n${instructions.step1 || ''}\n${instructions.step2 || ''}\n${instructions.step3 || ''}\n${instructions.step4 || ''}\n\n${instructions.access || ''}`;
+        const fullMessageParts = [
+          apiMessage,
+          instructions.important,
+          instructions.step1,
+          instructions.step2,
+          instructions.step3,
+          instructions.step4,
+          instructions.access
+        ].filter(Boolean);
+        
+        const fullMessage = fullMessageParts.join('\n');
         
         setMessage(fullMessage);
         
@@ -295,7 +305,11 @@ const CampRegistrationNewPage = () => {
           </div>
         </div>
 
-        {message && <div className="new-alert new-alert-success">{message}</div>}
+        {message && (
+          <div className="new-alert new-alert-success" style={{ whiteSpace: 'pre-line', textAlign: 'left' }}>
+            {message}
+          </div>
+        )}
         {error && <div className="new-alert new-alert-error">{error}</div>}
 
         <form className="new-form" onSubmit={handleSubmit}>
