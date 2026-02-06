@@ -223,7 +223,7 @@ const GuestRegistrationPage = () => {
                 type="text"
                 id="dateOfBirth"
                 name="dateOfBirth"
-                value={formData.dateOfBirth}
+                value={form.dateOfBirth}
                 onChange={handleChange}
                 onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
                 placeholder="JJ/MM/AAAA (ex: 15/03/2000)"
