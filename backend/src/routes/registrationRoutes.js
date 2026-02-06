@@ -43,6 +43,14 @@ router.get(
 	authorize('referent', 'responsable', 'admin'),
 	registrationController.getPendingCashPaymentsCount
 );
+// 🆕 Routes pour PreRegistrations
+router.patch(
+	'/pre-registration/:preRegistrationId/validate',
+	auth,
+	requireVerifiedEmail,
+	checkCampusResponsable,
+	registrationController.validatePreRegistration
+);
 router.post('/:registrationId/cash-payment', auth, registrationController.addCashPayment);
 router.patch(
 	'/:registrationId/cash-payment/:paymentId/validate',

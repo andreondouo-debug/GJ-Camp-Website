@@ -1,4 +1,5 @@
 const Registration = require('../models/Registration');
+const PreRegistration = require('../models/PreRegistration');
 const User = require('../models/User');
 const TransactionLog = require('../models/TransactionLog');
 const Settings = require('../models/Settings');
@@ -717,8 +718,9 @@ exports.createCashRegistration = async (req, res) => {
     const remaining = totalPrice - paid;
     const status = remaining === 0 ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
 
-    // Créer l'inscription
-    const registration = new Registration({
+    // 🚫 NE PAS créer l'inscription immédiatement pour les paiements espèces
+    // ✅ Créer une PRE-REGISTRATION en attente de validation
+    const preRegistration = new PreRegistration({
       user: user._id,
       isGuest,
       registeredBy: isGuest ? req.user.userId : null,
@@ -732,42 +734,51 @@ exports.createCashRegistration = async (req, res) => {
       refuge,
       hasAllergies: !!hasAllergies,
       allergyDetails: hasAllergies ? allergyDetails : null,
-      totalPrice,
-      amountPaid: 0, // Montant validé = 0 au début
-      amountRemaining: totalPrice,
-      paymentStatus: 'unpaid',
-      paymentMethod: 'cash',
-      paypalMode: 'cash', // 🔐 Les paiements en espèces ne passent pas par PayPal
-      cashPayments: [{
-        amount: paid,
-        status: 'pending',
-        submittedAt: new Date()
-      }]
+      cashAmount: paid,
+      status: 'pending',
+      submittedAt: new Date(),
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent']
     });
 
-    await registration.save();
+    await preRegistration.save();
+    console.log('✅ Pre-registration créée (en attente validation):', preRegistration._id);
 
-    // Envoyer email de confirmation avec statut "en attente"
+    // Envoyer email d'information (NON de confirmation)
     try {
       await sendCampRegistrationConfirmation(
-        registration.email,
-        registration.firstName,
-        registration,
+        preRegistration.email,
+        preRegistration.firstName,
+        {
+          email: preRegistration.email,
+          firstName: preRegistration.firstName,
+          amountPaid: 0,
+          amountRemaining: totalPrice,
+          paymentStatus: 'pending_validation',
+          cashAmount: paid
+        },
         { cashPaymentPending: true, cashAmount: paid }
       );
-      console.log('✅ Email confirmation paiement espèces envoyé');
+      console.log('✅ Email information paiement espèces envoyé');
     } catch (emailError) {
       console.error('⚠️ Erreur email:', emailError.message);
     }
 
     res.status(201).json({
-      message: `✅ Inscription enregistrée ! Votre paiement de ${paid}€ en espèces est en attente de validation par un responsable.`,
-      registration,
+      message: `⏳ Demande enregistrée ! Votre paiement de ${paid}€ en espèces doit être validé par un responsable de votre campus avant que votre inscription ne soit créée.`,
+      preRegistration: {
+        _id: preRegistration._id,
+        status: 'pending',
+        cashAmount: paid,
+        submittedAt: preRegistration.submittedAt
+      },
       instructions: {
-        step1: 'Remettez le montant en espèces à un responsable',
+        important: '⚠️ Votre inscription n\'est PAS encore créée',
+        step1: 'Remettez le montant de ' + paid + '€ en espèces à un responsable de votre campus',
         step2: 'Le responsable validera votre paiement dans le système',
-        step3: 'Vous recevrez un email de confirmation une fois validé',
-        step4: 'Votre inscription sera alors complète et vous pourrez accéder aux activités'
+        step3: 'Votre inscription sera alors CRÉÉE automatiquement',
+        step4: 'Vous recevrez un email de confirmation et pourrez accéder aux activités',
+        access: '🚫 Vous n\'avez pas encore accès au tableau de bord ni aux activités'
       }
     });
   } catch (error) {
@@ -1045,6 +1056,114 @@ exports.getCashPaymentsStats = async (req, res) => {
   } catch (error) {
     console.error('❌ Erreur stats espèces:', error);
     res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+// 🎯 Valider une PreRegistration et créer l'inscription (responsable/admin)
+exports.validatePreRegistration = async (req, res) => {
+  try {
+    const { preRegistrationId } = req.params;
+    const { amountValidated, note } = req.body;
+
+    // Récupérer la pre-registration
+    const preReg = await PreRegistration.findById(preRegistrationId);
+    if (!preReg) {
+      return res.status(404).json({ message: '❌ Demande d\'inscription non trouvée' });
+    }
+
+    if (preReg.status !== 'pending') {
+      return res.status(400).json({ message: '❌ Cette demande a déjà été traitée' });
+    }
+
+    // Vérifier que l'utilisateur existe toujours
+    const user = await User.findById(preReg.user);
+    if (!user) {
+      return res.status(404).json({ message: '❌ Utilisateur non trouvé' });
+    }
+
+    // Créer l'inscription maintenant que le paiement est validé
+    const validatedAmount = amountValidated || preReg.cashAmount;
+    const totalPrice = 120;
+    const remaining = totalPrice - validatedAmount;
+    const status = remaining === 0 ? 'paid' : (validatedAmount > 0 ? 'partial' : 'unpaid');
+
+    const registration = new Registration({
+      user: preReg.user,
+      isGuest: preReg.isGuest,
+      registeredBy: preReg.registeredBy,
+      firstName: preReg.firstName,
+      lastName: preReg.lastName,
+      email: preReg.email,
+      sex: preReg.sex,
+      dateOfBirth: preReg.dateOfBirth,
+      address: preReg.address,
+      phone: preReg.phone,
+      refuge: preReg.refuge,
+      hasAllergies: preReg.hasAllergies,
+      allergyDetails: preReg.allergyDetails,
+      totalPrice,
+      amountPaid: validatedAmount,
+      amountRemaining: remaining,
+      paymentStatus: status,
+      paymentMethod: 'cash',
+      paypalMode: 'cash',
+      cashPayments: [{
+        amount: validatedAmount,
+        status: 'validated',
+        submittedAt: preReg.submittedAt,
+        validatedAt: new Date(),
+        validatedBy: req.user.userId,
+        note: note || `Validation initiale depuis pre-registration ${preRegistrationId}`
+      }]
+    });
+
+    await registration.save();
+    console.log('✅ Inscription créée depuis pre-registration:', registration._id);
+
+    // Mettre à jour la PreRegistration
+    preReg.status = 'validated';
+    preReg.validatedAt = new Date();
+    preReg.validatedBy = req.user.userId;
+    preReg.registrationCreated = registration._id;
+    await preReg.save();
+
+    // Créer le payout pour redistribution
+    try {
+      const payout = await payoutService.createPayoutForRegistration(registration._id, req.user.userId);
+      console.log('✅ Payout créé pour inscription validée:', payout);
+    } catch (payoutError) {
+      console.error('⚠️ Erreur payout:', payoutError.message);
+    }
+
+    // Envoyer email de confirmation
+    try {
+      await sendCampRegistrationConfirmation(
+        registration.email,
+        registration.firstName,
+        registration,
+        { cashPaymentValidated: true, validatedAmount }
+      );
+      console.log('✅ Email de confirmation envoyé');
+    } catch (emailError) {
+      console.error('⚠️ Erreur email:', emailError.message);
+    }
+
+    // Notification push
+    pushService.notifyPaymentConfirmed(registration.user, validatedAmount).catch(err => {
+      console.error('❌ Erreur notification push:', err);
+    });
+
+    res.status(200).json({
+      message: `✅ Paiement de ${validatedAmount}€ validé - Inscription créée avec succès`,
+      registration,
+      preRegistration: preReg
+    });
+  } catch (error) {
+    console.error('❌ Erreur validation pre-registration:', error);
+    res.status(500).json({ 
+      message: 'Erreur serveur',
+      error: error.message 
+    });
   }
 };
 

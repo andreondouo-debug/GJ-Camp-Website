@@ -322,13 +322,15 @@ const sendCampRegistrationConfirmation = async (email, firstName, registration, 
   // Paiement en espèces en attente
   if (options.cashPaymentPending) {
     paymentStatusText = `⏳ En attente de validation (${options.cashAmount}€ en espèces)`;
-    subjectText = '⏳ Inscription en attente - GJ Camp 2026 (Paiement espèces)';
-    messageIntro = `Merci pour votre inscription au <span class="highlight">GJ Camp 2026</span>. Votre paiement de <strong>${options.cashAmount}€ en espèces</strong> est en attente de validation par un responsable.`;
+    subjectText = '⏳ Demande en attente - GJ Camp 2026 (Paiement espèces à valider)';
+    messageIntro = `Merci pour votre demande d'inscription au <span class="highlight">GJ Camp 2026</span>. Votre paiement de <strong>${options.cashAmount}€ en espèces</strong> doit être validé par un responsable de votre campus.`;
     nextSteps = `
-      <li>Remettez le montant de <strong>${options.cashAmount}€</strong> à un responsable</li>
+      <li><strong>⚠️ Important :</strong> Votre inscription n'est PAS encore créée</li>
+      <li>Remettez le montant de <strong>${options.cashAmount}€</strong> en espèces à un responsable de votre campus</li>
       <li>Le responsable validera votre paiement dans le système</li>
-      <li>Vous recevrez un email de confirmation une fois validé</li>
-      <li>Votre inscription sera alors complète</li>
+      <li>Votre inscription sera alors <strong>créée automatiquement</strong></li>
+      <li>Vous recevrez un email de confirmation dès validation</li>
+      <li>🚫 Vous n'avez pas encore accès au tableau de bord ni aux activités</li>
     `;
   }
   // Paiement en espèces validé
@@ -392,8 +394,8 @@ const sendCampRegistrationConfirmation = async (email, firstName, registration, 
       <body>
         <div class="container">
           <div class="header">
-            <h1>${options.cashPaymentPending ? '⏳ Inscription en attente !' : 
-                  (options.cashPaymentValidated ? '✅ Paiement validé !' :
+            <h1>${options.cashPaymentPending ? '⏳ Demande en attente de validation' : 
+                  (options.cashPaymentValidated ? '✅ Paiement validé - Inscription créée !' :
                   (isPartialPayment ? '📝 Inscription enregistrée !' : '🎉 Inscription confirmée !'))}</h1>
           </div>
           <div class="content">
@@ -401,24 +403,34 @@ const sendCampRegistrationConfirmation = async (email, firstName, registration, 
             
             <p>${messageIntro}</p>
             
-            ${options.cashPaymentPending || (isPartialPayment && !options.cashPaymentValidated) ? `
+            ${options.cashPaymentPending ? `
               <div class="warning-box">
-                <h4>💰 ${options.cashPaymentPending ? 'Paiement en espèces en attente' : 'Paiement partiel'}</h4>
-                ${options.cashPaymentPending ? `
-                  <p><strong>Montant déclaré :</strong> ${options.cashAmount}€</p>
-                  <p><strong>Statut :</strong> ⏳ En attente de validation</p>
-                  <p><strong>Instructions :</strong></p>
-                  <ol>
-                    <li>Remettez le montant en espèces à un responsable</li>
-                    <li>Le responsable validera votre paiement</li>
-                    <li>Vous recevrez un email de confirmation</li>
-                  </ol>
-                ` : `
-                  <p><strong>Montant payé :</strong> ${registration.amountPaid}€ / 120€</p>
-                  <p><strong>Reste à payer :</strong> ${registration.amountRemaining}€</p>
-                  <p style="color: #4caf50;"><strong>✅ Vous avez accès au planning des activités dès maintenant !</strong></p>
-                  <p>Vous pouvez compléter le paiement à tout moment depuis votre compte.</p>
-                `}
+                <h4>⚠️ ATTENTION : Votre inscription n'est PAS encore créée</h4>
+                <p><strong>Montant déclaré :</strong> ${options.cashAmount}€</p>
+                <p><strong>Statut :</strong> ⏳ En attente de validation par un responsable</p>
+                <p><strong>Ce que cela signifie :</strong></p>
+                <ul style="color: #856404;">
+                  <li>🚫 Votre inscription au camp n'existe pas encore dans le système</li>
+                  <li>🚫 Vous n'avez pas accès au tableau de bord</li>
+                  <li>🚫 Vous ne pouvez pas voir le planning ni les activités</li>
+                  <li>⏳ Vous devez d'abord remettre l'argent à un responsable</li>
+                </ul>
+                <p><strong>Prochaines étapes :</strong></p>
+                <ol>
+                  <li>Remettez <strong>${options.cashAmount}€ en espèces</strong> à un responsable de votre campus</li>
+                  <li>Le responsable validera votre paiement dans le système</li>
+                  <li>Votre inscription sera alors <strong>créée automatiquement</strong></li>
+                  <li>Vous recevrez un nouvel email de confirmation</li>
+                  <li>✅ Vous aurez alors accès au tableau de bord et aux activités</li>
+                </ol>
+              </div>
+            ` : (isPartialPayment && !options.cashPaymentValidated) ? `
+              <div class="warning-box">
+                <h4>💰 Paiement partiel</h4>
+                <p><strong>Montant payé :</strong> ${registration.amountPaid}€ / 120€</p>
+                <p><strong>Reste à payer :</strong> ${registration.amountRemaining}€</p>
+                <p style="color: #4caf50;"><strong>✅ Vous avez accès au planning des activités dès maintenant !</strong></p>
+                <p>Vous pouvez compléter le paiement à tout moment depuis votre compte.</p>
               </div>
             ` : ''}
             
