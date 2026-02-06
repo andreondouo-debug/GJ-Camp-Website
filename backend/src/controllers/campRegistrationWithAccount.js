@@ -1,10 +1,12 @@
 const Registration = require('../models/Registration');
+const PreRegistration = require('../models/PreRegistration');
 const User = require('../models/User');
+const Campus = require('../models/Campus');
 const TransactionLog = require('../models/TransactionLog');
 const Settings = require('../models/Settings');
 const paypalService = require('../services/paypalService');
 const payoutService = require('../services/payoutService');
-const { sendCampRegistrationConfirmation } = require('../config/email');
+const { sendCampRegistrationConfirmation, sendCashPaymentRequestToResponsable } = require('../config/email');
 const pushService = require('../services/pushService');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -274,6 +276,101 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
         amountPaid: verifiedAmount
       };
     } else if (paymentMethod === 'cash') {
+      // 🚫 NE PAS créer Registration pour paiement espèces
+      // ✅ Créer PreRegistration en attente de validation
+      console.log('💵 Inscription espèces → Création PreRegistration');
+      
+      const requestedAmount = parseFloat(amountPaid);
+      
+      const preRegistration = new PreRegistration({
+        user: user._id,
+        isGuest: false,
+        firstName,
+        lastName,
+        email,
+        sex,
+        dateOfBirth,
+        address,
+        phone,
+        refuge,
+        hasAllergies: !!hasAllergies,
+        allergyDetails: hasAllergies ? allergyDetails : null,
+        cashAmount: requestedAmount,
+        status: 'pending',
+        submittedAt: new Date(),
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent']
+      });
+      
+      await preRegistration.save();
+      console.log('✅ PreRegistration créée:', preRegistration._id);
+      
+      // Envoyer email d'information au participant
+      try {
+        await sendCampRegistrationConfirmation(
+          preRegistration.email,
+          preRegistration.firstName,
+          {
+            email: preRegistration.email,
+            firstName: preRegistration.firstName,
+            amountPaid: 0,
+            amountRemaining: 120,
+            paymentStatus: 'pending_validation',
+            cashAmount: requestedAmount
+          },
+          { cashPaymentPending: true, cashAmount: requestedAmount }
+        );
+        console.log('✅ Email information envoyé au participant');
+      } catch (emailError) {
+        console.error('⚠️ Erreur email participant:', emailError.message);
+      }
+      
+      // Envoyer email au responsable du campus
+      try {
+        const campus = await Campus.findOne({ name: refuge }).populate('responsable');
+        if (campus && campus.responsable) {
+          await sendCashPaymentRequestToResponsable(
+            campus.responsable.email,
+            campus.responsable.firstName,
+            preRegistration,
+            campus.name
+          );
+          console.log('✅ Email envoyé au responsable:', campus.responsable.email);
+        } else {
+          console.log('⚠️ Aucun responsable trouvé pour le campus:', refuge);
+        }
+      } catch (emailError) {
+        console.error('⚠️ Erreur email responsable:', emailError.message);
+      }
+      
+      // Retourner succès SANS créer de Registration
+      return res.status(201).json({
+        success: true,
+        message: `⏳ Demande enregistrée ! Votre paiement de ${requestedAmount}€ en espèces doit être validé par un responsable avant que votre inscription ne soit créée.`,
+        user: {
+          _id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role
+        },
+        preRegistration: {
+          _id: preRegistration._id,
+          status: 'pending',
+          cashAmount: requestedAmount
+        },
+        token: newToken,
+        isNewUser,
+        instructions: {
+          important: '⚠️ Votre inscription n\'est PAS encore créée',
+          step1: 'Remettez le montant de ' + requestedAmount + '€ en espèces à un responsable de votre campus',
+          step2: 'Le responsable validera votre paiement dans le système',
+          step3: 'Votre inscription sera alors CRÉÉE automatiquement',
+          step4: 'Vous recevrez un email de confirmation',
+          access: '🚫 Vous n\'avez pas encore accès au tableau de bord ni aux activités'
+        }
+      });
+    } else {
       // Pour paiement espèces, créer une entrée dans cashPayments pour compatibilité
       const requestedAmount = parseFloat(amountPaid); // Montant demandé par l'utilisateur
       registrationData.paymentMethod = 'cash';
