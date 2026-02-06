@@ -32,6 +32,7 @@ import UserManagementPage from './pages/UserManagementPage';
 import CreateRegistrationPage from './pages/CreateRegistrationPage';
 import PayoutManagementPage from './pages/PayoutManagementPage';
 import CashPaymentsManagement from './pages/CashPaymentsManagement';
+import CampusManagement from './pages/CampusManagement';
 import MessagesPage from './pages/MessagesPage';
 import MessageManagementPage from './pages/MessageManagementPage';
 import SettingsPage from './pages/SettingsPage';
@@ -186,6 +187,15 @@ function App() {
               element={
                 <GuardedRoute
                   element={<CashPaymentsManagement />}
+                  roles={['referent', 'responsable', 'admin']}
+                />
+              }
+            />
+            <Route
+              path="/gestion/campus"
+              element={
+                <GuardedRoute
+                  element={<CampusManagement />}
                   roles={['responsable', 'admin']}
                 />
               }

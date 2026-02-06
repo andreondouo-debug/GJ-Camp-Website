@@ -251,6 +251,7 @@ const Header = () => {
                           )}
                         </Link>
                       </li>
+                      <li><Link to="/gestion/campus" onClick={closeMobileMenu}>Campus & Responsables</Link></li>
                     </>
                   )}
                   {canAccessUserAdmin && (

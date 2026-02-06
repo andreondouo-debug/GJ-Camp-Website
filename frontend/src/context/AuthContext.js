@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }) => {
       }
       
       // Sinon, login classique avec email/password
-      const email = emailOrUser;
+      const email = emailOrUser.toLowerCase().trim(); // Normaliser email
       const password = passwordOrToken;
       
       const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });

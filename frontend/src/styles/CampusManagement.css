@@ -1,0 +1,294 @@
+/* CampusManagement.css */
+.campus-management-container {
+  max-width: 1400px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.campus-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.campus-management-header h1 {
+  color: var(--color-primary, #a01e1e);
+  font-size: 2rem;
+  margin: 0;
+}
+
+.refresh-btn {
+  background: var(--color-secondary, #d4af37);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.refresh-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.success-message {
+  background: #d4edda;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #c3e6cb;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #f5c6cb;
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.5rem;
+  padding: 3rem;
+  color: #666;
+}
+
+.campus-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.campus-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.campus-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.campus-card-header {
+  background: linear-gradient(135deg, var(--color-primary, #a01e1e) 0%, #c92a2a 100%);
+  color: white;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.campus-card-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.status-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.status-badge.inactive {
+  background: rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.campus-card-body {
+  padding: 1.5rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row .label {
+  font-weight: 600;
+  color: #555;
+}
+
+.info-row .value {
+  color: #333;
+}
+
+.responsable-section {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.responsable-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: var(--color-primary, #a01e1e);
+}
+
+.current-responsable {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 2px solid var(--color-secondary, #d4af37);
+}
+
+.responsable-info p {
+  margin: 0.5rem 0;
+  color: #333;
+}
+
+.responsable-info strong {
+  font-size: 1.1rem;
+  color: var(--color-primary, #a01e1e);
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: var(--color-secondary, #d4af37);
+  color: white;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.no-responsable {
+  color: #999;
+  font-style: italic;
+  margin: 0.5rem 0;
+}
+
+.assign-responsable {
+  margin-top: 1rem;
+}
+
+.assign-responsable label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.assign-responsable select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.assign-responsable select:hover {
+  border-color: var(--color-secondary, #d4af37);
+}
+
+.assign-responsable select:focus {
+  outline: none;
+  border-color: var(--color-primary, #a01e1e);
+}
+
+.remove-btn {
+  margin-top: 0.75rem;
+  width: 100%;
+  padding: 0.5rem;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.remove-btn:hover {
+  background: #c82333;
+}
+
+.campus-notes {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #fff3cd;
+  border-radius: 8px;
+  border-left: 4px solid #ffc107;
+}
+
+.campus-notes .label {
+  font-weight: 600;
+  color: #856404;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.campus-notes p {
+  margin: 0;
+  color: #856404;
+}
+
+.info-box {
+  background: #e7f3ff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border-left: 4px solid #0056b3;
+}
+
+.info-box h3 {
+  margin: 0 0 1rem 0;
+  color: #0056b3;
+}
+
+.info-box ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.info-box li {
+  margin: 0.5rem 0;
+  color: #004085;
+}
+
+.info-box strong {
+  color: var(--color-primary, #a01e1e);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .campus-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .campus-management-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .campus-management-header h1 {
+    font-size: 1.5rem;
+  }
+}

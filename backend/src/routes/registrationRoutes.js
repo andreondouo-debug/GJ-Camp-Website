@@ -4,6 +4,7 @@ const auth = require('../middleware/auth');
 const registrationController = require('../controllers/registrationController');
 const authorize = require('../middleware/authorize');
 const requireVerifiedEmail = require('../middleware/requireVerifiedEmail');
+const checkCampusResponsable = require('../middleware/checkCampusResponsable');
 
 // Route publique pour inscription camp avec création automatique de compte
 router.post('/camp-with-account', registrationController.createCampRegistrationWithAccount);
@@ -32,7 +33,7 @@ router.get(
 	'/cash/stats',
 	auth,
 	requireVerifiedEmail,
-	authorize('responsable', 'admin'),
+	authorize('referent', 'responsable', 'admin'),
 	registrationController.getCashPaymentsStats
 );
 router.get(
@@ -47,14 +48,14 @@ router.patch(
 	'/:registrationId/cash-payment/:paymentId/validate',
 	auth,
 	requireVerifiedEmail,
-	authorize('responsable', 'admin'),
+	checkCampusResponsable, // Vérifie que l'utilisateur est responsable du campus ou admin
 	registrationController.validateCashPayment
 );
 router.patch(
 	'/:registrationId/cash-payment/:paymentId/reject',
 	auth,
 	requireVerifiedEmail,
-	authorize('responsable', 'admin'),
+	checkCampusResponsable, // Vérifie que l'utilisateur est responsable du campus ou admin
 	registrationController.rejectCashPayment
 );
 

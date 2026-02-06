@@ -7,6 +7,58 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [0.2.0] - 2026-02-06
+
+### ✨ Ajouté
+- **Gestion des Responsables de Campus** : Système complet d'affectation de responsables pour validation des paiements en espèces
+  - Nouveau champ `responsable` dans le modèle Campus (référence User)
+  - Middleware `checkCampusResponsable` pour vérification des autorisations
+  - Routes API `/api/campus/:name/responsable` (PATCH, GET) pour affectation/retrait
+  - Page d'administration `/gestion/campus` pour gérer les affectations
+  - Filtrage automatique des paiements selon le campus du responsable
+  - Documentation complète dans `GESTION_RESPONSABLES_CAMPUS.md`
+  - Guide utilisateur dans `GUIDE_RAPIDE_RESPONSABLES.md`
+
+### 🔒 Sécurité Renforcée
+- **Validation des paiements espèces** : Seul le responsable du campus peut valider
+  - Les referents non-affectés n'ont plus accès aux paiements
+  - Les admins/responsables conservent l'accès à tous les campus
+  - Erreur 403 explicite si tentative de validation hors campus affecté
+  - Logs détaillés des tentatives d'accès
+
+### 🔧 Modifié
+- `backend/src/models/Campus.js` : Ajout champ `responsable` (ObjectId)
+- `backend/src/routes/campusRoutes.js` : Routes d'affectation responsables
+- `backend/src/routes/registrationRoutes.js` : Utilisation du middleware `checkCampusResponsable`
+- `backend/src/controllers/registrationController.js` : Filtrage stats par campus
+  - `getCashPaymentsStats()` filtre selon le campus du responsable
+  - Admins voient tous les campus, referents uniquement leurs campus
+- `frontend/src/pages/CampusManagement.js` : Nouvelle page d'administration
+- `frontend/src/styles/CampusManagement.css` : Styles interface gestion campus
+- `frontend/src/App.js` : Route `/gestion/campus` ajoutée
+- `frontend/src/components/Header.js` : Lien menu "Campus & Responsables"
+
+### 🎯 Workflow Amélioré
+1. Admin affecte un responsable à un campus via interface graphique
+2. Responsable reçoit notification des paiements en attente (son campus uniquement)
+3. Validation/rejet possible uniquement pour son campus
+4. Traçabilité complète des validations par responsable
+
+### 📋 Règles de Gestion
+- Un campus peut avoir **0 ou 1** responsable
+- Un utilisateur peut être responsable de **plusieurs** campus
+- Seuls les rôles `referent`, `responsable`, `admin` peuvent être affectés
+- Les admins **contournent** toujours les restrictions de campus
+- Retrait d'affectation → perte immédiate des droits de validation
+
+### 📊 Impact
+- **Sécurité** : Réduction risque de validation croisée entre campus
+- **Traçabilité** : Meilleure identification du validateur par campus
+- **Autonomie** : Les referents de campus gèrent leurs paiements de façon autonome
+- **Scalabilité** : Système prêt pour croissance multi-campus
+
+---
+
 ## [0.1.1] - 2026-01-16
 
 ### ✨ Ajouté

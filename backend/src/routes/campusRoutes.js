@@ -3,6 +3,8 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const { requireAdminRole } = require('../middleware/roleCheck');
 const Campus = require('../models/Campus');
+const User = require('../models/User');
+const { ADMIN_ROLES, MANAGEMENT_ROLES } = require('../constants/roles');
 
 /**
  * GET /api/campus - Lister tous les campus (PUBLIC - utilisé pour formulaires)
@@ -135,6 +137,83 @@ router.delete('/:name', auth, requireAdminRole, async (req, res) => {
     res.json({ message: 'Campus supprimé avec succès' });
   } catch (error) {
     console.error('❌ Erreur suppression campus:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+/**
+ * PATCH /api/campus/:name/responsable - Affecter un responsable à un campus (PROTÉGÉ - Admin uniquement)
+ */
+router.patch('/:name/responsable', auth, requireAdminRole, async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const campusName = req.params.name;
+
+    // Vérifier que le campus existe
+    const campus = await Campus.findOne({ name: campusName });
+    if (!campus) {
+      return res.status(404).json({ message: '❌ Campus introuvable' });
+    }
+
+    // Si userId est null, on retire le responsable
+    if (!userId) {
+      campus.responsable = null;
+      await campus.save();
+      return res.json({
+        message: `✅ Responsable retiré du campus ${campusName}`,
+        campus
+      });
+    }
+
+    // Vérifier que l'utilisateur existe
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: '❌ Utilisateur introuvable' });
+    }
+
+    // Vérifier que l'utilisateur a un rôle de gestion (referent, responsable ou admin)
+    if (!MANAGEMENT_ROLES.includes(user.role)) {
+      return res.status(400).json({ 
+        message: `❌ L'utilisateur doit avoir un rôle de gestion (referent, responsable ou admin) pour être affecté à un campus. Rôle actuel: ${user.role}` 
+      });
+    }
+
+    // Affecter le responsable
+    campus.responsable = userId;
+    await campus.save();
+
+    // Peupler le responsable pour la réponse
+    await campus.populate('responsable', 'firstName lastName email role');
+
+    res.json({
+      message: `✅ ${user.firstName} ${user.lastName} affecté(e) comme responsable du campus ${campusName}`,
+      campus
+    });
+
+  } catch (error) {
+    console.error('❌ Erreur affectation responsable campus:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+/**
+ * GET /api/campus/:name/responsable - Obtenir le responsable d'un campus
+ */
+router.get('/:name/responsable', auth, async (req, res) => {
+  try {
+    const campus = await Campus.findOne({ name: req.params.name })
+      .populate('responsable', 'firstName lastName email role phoneNumber');
+    
+    if (!campus) {
+      return res.status(404).json({ message: 'Campus introuvable' });
+    }
+
+    res.json({
+      campusName: campus.name,
+      responsable: campus.responsable
+    });
+  } catch (error) {
+    console.error('❌ Erreur récupération responsable campus:', error);
     res.status(500).json({ message: 'Erreur serveur' });
   }
 });

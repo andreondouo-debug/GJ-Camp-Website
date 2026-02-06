@@ -192,6 +192,7 @@ const CampRegistrationPage = () => {
     try {
       const dataToSend = {
         ...form,
+        email: form.email.toLowerCase().trim(), // Normaliser email
         paymentMethod: 'cash',
         paymentDetails: null // Pas de détails PayPal pour paiement espèces
       };

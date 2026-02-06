@@ -40,6 +40,12 @@ const campusSchema = new mongoose.Schema({
     email: String,
     phone: String,
   },
+  responsable: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+    comment: 'Responsable affecté à ce campus pour valider les paiements en espèces'
+  },
   notes: {
     type: String,
     trim: true,

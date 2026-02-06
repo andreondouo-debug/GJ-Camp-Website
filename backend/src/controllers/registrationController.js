@@ -956,13 +956,48 @@ exports.rejectCashPayment = async (req, res) => {
 // Obtenir les statistiques des paiements espèces (admin/responsable)
 exports.getCashPaymentsStats = async (req, res) => {
   try {
-    const registrations = await Registration.find({
+    const { userId, role } = req.user;
+    const { ADMIN_ROLES } = require('../constants/roles');
+    const Campus = require('../models/Campus');
+
+    // Déterminer les campus auxquels l'utilisateur a accès
+    let allowedCampusNames = [];
+    
+    if (ADMIN_ROLES.includes(role)) {
+      // Les admins voient tous les campus
+      console.log(`✅ Admin ${userId} - accès à tous les campus`);
+      allowedCampusNames = null; // null = pas de filtre
+    } else {
+      // Vérifier si l'utilisateur est responsable d'un ou plusieurs campus
+      const responsableCampus = await Campus.find({ responsable: userId });
+      
+      if (responsableCampus.length === 0) {
+        // Pas responsable de campus, pas d'accès
+        return res.status(403).json({ 
+          message: '❌ Vous devez être responsable d\'un campus pour accéder aux paiements en espèces' 
+        });
+      }
+      
+      allowedCampusNames = responsableCampus.map(c => c.name);
+      console.log(`✅ Responsable ${userId} - accès aux campus:`, allowedCampusNames);
+    }
+
+    // Construire le filtre de recherche
+    const searchFilter = {
       $or: [
         { paymentMethod: 'cash' },
         { paymentMethod: 'mixed' },
         { 'cashPayments.0': { $exists: true } } // Au moins 1 paiement espèces
       ]
-    }).populate('user', 'firstName lastName email');
+    };
+
+    // Si non-admin, filtrer par campus
+    if (allowedCampusNames !== null) {
+      searchFilter.refuge = { $in: allowedCampusNames };
+    }
+
+    const registrations = await Registration.find(searchFilter)
+      .populate('user', 'firstName lastName email');
 
     const stats = {
       totalCashRegistrations: 0,
