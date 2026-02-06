@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import ModernLogo from '../components/ModernLogo';
 import { UserIcon, MailIcon, HomeIcon, CreditCardIcon } from '../components/Icons';
 import PayPalButton from '../components/PayPalButton';
+import DateInput from '../components/DateInput';
 import '../styles/RegistrationNew.css';
 
 const CampRegistrationNewPage = () => {
@@ -331,19 +332,13 @@ const CampRegistrationNewPage = () => {
 
             <div className="new-grid">
               <div className="new-input-group">
-                <label>Date de naissance</label>
-                <input
-                  type="text"
-                  name="dateOfBirth"
+                <DateInput 
                   value={form.dateOfBirth}
                   onChange={handleChange}
-                  onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
-                  placeholder="JJ/MM/AAAA (ex: 15/03/2000)"
-                  pattern="\d{2}/\d{2}/\d{4}"
-                  title="Format: JJ/MM/AAAA"
+                  name="dateOfBirth"
+                  label="Date de naissance"
                   required
                 />
-                <small style={{color: '#666', fontSize: '0.85rem'}}>Format : JJ/MM/AAAA (ex: 15/03/2000)</small>
               </div>
               
               <div className="new-input-group">
