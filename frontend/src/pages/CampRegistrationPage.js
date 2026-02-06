@@ -240,7 +240,7 @@ const CampRegistrationPage = () => {
       }
       
       // Rediriger vers le tableau de bord (plus de temps pour lire si PreRegistration)
-      const redirectDelay = instructions.important ? 5000 : 2000;
+      const redirectDelay = instructions.important ? 15000 : 2000;
       setTimeout(() => {
         navigate('/tableau-de-bord');
       }, redirectDelay);

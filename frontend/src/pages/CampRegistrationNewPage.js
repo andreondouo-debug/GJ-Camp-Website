@@ -156,10 +156,10 @@ const CampRegistrationNewPage = () => {
         
         setMessage(fullMessage);
         
-        // Redirection vers l'accueil avec message de succès
+        // Redirection vers l'accueil avec message de succès (15s pour lire les instructions)
         setTimeout(() => {
           navigate('/', { state: { inscriptionSuccess: true, pendingCashPayment: true } });
-        }, 5000);
+        }, 15000);
         
         setLoading(false);
         return;
