@@ -194,8 +194,11 @@ const CreateRegistrationPage = () => {
                     name="dateOfBirth"
                     value={form.dateOfBirth}
                     onChange={handleChange}
+                    onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
+                    placeholder="jj/mm/aaaa"
                     required
                   />
+                  <small style={{color: '#666', fontSize: '0.85rem'}}>Vous pouvez saisir manuellement ou utiliser le calendrier</small>
                 </div>
               </div>
             </section>

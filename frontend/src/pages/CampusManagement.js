@@ -129,7 +129,7 @@ const CampusManagement = () => {
               </div>
 
               <div className="responsable-section">
-                <h3>👤 Responsable des Paiements en Espèces</h3>
+                <h3>👤 Responsable des Paiements en Espèces - Campus {c.name}</h3>
                 
                 {c.responsableDetails ? (
                   <div className="current-responsable">
@@ -140,6 +140,7 @@ const CampusManagement = () => {
                       {c.responsableDetails.phoneNumber && (
                         <p>📱 {c.responsableDetails.phoneNumber}</p>
                       )}
+                      <p className="campus-label">🏛️ Campus : <strong>{c.name}</strong></p>
                     </div>
                     <button 
                       className="remove-btn"
@@ -153,7 +154,7 @@ const CampusManagement = () => {
                 )}
 
                 <div className="assign-responsable">
-                  <label>Affecter un nouveau responsable:</label>
+                  <label>Affecter un nouveau responsable au campus {c.name}:</label>
                   <select
                     onChange={(e) => {
                       if (e.target.value) {

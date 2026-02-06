@@ -47,6 +47,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import PasswordResetManagementPage from './pages/PasswordResetManagementPage';
 import CampusLeadersManagement from './pages/CampusLeadersManagement';
 import GuardedRoute from './components/GuardedRoute';
+import RequireRegistration from './components/RequireRegistration';
 // import CookieConsent from './components/CookieConsent'; // Désactivé - acceptation implicite via politique
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import VersionBadge from './components/VersionBadge';
@@ -113,7 +114,15 @@ function App() {
             <Route path="/logos" element={<LogoShowcasePage />} />
             <Route
               path="/tableau-de-bord"
-              element={<GuardedRoute element={<UserDashboard />} />}
+              element={
+                <GuardedRoute 
+                  element={
+                    <RequireRegistration>
+                      <UserDashboard />
+                    </RequireRegistration>
+                  } 
+                />
+              }
             />
             <Route
               path="/profil"
@@ -253,8 +262,30 @@ function App() {
                 />
               }
             />
-            <Route path="/programme" element={<ProgrammePage />} />
-            <Route path="/activites" element={<ActivitiesPage />} />
+            <Route 
+              path="/programme" 
+              element={
+                <GuardedRoute 
+                  element={
+                    <RequireRegistration>
+                      <ProgrammePage />
+                    </RequireRegistration>
+                  } 
+                />
+              } 
+            />
+            <Route 
+              path="/activites" 
+              element={
+                <GuardedRoute 
+                  element={
+                    <RequireRegistration>
+                      <ActivitiesPage />
+                    </RequireRegistration>
+                  } 
+                />
+              } 
+            />
             <Route path="/a-propos" element={<AboutPage />} />
             <Route path="/gj-crpt" element={<GJCRPTPage />} />
             <Route path="/generation-josue" element={<GJPage />} />
