@@ -522,11 +522,100 @@ const sendCampRegistrationConfirmation = async (email, firstName, registration, 
   return await sendEmailViaBrevoAPI(email, subject, htmlContent, textContent);
 };
 
+/**
+ * Envoyer email de rejet de paiement espèces
+ */
+const sendCashPaymentRejection = async (email, firstName, amount, reason) => {
+  console.log(`📧 Envoi email rejet paiement espèces à ${email}`);
+  
+  const subject = '❌ Demande d\'inscription rejetée - GJ Camp 2026';
+  
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #ef4444; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+          .content { background-color: #f9f9f9; padding: 30px; border: 1px solid #ddd; }
+          .button { display: inline-block; background-color: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .warning-box { background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; }
+          .footer { text-align: center; padding: 20px; color: #777; font-size: 12px; }
+          .highlight { color: #a01e1e; font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>❌ Demande rejetée</h1>
+          </div>
+          <div class="content">
+            <p>Bonjour <strong>${firstName}</strong>,</p>
+            
+            <p>Nous sommes désolés de vous informer que votre demande d'inscription au <span class="highlight">GJ Camp 2026</span> avec paiement en espèces a été <strong>rejetée</strong> par un responsable.</p>
+            
+            <div class="warning-box">
+              <h4>❌ Informations sur le rejet</h4>
+              <p><strong>Montant déclaré :</strong> ${amount}€</p>
+              <p><strong>Raison du rejet :</strong></p>
+              <p style="background: white; padding: 12px; border-radius: 5px; margin: 10px 0;">${reason}</p>
+            </div>
+            
+            <h3>🔄 Que faire maintenant ?</h3>
+            <ul>
+              <li>Contactez votre responsable de campus pour plus d'informations</li>
+              <li>Vérifiez les détails de votre demande et soumettez-la à nouveau si nécessaire</li>
+              <li>Vous pouvez aussi payer en ligne via PayPal/Carte bancaire</li>
+            </ul>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.FRONTEND_URL || 'https://gjsdecrpt.fr'}/inscription-camp" class="button">
+                📝 Nouvelle inscription
+              </a>
+            </div>
+            
+            <p style="color: #666; font-size: 14px; margin-top: 30px;">
+              Si vous avez des questions ou si vous pensez qu'il s'agit d'une erreur, n'hésitez pas à contacter votre responsable de campus.
+            </p>
+          </div>
+          <div class="footer">
+            <p>Camp Génération Josué 2026 • 16-25 août 2025</p>
+            <p style="color: #999; font-size: 11px;">Cet email a été envoyé automatiquement, merci de ne pas y répondre directement.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+  
+  const textContent = `
+Bonjour ${firstName},
+
+Nous sommes désolés de vous informer que votre demande d'inscription au GJ Camp 2026 avec paiement en espèces a été rejetée.
+
+Montant déclaré : ${amount}€
+Raison du rejet : ${reason}
+
+Que faire maintenant ?
+- Contactez votre responsable de campus pour plus d'informations
+- Vérifiez les détails de votre demande et soumettez-la à nouveau si nécessaire
+- Vous pouvez aussi payer en ligne via PayPal/Carte bancaire
+
+Rendez-vous sur ${process.env.FRONTEND_URL || 'https://gjsdecrpt.fr'}/inscription-camp pour faire une nouvelle inscription.
+
+Camp Génération Josué 2026 • 16-25 août 2025
+  `;
+  
+  return await sendEmailViaBrevoAPI(email, subject, htmlContent, textContent);
+};
+
 module.exports = {
   sendVerificationEmail,
   resendVerificationEmail,
   sendPasswordResetRequestEmail,
   sendPasswordResetEmail,
   sendCampRegistrationConfirmation,
+  sendCashPaymentRequestToResponsable,
+  sendCashPaymentRejection,
   sendEmailViaBrevoAPI
 };

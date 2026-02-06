@@ -58,6 +58,13 @@ router.patch(
 	checkCampusResponsable,
 	registrationController.validatePreRegistration
 );
+router.patch(
+	'/pre-registration/:preRegistrationId/reject',
+	auth,
+	requireVerifiedEmail,
+	checkCampusResponsable,
+	registrationController.rejectPreRegistration
+);
 router.post('/:registrationId/cash-payment', auth, registrationController.addCashPayment);
 router.patch(
 	'/:registrationId/cash-payment/:paymentId/validate',

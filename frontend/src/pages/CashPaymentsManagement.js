@@ -14,6 +14,8 @@ const CashPaymentsManagement = () => {
   const [validationAmount, setValidationAmount] = useState({});
   const [validationNote, setValidationNote] = useState({});
   const [rejectionReason, setRejectionReason] = useState({});
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [itemToReject, setItemToReject] = useState(null);
 
   useEffect(() => {
     fetchStats();
@@ -141,6 +143,60 @@ const CashPaymentsManagement = () => {
       await fetchPreRegistrations();
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de la validation');
+    }
+  };
+
+  const openRejectModal = (item, type = 'preRegistration') => {
+    setItemToReject({ ...item, type });
+    setShowRejectModal(true);
+  };
+
+  const closeRejectModal = () => {
+    setShowRejectModal(false);
+    setItemToReject(null);
+    setRejectionReason({});
+  };
+
+  const confirmReject = async () => {
+    if (!itemToReject) return;
+
+    const reason = rejectionReason[itemToReject._id];
+    if (!reason || reason.trim() === '') {
+      setError('⚠️ Veuillez indiquer une raison de rejet');
+      return;
+    }
+
+    try {
+      setMessage(null);
+      setError(null);
+
+      if (itemToReject.type === 'preRegistration') {
+        // Rejeter une PreRegistration
+        await axios.patch(
+          `/api/registrations/pre-registration/${itemToReject._id}/reject`,
+          { reason: reason.trim() },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setMessage('❌ Demande d\'inscription rejetée avec succès');
+        await fetchPreRegistrations();
+      } else {
+        // Rejeter un paiement supplémentaire
+        await axios.patch(
+          `/api/registrations/${itemToReject.registrationId}/cash-payment/${itemToReject.paymentId}/reject`,
+          { reason: reason.trim() },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setMessage('❌ Paiement rejeté avec succès');
+      }
+
+      // 🔔 Déclencher événement pour rafraîchir le badge Header
+      window.dispatchEvent(new Event('cashPaymentsUpdated'));
+
+      // Réinitialiser et fermer
+      closeRejectModal();
+      await fetchStats();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Erreur lors du rejet');
     }
   };
 
@@ -344,12 +400,20 @@ const CashPaymentsManagement = () => {
                           />
                         </div>
                       </div>
-                      <button
-                        className="validate-btn"
-                        onClick={() => handleValidatePreRegistration(preReg._id, preReg.cashAmount)}
-                      >
-                        ✅ Valider et créer l'inscription
-                      </button>
+                      <div className="action-buttons">
+                        <button
+                          className="validate-btn"
+                          onClick={() => handleValidatePreRegistration(preReg._id, preReg.cashAmount)}
+                        >
+                          ✅ Valider et créer l'inscription
+                        </button>
+                        <button
+                          className="reject-btn"
+                          onClick={() => openRejectModal(preReg, 'preRegistration')}
+                        >
+                          ❌ Rejeter la demande
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -537,6 +601,60 @@ const CashPaymentsManagement = () => {
           </>
         )}
       </div>
+
+      {/* Modal de confirmation de rejet */}
+      {showRejectModal && itemToReject && (
+        <div className="modal-overlay" onClick={closeRejectModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>❌ Confirmer le rejet</h2>
+              <button className="modal-close" onClick={closeRejectModal}>✕</button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="reject-warning">
+                <p><strong>⚠️ Attention :</strong> Vous êtes sur le point de rejeter :</p>
+                <div className="reject-info">
+                  <p><strong>Nom :</strong> {itemToReject.firstName} {itemToReject.lastName}</p>
+                  <p><strong>Email :</strong> {itemToReject.email}</p>
+                  <p><strong>Montant :</strong> {itemToReject.cashAmount || itemToReject.amount}€</p>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Raison du rejet *</label>
+                <textarea
+                  placeholder="Expliquez pourquoi cette demande est rejetée (ex: montant incorrect, doublon, erreur...)"
+                  rows="4"
+                  value={rejectionReason[itemToReject._id] || ''}
+                  onChange={(e) => setRejectionReason({
+                    ...rejectionReason,
+                    [itemToReject._id]: e.target.value
+                  })}
+                  required
+                />
+              </div>
+
+              <p className="reject-notice">
+                📧 Un email sera envoyé à {itemToReject.firstName} pour l'informer du rejet avec la raison indiquée.
+              </p>
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={closeRejectModal}>
+                Annuler
+              </button>
+              <button 
+                className="btn-reject" 
+                onClick={confirmReject}
+                disabled={!rejectionReason[itemToReject._id] || rejectionReason[itemToReject._id].trim() === ''}
+              >
+                ❌ Confirmer le rejet
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

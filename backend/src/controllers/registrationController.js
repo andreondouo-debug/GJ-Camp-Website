@@ -1239,6 +1239,62 @@ exports.validatePreRegistration = async (req, res) => {
   }
 };
 
+// 🆕 Rejeter une PreRegistration
+exports.rejectPreRegistration = async (req, res) => {
+  try {
+    const { preRegistrationId } = req.params;
+    const { reason } = req.body;
+
+    if (!reason || reason.trim() === '') {
+      return res.status(400).json({ message: '❌ La raison du rejet est obligatoire' });
+    }
+
+    // Récupérer la pre-registration
+    const preReg = await PreRegistration.findById(preRegistrationId);
+    if (!preReg) {
+      return res.status(404).json({ message: '❌ Demande d\'inscription non trouvée' });
+    }
+
+    if (preReg.status !== 'pending') {
+      return res.status(400).json({ message: '❌ Cette demande a déjà été traitée' });
+    }
+
+    // Mettre à jour la PreRegistration
+    preReg.status = 'rejected';
+    preReg.validatedAt = new Date();
+    preReg.validatedBy = req.user.userId;
+    preReg.rejectionReason = reason.trim();
+    await preReg.save();
+
+    console.log('❌ PreRegistration rejetée:', preReg._id);
+
+    // Envoyer email au participant pour l'informer du rejet
+    try {
+      const { sendCashPaymentRejection } = require('../config/email-brevo-api');
+      await sendCashPaymentRejection(
+        preReg.email,
+        preReg.firstName,
+        preReg.cashAmount,
+        reason.trim()
+      );
+      console.log('✅ Email de rejet envoyé à:', preReg.email);
+    } catch (emailError) {
+      console.error('⚠️ Erreur email rejet:', emailError.message);
+    }
+
+    res.status(200).json({
+      message: `❌ Demande de ${preReg.firstName} ${preReg.lastName} rejetée`,
+      preRegistration: preReg
+    });
+  } catch (error) {
+    console.error('❌ Erreur rejet pre-registration:', error);
+    res.status(500).json({ 
+      message: 'Erreur serveur',
+      error: error.message 
+    });
+  }
+};
+
 // 🔔 Compter les demandes de paiement en espèces en attente (pour notification badge)
 exports.getPendingCashPaymentsCount = async (req, res) => {
   try {
