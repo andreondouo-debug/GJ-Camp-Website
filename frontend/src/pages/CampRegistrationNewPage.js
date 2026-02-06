@@ -138,12 +138,18 @@ const CampRegistrationNewPage = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        setMessage('✅ Inscription enregistrée ! Votre paiement en espèces est en attente de validation par un responsable.');
+        // Afficher le message détaillé de l'API
+        const apiMessage = response.data.message || '';
+        const instructions = response.data.instructions || {};
+        
+        const fullMessage = `${apiMessage}\n\n${instructions.important || ''}\n${instructions.step1 || ''}\n${instructions.step2 || ''}\n${instructions.step3 || ''}\n${instructions.step4 || ''}\n\n${instructions.access || ''}`;
+        
+        setMessage(fullMessage);
         
         // Redirection vers l'accueil avec message de succès
         setTimeout(() => {
-          navigate('/', { state: { inscriptionSuccess: true } });
-        }, 2000);
+          navigate('/', { state: { inscriptionSuccess: true, pendingCashPayment: true } });
+        }, 5000);
         
         setLoading(false);
         return;

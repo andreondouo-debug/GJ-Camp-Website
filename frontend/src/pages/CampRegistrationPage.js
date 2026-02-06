@@ -211,7 +211,17 @@ const CampRegistrationPage = () => {
       });
 
       console.log('✅ Inscription espèces créée:', response.data);
-      setMessage(response.data.message || '🎉 Inscription réussie ! Vous pourrez payer au camp.');
+      
+      // Afficher le message détaillé de l'API
+      const apiMessage = response.data.message || '🎉 Inscription réussie ! Vous pourrez payer au camp.';
+      const instructions = response.data.instructions || {};
+      
+      let fullMessage = apiMessage;
+      if (instructions.important) {
+        fullMessage = `${apiMessage}\n\n${instructions.important}\n${instructions.step1 || ''}\n${instructions.step2 || ''}\n${instructions.step3 || ''}\n${instructions.step4 || ''}\n\n${instructions.access || ''}`;
+      }
+      
+      setMessage(fullMessage);
       
       // Si compte créé, connecter automatiquement
       if (response.data.token && response.data.user) {
@@ -220,10 +230,11 @@ const CampRegistrationPage = () => {
         console.log('✅ Connexion automatique réussie');
       }
       
-      // Rediriger vers le tableau de bord après 2 secondes
+      // Rediriger vers le tableau de bord (plus de temps pour lire si PreRegistration)
+      const redirectDelay = instructions.important ? 5000 : 2000;
       setTimeout(() => {
         navigate('/tableau-de-bord');
-      }, 2000);
+      }, redirectDelay);
     } catch (err) {
       console.error('❌ Erreur inscription espèces:', err);
       console.error('❌ Détails erreur:', err.response?.data);

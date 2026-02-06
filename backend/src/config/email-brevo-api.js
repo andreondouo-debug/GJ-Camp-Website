@@ -315,13 +315,15 @@ const sendCampRegistrationConfirmation = async (email, firstName, registration, 
   // Paiement en espèces en attente
   if (options.cashPaymentPending) {
     paymentStatusText = `⏳ En attente de validation (${options.cashAmount}€ en espèces)`;
-    subjectText = '⏳ Inscription en attente - GJ Camp 2026 (Paiement espèces)';
-    messageIntro = `Merci pour votre inscription au <span class="highlight">GJ Camp 2026</span>. Votre paiement de <strong>${options.cashAmount}€ en espèces</strong> est en attente de validation par un responsable.`;
+    subjectText = '⏳ Demande enregistrée - GJ Camp 2026 (Paiement espèces en attente)';
+    messageIntro = `Merci pour votre demande d'inscription au <span class="highlight">GJ Camp 2026</span>. Votre paiement de <strong>${options.cashAmount}€ en espèces</strong> doit être validé par un responsable avant que votre inscription ne soit créée.`;
     nextSteps = `
-      <li>Remettez le montant de <strong>${options.cashAmount}€</strong> à un responsable</li>
+      <li><strong>⚠️ IMPORTANT : Votre inscription n'est PAS encore créée</strong></li>
+      <li>Remettez le montant de <strong>${options.cashAmount}€</strong> en espèces à un responsable de votre campus</li>
       <li>Le responsable validera votre paiement dans le système</li>
+      <li>Votre inscription sera alors <strong>CRÉÉE automatiquement</strong></li>
       <li>Vous recevrez un email de confirmation une fois validé</li>
-      <li>Votre inscription sera alors complète</li>
+      <li>🚫 Vous n'avez pas encore accès au tableau de bord ni aux activités</li>
     `;
   }
   // Paiement en espèces validé
@@ -385,7 +387,7 @@ const sendCampRegistrationConfirmation = async (email, firstName, registration, 
       <body>
         <div class="container">
           <div class="header">
-            <h1>${options.cashPaymentPending ? '⏳ Inscription en attente !' : 
+            <h1>${options.cashPaymentPending ? '⏳ Demande enregistrée !' : 
                   (options.cashPaymentValidated ? '✅ Paiement validé !' :
                   (isPartialPayment ? '📝 Inscription enregistrée !' : '🎉 Inscription confirmée !'))}</h1>
           </div>
@@ -396,16 +398,24 @@ const sendCampRegistrationConfirmation = async (email, firstName, registration, 
             
             ${options.cashPaymentPending || (isPartialPayment && !options.cashPaymentValidated) ? `
               <div class="warning-box">
-                <h4>💰 ${options.cashPaymentPending ? 'Paiement en espèces en attente' : 'Paiement partiel'}</h4>
+                <h4>💰 ${options.cashPaymentPending ? '⚠️ Paiement en espèces en attente de validation' : 'Paiement partiel'}</h4>
                 ${options.cashPaymentPending ? `
-                  <p><strong>Montant déclaré :</strong> ${options.cashAmount}€</p>
+                  <p><strong>⚠️ IMPORTANT :</strong> Votre inscription n'est <strong>PAS encore créée</strong></p>
+                  <p><strong>Montant déclaré :</strong> ${options.cashAmount}€ en espèces</p>
                   <p><strong>Statut :</strong> ⏳ En attente de validation</p>
-                  <p><strong>Instructions :</strong></p>
+                  <p><strong>Ce que vous devez faire :</strong></p>
                   <ol>
-                    <li>Remettez le montant en espèces à un responsable</li>
-                    <li>Le responsable validera votre paiement</li>
+                    <li>Remettez le montant de <strong>${options.cashAmount}€</strong> en espèces à un responsable de votre campus</li>
+                    <li>Le responsable validera votre paiement dans le système</li>
+                    <li>Votre inscription sera alors <strong>CRÉÉE automatiquement</strong></li>
                     <li>Vous recevrez un email de confirmation</li>
                   </ol>
+                  <p style="color: #d32f2f; font-weight: bold; margin-top: 10px;">🚫 Restrictions actuelles :</p>
+                  <ul style="color: #d32f2f;">
+                    <li>Pas d'accès au tableau de bord</li>
+                    <li>Pas d'accès aux activités</li>
+                    <li>Pas de QR code disponible</li>
+                  </ul>
                 ` : `
                   <p><strong>Montant payé :</strong> ${registration.amountPaid}€ / 120€</p>
                   <p><strong>Reste à payer :</strong> ${registration.amountRemaining}€</p>
