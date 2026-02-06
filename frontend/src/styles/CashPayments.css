@@ -471,18 +471,6 @@
 .action-buttons .reject-btn {
   flex: 1;
 }
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-  white-space: nowrap;
-}
-
-.reject-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
-}
 
 /* Messages */
 .success-message {
