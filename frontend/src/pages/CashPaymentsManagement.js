@@ -6,17 +6,31 @@ import '../styles/CashPayments.css';
 const CashPaymentsManagement = () => {
   const { token } = useContext(AuthContext);
   const [stats, setStats] = useState(null);
+  const [preRegistrations, setPreRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('pending');
+  const [activeTab, setActiveTab] = useState('pre-registrations');
   const [validationAmount, setValidationAmount] = useState({});
   const [validationNote, setValidationNote] = useState({});
   const [rejectionReason, setRejectionReason] = useState({});
 
   useEffect(() => {
     fetchStats();
+    fetchPreRegistrations();
   }, []);
+
+  const fetchPreRegistrations = async () => {
+    try {
+      const response = await axios.get('/api/registrations/pre-registrations/pending', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPreRegistrations(response.data.preRegistrations || []);
+    } catch (err) {
+      console.error('Erreur chargement PreRegistrations:', err);
+      setPreRegistrations([]);
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -85,6 +99,46 @@ const CashPaymentsManagement = () => {
 
       // Recharger les stats
       await fetchStats();
+      await fetchPreRegistrations();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Erreur lors de la validation');
+    }
+  };
+
+  const handleValidatePreRegistration = async (preRegistrationId, cashAmount) => {
+    try {
+      setMessage(null);
+      setError(null);
+
+      const amount = validationAmount[preRegistrationId] || cashAmount;
+      const note = validationNote[preRegistrationId] || '';
+
+      const response = await axios.patch(
+        `/api/registrations/pre-registration/${preRegistrationId}/validate`,
+        { amountValidated: parseFloat(amount), note },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setMessage(`✅ Demande validée ! Inscription créée avec ${amount}€`);
+      
+      // 🔔 Déclencher événement pour rafraîchir le badge Header
+      window.dispatchEvent(new Event('cashPaymentsUpdated'));
+      
+      // Réinitialiser les champs
+      setValidationAmount(prev => {
+        const newState = { ...prev };
+        delete newState[preRegistrationId];
+        return newState;
+      });
+      setValidationNote(prev => {
+        const newState = { ...prev };
+        delete newState[preRegistrationId];
+        return newState;
+      });
+
+      // Recharger les listes
+      await fetchStats();
+      await fetchPreRegistrations();
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur lors de la validation');
     }
@@ -189,13 +243,19 @@ const CashPaymentsManagement = () => {
         </div>
       </div>
 
-      {/* Onglets */}
+      // Onglets */}
       <div className="tabs">
+        <button 
+          className={`tab ${activeTab === 'pre-registrations' ? 'active' : ''}`}
+          onClick={() => setActiveTab('pre-registrations')}
+        >
+          🆕 Demandes à valider ({preRegistrations.length})
+        </button>
         <button 
           className={`tab ${activeTab === 'pending' ? 'active' : ''}`}
           onClick={() => setActiveTab('pending')}
         >
-          ⏳ En attente ({stats.pendingPayments.length})
+          ⏳ Paiements supplémentaires ({stats.pendingPayments.length})
         </button>
         <button 
           className={`tab ${activeTab === 'validated' ? 'active' : ''}`}
@@ -213,6 +273,91 @@ const CashPaymentsManagement = () => {
 
       {/* Liste des paiements */}
       <div className="payments-list">
+        {activeTab === 'pre-registrations' && (
+          <>
+            {preRegistrations.length === 0 ? (
+              <div className="empty-state">
+                <p>✅ Aucune demande d'inscription en attente</p>
+              </div>
+            ) : (
+              <>
+                <div className="info-banner">
+                  <strong>🆕 Nouvelles demandes d'inscription</strong>
+                  <p>Ces personnes ont déclaré un paiement espèces mais leur inscription n'est PAS encore créée. Validez pour créer l'inscription.</p>
+                </div>
+                {preRegistrations.map(preReg => (
+                  <div key={preReg._id} className="payment-card pre-registration-card">
+                    <div className="payment-header">
+                      <div className="user-info">
+                        <h3>{preReg.firstName} {preReg.lastName}</h3>
+                        <p>{preReg.email}</p>
+                        <p>{preReg.phone}</p>
+                      </div>
+                      <div className="payment-amount">
+                        <span className="amount">{preReg.cashAmount}€</span>
+                        <span className="label">Montant déclaré</span>
+                      </div>
+                    </div>
+
+                    <div className="payment-details">
+                      <div className="detail">
+                        <span className="label">📍 Campus :</span>
+                        <span className="value">{preReg.refuge}</span>
+                      </div>
+                      <div className="detail">
+                        <span className="label">📅 Demande le :</span>
+                        <span className="value">{new Date(preReg.submittedAt).toLocaleString('fr-FR')}</span>
+                      </div>
+                      <div className="detail">
+                        <span className="label">⚠️ Statut :</span>
+                        <span className="value badge-pending">INSCRIPTION NON CRÉÉE</span>
+                      </div>
+                    </div>
+
+                    <div className="validation-section">
+                      <div className="validation-inputs">
+                        <div className="input-group">
+                          <label>Montant validé (€)</label>
+                          <input
+                            type="number"
+                            min="20"
+                            max="120"
+                            step="0.01"
+                            placeholder={preReg.cashAmount}
+                            value={validationAmount[preReg._id] || ''}
+                            onChange={(e) => setValidationAmount({
+                              ...validationAmount,
+                              [preReg._id]: e.target.value
+                            })}
+                          />
+                        </div>
+                        <div className="input-group">
+                          <label>Note (optionnel)</label>
+                          <input
+                            type="text"
+                            placeholder="Ex: Paiement reçu le..."
+                            value={validationNote[preReg._id] || ''}
+                            onChange={(e) => setValidationNote({
+                              ...validationNote,
+                              [preReg._id]: e.target.value
+                            })}
+                          />
+                        </div>
+                      </div>
+                      <button
+                        className="validate-btn"
+                        onClick={() => handleValidatePreRegistration(preReg._id, preReg.cashAmount)}
+                      >
+                        ✅ Valider et créer l'inscription
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </>
+        )}
+
         {activeTab === 'pending' && (
           <>
             {stats.pendingPayments.length === 0 ? (

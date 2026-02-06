@@ -191,6 +191,44 @@
 .pending-card { border-left-color: #f59e0b; }
 .validated-card { border-left-color: #10b981; }
 .rejected-card { border-left-color: #ef4444; }
+.pre-registration-card { 
+  border-left-color: #8b5cf6; 
+  background: linear-gradient(to right, #faf5ff 0%, #ffffff 100%);
+}
+
+.info-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.info-banner strong {
+  display: block;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.info-banner p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.95;
+  line-height: 1.5;
+}
+
+.badge-pending {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
 .payment-header {
   display: grid;
