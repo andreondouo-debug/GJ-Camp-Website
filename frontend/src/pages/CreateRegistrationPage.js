@@ -190,15 +190,17 @@ const CreateRegistrationPage = () => {
                 <div className="form-group">
                   <label>Date de naissance *</label>
                   <input
-                    type="date"
+                    type="text"
                     name="dateOfBirth"
-                    value={form.dateOfBirth}
+                    value={formData.dateOfBirth}
                     onChange={handleChange}
                     onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
-                    placeholder="jj/mm/aaaa"
+                    placeholder="JJ/MM/AAAA (ex: 15/03/2000)"
+                    pattern="\d{2}/\d{2}/\d{4}"
+                    title="Format: JJ/MM/AAAA"
                     required
                   />
-                  <small style={{color: '#666', fontSize: '0.85rem'}}>Vous pouvez saisir manuellement ou utiliser le calendrier</small>
+                  <small style={{color: '#666', fontSize: '0.85rem'}}>Format : JJ/MM/AAAA (ex: 15/03/2000)</small>
                 </div>
               </div>
             </section>
