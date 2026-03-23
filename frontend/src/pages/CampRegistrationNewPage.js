@@ -43,8 +43,8 @@ const CampRegistrationNewPage = () => {
       try {
         const response = await axios.get('/api/settings');
         if (response.data.settings) {
-          const min = response.data.settings.registrationMinAmount || 20;
-          const max = response.data.settings.registrationMaxAmount || 120;
+          const min = Number(response.data.settings.registrationMinAmount) || 20;
+          const max = Number(response.data.settings.registrationMaxAmount) || 120;
           setMinAmount(min);
           setMaxAmount(max);
           // Mettre à jour le montant initial si nécessaire

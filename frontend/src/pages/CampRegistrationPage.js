@@ -42,8 +42,8 @@ const CampRegistrationPage = () => {
       try {
         const response = await axios.get('/api/settings');
         const settings = response.data.settings;
-        const min = settings?.registrationMinAmount || 20;
-        const max = settings?.registrationMaxAmount || 120;
+        const min = Number(settings?.registrationMinAmount) || 20;
+        const max = Number(settings?.registrationMaxAmount) || 120;
         setMinAmount(min);
         setMaxAmount(max);
         // Mettre à jour le montant par défaut si nécessaire
@@ -59,6 +59,9 @@ const CampRegistrationPage = () => {
     const { name, value, type, checked } = e.target;
     if (type === 'checkbox') {
       setForm(prev => ({ ...prev, [name]: checked }));
+    } else if (name === 'amountPaid') {
+      const numericValue = parseFloat(value) || minAmount;
+      setForm(prev => ({ ...prev, [name]: numericValue }));
     } else {
       setForm(prev => ({ ...prev, [name]: value }));
     }
