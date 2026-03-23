@@ -60,7 +60,7 @@ exports.createRegistration = async (req, res) => {
     console.log(`💳 Mode PayPal actuel: ${paypalMode.toUpperCase()}`);
 
     // Validation du montant payé
-    const paid = parseFloat(amountPaid);
+    const paid = Math.round(parseFloat(amountPaid) * 100) / 100;
     if (isNaN(paid) || paid < minAmount || paid > maxAmount) {
       return res.status(400).json({ message: `Le montant doit être entre ${minAmount}€ et ${maxAmount}€.` });
     }
@@ -706,7 +706,7 @@ exports.createCashRegistration = async (req, res) => {
       return res.status(400).json({ message: 'Veuillez sélectionner un sexe valide (M ou F).' });
     }
 
-    const paid = parseFloat(amountPaid);
+    const paid = Math.round(parseFloat(amountPaid) * 100) / 100;
     if (isNaN(paid) || paid < 20 || paid > 120) {
       return res.status(400).json({ message: 'Le montant doit être entre 20€ et 120€.' });
     }

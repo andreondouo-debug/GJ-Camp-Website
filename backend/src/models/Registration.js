@@ -104,7 +104,6 @@ const registrationSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Le montant payé est obligatoire'],
     min: [0, 'Le montant ne peut pas être négatif'],
-    max: [120, 'Le montant ne peut pas dépasser 120 euros'],
     default: 0
   },
   amountRemaining: {
