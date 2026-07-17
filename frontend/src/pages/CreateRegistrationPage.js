@@ -30,7 +30,46 @@ const CreateRegistrationPage = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
-  const [existingUser, setExistingUser] = useState(null); // compte déjà existant
+  const [existingUser, setExistingUser] = useState(null);
+
+  // Recherche de compte existant
+  const [useExistingAccount, setUseExistingAccount] = useState(false);
+  const [userQuery, setUserQuery] = useState('');
+  const [userResults, setUserResults] = useState([]);
+  const [searchingUsers, setSearchingUsers] = useState(false);
+
+  const handleUserSearch = async (query) => {
+    setUserQuery(query);
+    if (query.length < 2) { setUserResults([]); return; }
+    setSearchingUsers(true);
+    try {
+      const response = await axios.get(`${API_URL}/api/users?search=${encodeURIComponent(query)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const all = response.data.users || [];
+      // Filtrer par nom ou email
+      const q = query.toLowerCase();
+      setUserResults(all.filter(u =>
+        u.firstName?.toLowerCase().includes(q) ||
+        u.lastName?.toLowerCase().includes(q) ||
+        u.email?.toLowerCase().includes(q)
+      ).slice(0, 8));
+    } catch { setUserResults([]); }
+    finally { setSearchingUsers(false); }
+  };
+
+  const handleSelectUser = (user) => {
+    setExistingUser(user);
+    setForm(prev => ({
+      ...prev,
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      email: user.email || '',
+      phone: user.phoneNumber || prev.phone
+    }));
+    setUserQuery(`${user.firstName} ${user.lastName} (${user.email})`);
+    setUserResults([]);
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -121,6 +160,9 @@ const CreateRegistrationPage = () => {
         amountPaid: 0
       });
       setExistingUser(null);
+      setUseExistingAccount(false);
+      setUserQuery('');
+      setUserResults([]);
       
       // Rediriger vers dashboard après 2 secondes
       setTimeout(() => {
@@ -147,6 +189,63 @@ const CreateRegistrationPage = () => {
           {error && <div className="alert alert-error">{error}</div>}
 
           <form onSubmit={handleSubmit} className="registration-form">
+
+            {/* Sélection compte existant */}
+            <section className="form-section" style={{ background: '#f0f4ff', border: '2px solid #667eea', borderRadius: '10px', padding: '16px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: 'bold', fontSize: '15px' }}>
+                <input
+                  type="checkbox"
+                  checked={useExistingAccount}
+                  onChange={(e) => {
+                    setUseExistingAccount(e.target.checked);
+                    if (!e.target.checked) {
+                      setExistingUser(null);
+                      setUserQuery('');
+                      setUserResults([]);
+                      setForm(prev => ({ ...prev, firstName: '', lastName: '', email: '', phone: '' }));
+                    }
+                  }}
+                  style={{ width: '18px', height: '18px' }}
+                />
+                Cette personne a déjà un compte sur GJ Camp
+              </label>
+
+              {useExistingAccount && (
+                <div style={{ marginTop: '12px', position: 'relative' }}>
+                  <input
+                    type="text"
+                    value={userQuery}
+                    onChange={(e) => handleUserSearch(e.target.value)}
+                    placeholder="Rechercher par nom ou email..."
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #ccc', fontSize: '14px' }}
+                    autoComplete="off"
+                  />
+                  {searchingUsers && <p style={{ fontSize: '13px', color: '#888', marginTop: '4px' }}>⏳ Recherche...</p>}
+                  {userResults.length > 0 && (
+                    <div style={{ position: 'absolute', zIndex: 10, width: '100%', background: 'white', border: '1px solid #ddd', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', marginTop: '4px' }}>
+                      {userResults.map(u => (
+                        <div
+                          key={u._id}
+                          onClick={() => handleSelectUser(u)}
+                          style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                          onMouseEnter={e => e.currentTarget.style.background = '#f0f4ff'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'white'}
+                        >
+                          <span><strong>{u.firstName} {u.lastName}</strong></span>
+                          <span style={{ fontSize: '12px', color: '#888' }}>{u.email}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {existingUser && (
+                    <div style={{ marginTop: '8px', padding: '10px 14px', background: '#e8f5e9', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#27ae60', fontWeight: 'bold' }}>✅ {existingUser.firstName} {existingUser.lastName} sélectionné</span>
+                      <button type="button" onClick={() => { setExistingUser(null); setUserQuery(''); setForm(prev => ({ ...prev, firstName: '', lastName: '', email: '', phone: '' })); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#e74c3c', fontSize: '18px' }}>×</button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
             {/* Informations personnelles */}
             <section className="form-section section-info">
               <h3 className="section-title">📋 Informations personnelles</h3>
