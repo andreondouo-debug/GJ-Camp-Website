@@ -201,6 +201,19 @@ function PayoutManagementPage() {
     }
   };
 
+  const handleDeleteCampus = async (campusName) => {
+    if (!window.confirm(`❗ Supprimer le campus "${campusName}" de la redistribution ?\nCette action est irréversible.`)) return;
+    try {
+      await axios.delete(`/api/campus/${campusName}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFeedback({ type: 'success', message: `✅ Campus "${campusName}" supprimé` });
+      fetchCampus();
+    } catch (error) {
+      setFeedback({ type: 'error', message: error.response?.data?.message || 'Erreur lors de la suppression' });
+    }
+  };
+
   const handleEditCampus = (campus) => {
     setEditingCampus(campus.name);
     setCampusForm({
@@ -463,12 +476,21 @@ function PayoutManagementPage() {
                       <p>💵 Redistribution: {campus.redistributionPercentage}%</p>
                       {campus.iban && <p>🏦 IBAN: {campus.iban}</p>}
                     </div>
-                    <button
-                      className="btn-edit"
-                      onClick={() => handleEditCampus(campus)}
-                    >
-                      ✏️ Modifier
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        className="btn-edit"
+                        onClick={() => handleEditCampus(campus)}
+                      >
+                        ✏️ Modifier
+                      </button>
+                      <button
+                        className="btn-cancel"
+                        onClick={() => handleDeleteCampus(campus.name)}
+                        style={{ backgroundColor: '#e74c3c', color: 'white' }}
+                      >
+                        🗑️ Supprimer
+                      </button>
+                    </div>
                   </div>
                 ))
               )}
