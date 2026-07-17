@@ -553,8 +553,8 @@ const CampRegistrationNewPage = () => {
                   <div className="method-content">
                     <span className="method-icon">💳</span>
                     <div>
-                      <strong>PayPal</strong>
-                      <small>Paiement en ligne sécurisé</small>
+                      <strong>Carte bancaire</strong>
+                      <small>Sans compte PayPal requis</small>
                     </div>
                   </div>
                 </label>
@@ -652,8 +652,12 @@ const CampRegistrationNewPage = () => {
 
           {showPayPal && form.paymentMethod === 'paypal' && (
             <div className="paypal-section">
-              <h3>💳 Paiement sécurisé via PayPal / Carte bancaire</h3>
+              <h3>💳 Paiement sécurisé par carte bancaire</h3>
               <p className="paypal-info">Montant à régler : <strong>{form.amountPaid}€</strong></p>
+              <p style={{ fontSize: '13px', color: '#555', marginBottom: '12px' }}>
+                Saisissez votre numéro de carte. <strong>Aucun compte PayPal nécessaire.</strong><br/>
+                Si vous avez un compte PayPal, vous pouvez aussi l'utiliser directement.
+              </p>
               <PayPalButton
                 amount={form.amountPaid}
                 onSuccess={handlePaymentSuccess}

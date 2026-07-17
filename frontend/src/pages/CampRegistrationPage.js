@@ -520,7 +520,7 @@ const CampRegistrationPage = () => {
                   className={`payment-method-btn ${form.paymentMethod === 'paypal' ? 'active' : ''}`}
                   onClick={() => setForm(prev => ({ ...prev, paymentMethod: 'paypal' }))}
                 >
-                  💳 PayPal / Carte bancaire
+                  💳 Carte bancaire
                 </button>
                 <button
                   type="button"
@@ -530,6 +530,10 @@ const CampRegistrationPage = () => {
                   💵 Espèces (payer au camp)
                 </button>
               </div>
+              <p style={{ fontSize: '12px', color: '#888', marginTop: '6px' }}>
+                💳 Paiement par carte bancaire — aucun compte PayPal requis.<br/>
+                Vous avez un compte PayPal ? Vous pouvez aussi l'utiliser lors du paiement.
+              </p>
             </div>
             
             <div className="form-field">
@@ -604,12 +608,13 @@ const CampRegistrationPage = () => {
 
         {showPayPal && (
           <div className="paypal-section">
-            <h3>💳 Finaliser le Paiement</h3>
+            <h3>💳 Paiement sécurisé par carte bancaire</h3>
             <p className="paypal-info">
               Montant à régler : <strong>{validatedForm?.amountPaid || 20}€</strong>
             </p>
-            <p className="paypal-hint">
-              Vous pouvez payer avec votre compte PayPal ou par carte bancaire.
+            <p className="paypal-hint" style={{ fontSize: '13px', color: '#555', marginBottom: '12px' }}>
+              Saisissez simplement votre numéro de carte. <strong>Aucun compte PayPal nécessaire.</strong><br/>
+              Si vous avez un compte PayPal, vous pouvez aussi l'utiliser.
             </p>
             <div className="paypal-button-container">
               <PayPalButton
