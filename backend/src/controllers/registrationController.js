@@ -1359,7 +1359,9 @@ exports.createRegistrationWithoutPayment = async (req, res) => {
       phone,
       refuge,
       hasAllergies,
-      allergyDetails
+      allergyDetails,
+      amountPaid: amountPaidRaw,
+      numberOfDays
     } = req.body;
 
     console.log('👤 Admin crée inscription sans paiement pour:', email);
@@ -1464,7 +1466,15 @@ exports.createRegistrationWithoutPayment = async (req, res) => {
       parsedDateOfBirth = new Date(dateOfBirth);
     }
 
-    // ===== CRÉER L'INSCRIPTION (statut: pending, montant: 0) =====
+    // Calculer totalPrice selon les jours (1j=40€, 2j=80€, 3j=120€)
+    const validDays = [1, 2, 3];
+    const days = validDays.includes(parseInt(numberOfDays)) ? parseInt(numberOfDays) : 3;
+    const totalPrice = days * 40;
+    const paid = Math.min(Math.max(0, parseFloat(amountPaidRaw) || 0), totalPrice);
+    const remaining = Math.max(0, totalPrice - paid);
+    const payStatus = remaining === 0 ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
+
+    // ===== CRÉER L'INSCRIPTION =====
     const registration = new Registration({
       user: user._id,
       isGuest: false,
@@ -1478,10 +1488,12 @@ exports.createRegistrationWithoutPayment = async (req, res) => {
       refuge,
       hasAllergies,
       allergyDetails: hasAllergies ? allergyDetails : undefined,
-      amountPaid: 0,
-      amountRemaining: maxAmount,
-      paymentMethod: 'pending', // Statut spécial
-      status: 'pending', // En attente de paiement
+      numberOfDays: days,
+      totalPrice,
+      amountPaid: paid,
+      amountRemaining: remaining,
+      paymentStatus: payStatus,
+      paypalMode: paid > 0 ? 'cash' : undefined,
       consent: {
         privacyPolicy: true,
         photoRelease: true,
@@ -1499,8 +1511,9 @@ exports.createRegistrationWithoutPayment = async (req, res) => {
         firstName,
         {
           registrationId: registration._id,
-          amountPaid: 0,
-          amountRemaining: maxAmount,
+          amountPaid: paid,
+          amountRemaining: remaining,
+          paymentStatus: payStatus,
           refuge,
           sex,
           dateOfBirth
