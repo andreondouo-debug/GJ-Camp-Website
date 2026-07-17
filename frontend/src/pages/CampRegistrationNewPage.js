@@ -24,6 +24,7 @@ const CampRegistrationNewPage = () => {
     hasAllergies: false,
     allergyDetails: '',
     numberOfDays: 3,
+    partialAttendance: false,
     amountPaid: 20,
     paymentMethod: 'paypal' // 'paypal' ou 'cash'
   });
@@ -459,23 +460,41 @@ const CampRegistrationNewPage = () => {
               </select>
             </div>
 
-            <div className="new-input-group">
-              <label>Nombre de jours de présence *</label>
-              <div className="new-payment-options" style={{ gap: '10px' }}>
-                {[1, 2, 3].map(d => (
-                  <button
-                    key={d}
-                    type="button"
-                    className={`new-payment-option ${form.numberOfDays === d ? 'active' : ''}`}
-                    onClick={() => setForm(prev => ({ ...prev, numberOfDays: d, amountPaid: Math.min(prev.amountPaid, d * 40) }))}
-                  >
-                    <span className="amount">{d} jour{d > 1 ? 's' : ''}</span>
-                    <span className="label">{d * 40}€</span>
-                  </button>
-                ))}
-              </div>
-              <p style={{ fontSize: '13px', color: '#888', marginTop: '6px' }}>40€/jour · Total : <strong>{form.numberOfDays * 40}€</strong></p>
+            <div className="new-checkbox-group">
+              <label className="new-checkbox">
+                <input
+                  type="checkbox"
+                  checked={form.partialAttendance}
+                  onChange={(e) => setForm(prev => ({
+                    ...prev,
+                    partialAttendance: e.target.checked,
+                    numberOfDays: e.target.checked ? 1 : 3,
+                    amountPaid: minAmount
+                  }))}
+                />
+                <span>Je ne serai là que pour un certain nombre de jours</span>
+              </label>
             </div>
+
+            {form.partialAttendance && (
+              <div className="new-input-group">
+                <label>Nombre de jours de présence</label>
+                <div className="new-payment-options" style={{ gap: '10px' }}>
+                  {[1, 2].map(d => (
+                    <button
+                      key={d}
+                      type="button"
+                      className={`new-payment-option ${form.numberOfDays === d ? 'active' : ''}`}
+                      onClick={() => setForm(prev => ({ ...prev, numberOfDays: d, amountPaid: minAmount }))}
+                    >
+                      <span className="amount">{d} jour{d > 1 ? 's' : ''}</span>
+                      <span className="label">{d * 40}€</span>
+                    </button>
+                  ))}
+                </div>
+                <p style={{ fontSize: '13px', color: '#888', marginTop: '6px' }}>40€/jour · Total : <strong>{form.numberOfDays * 40}€</strong></p>
+              </div>
+            )}
 
             <div className="new-checkbox-group">
               <label className="new-checkbox">

@@ -25,6 +25,7 @@ const CampRegistrationPage = () => {
     hasAllergies: false,
     allergyDetails: '',
     numberOfDays: 3,
+    partialAttendance: false,
     paymentMethod: 'paypal', // Mode de paiement par défaut
     amountPaid: 20
   });
@@ -442,22 +443,41 @@ const CampRegistrationPage = () => {
             </div>
 
             <div className="form-field">
-              <label>Nombre de jours de présence *</label>
-              <div className="payment-buttons">
-                {[1, 2, 3].map(d => (
-                  <button
-                    key={d}
-                    type="button"
-                    className={`payment-btn ${form.numberOfDays === d ? 'active' : ''}`}
-                    onClick={() => setForm(prev => ({ ...prev, numberOfDays: d, amountPaid: Math.min(prev.amountPaid, d * 40) }))}
-                  >
-                    <span>{d} jour{d > 1 ? 's' : ''}</span>
-                    <small>{d * 40}€</small>
-                  </button>
-                ))}
-              </div>
-              <p style={{ fontSize: '13px', color: '#666', marginTop: '6px' }}>40€/jour · Total sélectionné : <strong>{form.numberOfDays * 40}€</strong></p>
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="partialAttendance"
+                  checked={form.partialAttendance}
+                  onChange={(e) => setForm(prev => ({
+                    ...prev,
+                    partialAttendance: e.target.checked,
+                    numberOfDays: e.target.checked ? 1 : 3,
+                    amountPaid: minAmount
+                  }))}
+                />
+                <span>Je ne serai là que pour un certain nombre de jours</span>
+              </label>
             </div>
+
+            {form.partialAttendance && (
+              <div className="form-field">
+                <label>Nombre de jours de présence</label>
+                <div className="payment-buttons">
+                  {[1, 2].map(d => (
+                    <button
+                      key={d}
+                      type="button"
+                      className={`payment-btn ${form.numberOfDays === d ? 'active' : ''}`}
+                      onClick={() => setForm(prev => ({ ...prev, numberOfDays: d, amountPaid: minAmount }))}
+                    >
+                      <span>{d} jour{d > 1 ? 's' : ''}</span>
+                      <small>{d * 40}€</small>
+                    </button>
+                  ))}
+                </div>
+                <p style={{ fontSize: '13px', color: '#666', marginTop: '6px' }}>40€/jour · Total pour {form.numberOfDays} jour{form.numberOfDays > 1 ? 's' : ''} : <strong>{form.numberOfDays * 40}€</strong></p>
+              </div>
+            )}
 
             <div className="form-field">
               <label className="checkbox-label">
