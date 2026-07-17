@@ -12,8 +12,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // Importer la fonction de création de compte avec inscription
-const { createCampRegistrationWithAccount } = require('./campRegistrationWithAccount');
+const { createCampRegistrationWithAccount, validateCampRegistration } = require('./campRegistrationWithAccount');
 exports.createCampRegistrationWithAccount = createCampRegistrationWithAccount;
+exports.validateCampRegistration = validateCampRegistration;
 
 // Créer une inscription au camp
 exports.createRegistration = async (req, res) => {

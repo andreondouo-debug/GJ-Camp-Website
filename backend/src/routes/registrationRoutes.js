@@ -9,6 +9,9 @@ const checkCampusResponsable = require('../middleware/checkCampusResponsable');
 // Route publique pour inscription camp avec création automatique de compte
 router.post('/camp-with-account', registrationController.createCampRegistrationWithAccount);
 
+// Route publique de validation AVANT paiement (dry-run, ne crée rien)
+router.post('/validate-camp-registration', registrationController.validateCampRegistration);
+
 // Route admin pour créer inscription sans paiement
 router.post('/create-without-payment', 
   auth, 

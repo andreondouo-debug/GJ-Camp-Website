@@ -117,11 +117,22 @@ const CampRegistrationPage = () => {
 
       // ✅ Formulaire validé
       if (form.paymentMethod === 'paypal') {
+        // 🔒 VALIDATION SERVEUR AVANT PAIEMENT (garantit que l'inscription réussira après paiement)
+        try {
+          await axios.post('/api/registrations/validate-camp-registration', form, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {}
+          });
+        } catch (validationErr) {
+          setError(validationErr.response?.data?.message || 'Vos informations sont incomplètes ou invalides. Corrigez avant de payer.');
+          setLoading(false);
+          return;
+        }
+
         // Afficher PayPal pour paiement en ligne
-        console.log('✅ Formulaire validé, affichage PayPal');
+        console.log('✅ Informations validées côté serveur, affichage PayPal');
         setValidatedForm(form);
         setShowPayPal(true);
-        setMessage('✅ Formulaire validé ! Procédez au paiement ci-dessous.');
+        setMessage('✅ Informations validées ! Vous pouvez procéder au paiement en toute sécurité.');
         setLoading(false);
       } else {
         // Paiement espèces : envoyer directement sans PayPal

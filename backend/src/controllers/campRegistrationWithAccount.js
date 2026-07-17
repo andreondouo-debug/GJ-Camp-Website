@@ -12,6 +12,151 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 /**
+ * ✅ VALIDATION AVANT PAIEMENT (dry-run)
+ *
+ * Vérifie TOUTES les données d'inscription SANS rien enregistrer.
+ * Appelée avant d'afficher le bouton de paiement.
+ * Si cette validation passe, l'inscription réelle après paiement réussira forcément.
+ *
+ * Garantit qu'on ne peut jamais payer sans que l'inscription soit possible.
+ */
+exports.validateCampRegistration = async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      sex,
+      dateOfBirth,
+      address,
+      phone,
+      refuge,
+      hasAllergies,
+      allergyDetails,
+      amountPaid,
+      numberOfDays
+    } = req.body;
+
+    // Refuge
+    const validRefuges = ['Lorient', 'Laval', 'Amiens', 'Nantes', 'Autres'];
+    if (!refuge || !validRefuges.includes(refuge)) {
+      return res.status(400).json({ valid: false, message: 'Veuillez sélectionner un refuge CRPT valide.' });
+    }
+
+    // Sexe
+    if (!sex || !['M', 'F'].includes(sex)) {
+      return res.status(400).json({ valid: false, message: 'Veuillez sélectionner un sexe valide (M ou F).' });
+    }
+
+    // Email
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ valid: false, message: 'Email invalide.' });
+    }
+
+    // Champs obligatoires
+    if (!firstName || !lastName) {
+      return res.status(400).json({ valid: false, message: 'Le nom et le prénom sont obligatoires.' });
+    }
+    if (!address) {
+      return res.status(400).json({ valid: false, message: "L'adresse postale est obligatoire." });
+    }
+    if (!phone) {
+      return res.status(400).json({ valid: false, message: 'Le numéro de téléphone est obligatoire.' });
+    }
+
+    // Mot de passe (uniquement si nouveau compte)
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (!existingUser) {
+      if (!password) {
+        return res.status(400).json({ valid: false, message: 'Le mot de passe est requis pour créer un compte.' });
+      }
+      const pwdErrors = [];
+      if (password.length < 8) pwdErrors.push('au moins 8 caractères');
+      if (!/[A-Z]/.test(password)) pwdErrors.push('une lettre majuscule');
+      if (!/[a-z]/.test(password)) pwdErrors.push('une lettre minuscule');
+      if (!/[0-9]/.test(password)) pwdErrors.push('un chiffre');
+      if (!/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(password)) pwdErrors.push('un caractère spécial (!@#$%&*...)');
+      if (pwdErrors.length > 0) {
+        return res.status(400).json({ valid: false, message: `🔒 Mot de passe trop faible ! Il doit contenir : ${pwdErrors.join(', ')}.` });
+      }
+    } else {
+      // Vérifier qu'il n'a pas déjà une inscription
+      const existingReg = await Registration.findOne({ user: existingUser._id, isGuest: { $ne: true } });
+      if (existingReg) {
+        return res.status(409).json({ valid: false, message: '❌ Vous avez déjà une inscription active au camp.' });
+      }
+    }
+
+    // Montant
+    const settings = await Settings.findOne();
+    const minAmount = settings?.settings?.registrationMinAmount || 20;
+    const days = [1, 2, 3].includes(parseInt(numberOfDays)) ? parseInt(numberOfDays) : 3;
+    const totalPrice = days * 40;
+    const paid = parseFloat(amountPaid);
+    if (isNaN(paid) || paid < minAmount || paid > totalPrice) {
+      return res.status(400).json({ valid: false, message: `Le montant doit être entre ${minAmount}€ et ${totalPrice}€.` });
+    }
+
+    // Allergies
+    if (hasAllergies && !allergyDetails) {
+      return res.status(400).json({ valid: false, message: 'Veuillez préciser vos allergies.' });
+    }
+
+    // Date de naissance : parsing + validité
+    let parsedDate;
+    if (dateOfBirth && typeof dateOfBirth === 'string' && dateOfBirth.includes('/')) {
+      const [day, month, year] = dateOfBirth.split('/');
+      const d = parseInt(day), m = parseInt(month), y = parseInt(year);
+      parsedDate = new Date(y, m - 1, d);
+      // Vérifier que la date reconstruite correspond (évite les débordements type 99/99/9999)
+      const currentYear = new Date().getFullYear();
+      if (
+        isNaN(parsedDate.getTime()) ||
+        parsedDate.getDate() !== d ||
+        parsedDate.getMonth() !== m - 1 ||
+        parsedDate.getFullYear() !== y ||
+        y < 1900 || y > currentYear
+      ) {
+        return res.status(400).json({ valid: false, message: 'La date de naissance est invalide (format JJ/MM/AAAA attendu).' });
+      }
+    } else {
+      parsedDate = new Date(dateOfBirth);
+      if (!dateOfBirth || isNaN(parsedDate.getTime())) {
+        return res.status(400).json({ valid: false, message: 'La date de naissance est invalide (format JJ/MM/AAAA attendu).' });
+      }
+    }
+
+    // Simulation Mongoose : construit l'objet et valide sans sauvegarder
+    const testRegistration = new Registration({
+      user: existingUser?._id || new (require('mongoose')).Types.ObjectId(),
+      firstName, lastName, email: email.toLowerCase(),
+      sex, dateOfBirth: parsedDate, address, phone, refuge,
+      hasAllergies: !!hasAllergies,
+      allergyDetails: hasAllergies ? allergyDetails : null,
+      numberOfDays: days, totalPrice,
+      amountPaid: paid, amountRemaining: Math.max(0, totalPrice - paid),
+      paymentStatus: (totalPrice - paid) === 0 ? 'paid' : (paid > 0 ? 'partial' : 'unpaid')
+    });
+    const validationError = testRegistration.validateSync();
+    if (validationError) {
+      const msg = Object.values(validationError.errors).map(e => e.message).join(' | ');
+      return res.status(400).json({ valid: false, message: `Erreur de validation : ${msg}` });
+    }
+
+    // ✅ Tout est bon
+    return res.status(200).json({
+      valid: true,
+      message: '✅ Toutes les informations sont valides. Vous pouvez procéder au paiement.',
+      isNewUser: !existingUser
+    });
+  } catch (error) {
+    console.error('❌ Erreur validation avant paiement:', error);
+    return res.status(500).json({ valid: false, message: 'Erreur lors de la validation des informations.' });
+  }
+};
+
+/**
  * 🎯 NOUVELLE ROUTE: Inscription camp avec création automatique de compte
  * 
  * Workflow:
