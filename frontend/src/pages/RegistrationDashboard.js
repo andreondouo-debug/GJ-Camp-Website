@@ -454,24 +454,6 @@ const RegistrationDashboard = () => {
             <p>Total payé</p>
           </div>
         </div>
-        <div className="stat-card" style={{ borderLeft: '4px solid #e67e22' }}>
-          <div className="stat-icon">
-            <DollarIcon size={28} color="#e67e22" />
-          </div>
-          <div className="stat-info">
-            <h3 style={{ color: '#e67e22' }}>-{stats.totalPaypalFees.toFixed(2)}€</h3>
-            <p>Frais PayPal (3,4%+0,35€)</p>
-          </div>
-        </div>
-        <div className="stat-card" style={{ borderLeft: '4px solid #27ae60' }}>
-          <div className="stat-icon">
-            <DollarIcon size={28} color="#27ae60" />
-          </div>
-          <div className="stat-info">
-            <h3 style={{ color: '#27ae60' }}>{(stats.totalRevenue - stats.totalPaypalFees).toFixed(2)}€</h3>
-            <p>Net reçu</p>
-          </div>
-        </div>
       </div>
 
       {/* Statistiques filtrées */}

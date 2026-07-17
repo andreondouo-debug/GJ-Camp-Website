@@ -522,49 +522,72 @@ function PayoutManagementPage() {
               const cashRegs   = registrations.filter(r => r.paypalMode === 'cash');
               const totalPaypal = paypalRegs.reduce((s, r) => s + (r.amountPaid || 0), 0);
               const totalCash   = cashRegs.reduce((s, r) => s + (r.amountPaid || 0), 0);
-              // Frais PayPal : 3,4% + 0,35€ par transaction
+              // Frais PayPal : 3,4% + 0,35€ par transaction (absorbés par GJ Camp)
               const paypalFees  = paypalRegs.reduce((s, r) => s + Math.round(((r.amountPaid || 0) * 0.034 + 0.35) * 100) / 100, 0);
-              const netPaypal   = totalPaypal - paypalFees;
+              const netReceived = totalPaypal - paypalFees; // Ce que reçoit vraiment le compte
               return (
-                <div style={{ background: '#f8f9ff', border: '1px solid #e0e4ff', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
-                  <h3 style={{ margin: '0 0 16px', color: '#333' }}>💶 Résumé financier global</h3>
+                <div style={{ marginBottom: '24px' }}>
+                  <h3 style={{ margin: '0 0 14px', color: '#333' }}>💶 Résumé financier global</h3>
 
-                  {/* PayPal */}
-                  <div style={{ background: 'white', borderRadius: '8px', padding: '16px', marginBottom: '12px', border: '1px solid #e8e8e8' }}>
-                    <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#003087' }}>💳 Paiements PayPal ({paypalRegs.length} inscription{paypalRegs.length > 1 ? 's' : ''})</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px' }}>
-                      <div style={{ textAlign: 'center', padding: '10px', background: '#f0f4ff', borderRadius: '8px' }}>
-                        <div style={{ fontSize: '22px', fontWeight: 'bold' }}>{totalPaypal.toFixed(2)}€</div>
-                        <div style={{ fontSize: '12px', color: '#666' }}>Collecté brut</div>
+                  {/* Compte principal */}
+                  <div style={{ background: '#f0f4ff', border: '2px solid #667eea', borderRadius: '12px', padding: '18px', marginBottom: '12px' }}>
+                    <div style={{ fontWeight: 'bold', fontSize: '15px', marginBottom: '12px', color: '#333' }}>
+                      🏦 Compte principal Laval (reçoit tous les paiements PayPal)
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '10px', marginBottom: '14px' }}>
+                      <div style={{ textAlign: 'center', padding: '12px', background: 'white', borderRadius: '8px', border: '1px solid #dde' }}>
+                        <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#333' }}>{totalPaypal.toFixed(2)}€</div>
+                        <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>Collecté (PayPal brut)</div>
                       </div>
-                      <div style={{ textAlign: 'center', padding: '10px', background: '#fff3e0', borderRadius: '8px' }}>
+                      <div style={{ textAlign: 'center', padding: '12px', background: '#fff3e0', borderRadius: '8px', border: '1px solid #ffd' }}>
                         <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#e67e22' }}>-{paypalFees.toFixed(2)}€</div>
-                        <div style={{ fontSize: '12px', color: '#666' }}>Frais PayPal (3,4%+0,35€/tx)</div>
+                        <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>Frais PayPal<br/>(pris en charge par GJ Camp)</div>
                       </div>
-                      <div style={{ textAlign: 'center', padding: '10px', background: '#e8f5e9', borderRadius: '8px' }}>
-                        <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#27ae60' }}>{netPaypal.toFixed(2)}€</div>
-                        <div style={{ fontSize: '12px', color: '#666' }}>Net reçu → à redistribuer</div>
+                      <div style={{ textAlign: 'center', padding: '12px', background: '#ffeef0', borderRadius: '8px', border: '1px solid #fdd' }}>
+                        <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#c0392b' }}>{netReceived.toFixed(2)}€</div>
+                        <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>Net disponible en compte</div>
+                      </div>
+                    </div>
+
+                    {/* Flèche redistribution */}
+                    <div style={{ borderTop: '1px dashed #aab', paddingTop: '12px' }}>
+                      <div style={{ fontSize: '13px', color: '#555', marginBottom: '8px' }}>📤 Redistribution vers les campus</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                        <div style={{ textAlign: 'center', padding: '12px', background: '#e8f5e9', borderRadius: '8px', border: '1px solid #c8e6c9' }}>
+                          <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#27ae60' }}>{totalPaypal.toFixed(2)}€</div>
+                          <div style={{ fontSize: '12px', color: '#555', marginTop: '4px' }}>✅ Envoyé aux campus<br/><strong>(montant total, Laval absorbe les frais)</strong></div>
+                        </div>
+                        <div style={{ textAlign: 'center', padding: '12px', background: '#fff8e1', borderRadius: '8px', border: '1px solid #ffe0b2' }}>
+                          <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#e67e22' }}>{paypalFees.toFixed(2)}€</div>
+                          <div style={{ fontSize: '12px', color: '#555', marginTop: '4px' }}>💸 Frais assumés par Laval<br/>(non répercutés sur les autres campus)</div>
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Espèces */}
-                  <div style={{ background: 'white', borderRadius: '8px', padding: '16px', marginBottom: '12px', border: '1px solid #e8e8e8' }}>
-                    <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#27ae60' }}>💵 Paiements en espèces ({cashRegs.length} inscription{cashRegs.length > 1 ? 's' : ''})</div>
+                  <div style={{ background: '#f1f8f4', border: '2px solid #27ae60', borderRadius: '12px', padding: '18px', marginBottom: '12px' }}>
+                    <div style={{ fontWeight: 'bold', fontSize: '15px', marginBottom: '12px', color: '#333' }}>
+                      💵 Paiements en espèces ({cashRegs.length} inscription{cashRegs.length > 1 ? 's' : ''}) — hors PayPal
+                    </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                      <div style={{ textAlign: 'center', padding: '10px', background: '#e8f5e9', borderRadius: '8px' }}>
+                      <div style={{ textAlign: 'center', padding: '12px', background: 'white', borderRadius: '8px', border: '1px solid #c8e6c9' }}>
                         <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#27ae60' }}>{totalCash.toFixed(2)}€</div>
-                        <div style={{ fontSize: '12px', color: '#666' }}>Total espèces collectées</div>
+                        <div style={{ fontSize: '12px', color: '#555', marginTop: '4px' }}>Total espèces collectées<br/>(aucun frais PayPal)</div>
                       </div>
-                      <div style={{ textAlign: 'center', padding: '10px', background: '#fff8e1', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ fontSize: '13px', color: '#e67e22' }}>⚠️ À remettre directement aux campus<br/><strong>Ne passe PAS par PayPal</strong></div>
+                      <div style={{ padding: '12px', background: '#fff8e1', borderRadius: '8px', border: '1px solid #ffe0b2', display: 'flex', alignItems: 'center' }}>
+                        <div style={{ fontSize: '13px', color: '#e67e22' }}>
+                          ⚠️ <strong>À remettre directement aux campus</strong><br/>
+                          Ces montants ne passent pas par PayPal.<br/>
+                          Remise physique à chaque responsable.
+                        </div>
                       </div>
                     </div>
                     {cashRegs.length > 0 && (
-                      <div style={{ marginTop: '10px', fontSize: '13px', color: '#555' }}>
+                      <div style={{ marginTop: '10px' }}>
                         {cashRegs.map(r => (
-                          <div key={r._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #f0f0f0' }}>
-                            <span>{r.firstName} {r.lastName} — {r.refuge}</span>
+                          <div key={r._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 4px', borderBottom: '1px solid #d0ead8', fontSize: '13px' }}>
+                            <span>{r.firstName} {r.lastName} — <em>{r.refuge}</em></span>
                             <strong>{r.amountPaid}€</strong>
                           </div>
                         ))}
@@ -573,9 +596,12 @@ function PayoutManagementPage() {
                   </div>
 
                   {/* Total global */}
-                  <div style={{ background: '#1a1a2e', borderRadius: '8px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: '#aaa', fontSize: '14px' }}>Grand total (net PayPal + espèces)</span>
-                    <span style={{ color: 'white', fontSize: '22px', fontWeight: 'bold' }}>{(netPaypal + totalCash).toFixed(2)}€</span>
+                  <div style={{ background: '#1a1a2e', borderRadius: '10px', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ color: '#aaa', fontSize: '13px' }}>Grand total redistribué aux campus</div>
+                      <div style={{ color: '#888', fontSize: '12px', marginTop: '2px' }}>PayPal ({totalPaypal.toFixed(2)}€) + Espèces ({totalCash.toFixed(2)}€)</div>
+                    </div>
+                    <span style={{ color: 'white', fontSize: '26px', fontWeight: 'bold' }}>{(totalPaypal + totalCash).toFixed(2)}€</span>
                   </div>
                 </div>
               );
