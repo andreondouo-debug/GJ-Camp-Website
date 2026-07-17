@@ -497,24 +497,15 @@ const CashPaymentsManagement = () => {
                         ✅ Valider
                       </button>
 
-                      <div className="reject-group">
-                        <input
-                          type="text"
-                          placeholder="Raison du rejet"
-                          value={rejectionReason[payment.paymentId] || ''}
-                          onChange={(e) => setRejectionReason(prev => ({
-                            ...prev,
-                            [payment.paymentId]: e.target.value
-                          }))}
-                          className="reject-input"
-                        />
-                        <button 
-                          className="reject-btn"
-                          onClick={() => handleReject(payment.registrationId, payment.paymentId)}
-                        >
-                          ❌ Rejeter
-                        </button>
-                      </div>
+                      <button 
+                        className="reject-btn"
+                        onClick={() => openRejectModal(
+                          { ...payment, _id: payment.paymentId, type: 'cashPayment' },
+                          'cashPayment'
+                        )}
+                      >
+                        ❌ Rejeter
+                      </button>
                     </div>
                   </div>
                 </div>
