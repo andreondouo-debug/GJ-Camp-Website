@@ -7,31 +7,31 @@
  */
 
 :root {
-  /* ===== PALETTE DE COULEURS ===== */
+  /* ===== PALETTE DE COULEURS ELIJAH'GOD ===== */
   
-  /* Rouge principal (GJ Red) */
-  --color-primary: #a01e1e;
-  --color-primary-light: #e74c3c;
-  --color-primary-dark: #7a1515;
-  --color-primary-rgb: 160, 30, 30;
+  /* Bronze principal (Brand ELIJAH'GOD) */
+  --color-primary: #CD7F32;
+  --color-primary-light: #E8A249;
+  --color-primary-dark: #9B5F23;
+  --color-primary-rgb: 205, 127, 50;
 
-  /* Or/Doré (GJ Gold) */
-  --color-secondary: #d4af37;
-  --color-gold-light: #f3d87c;
-  --color-gold-dark: #b8942a;
+  /* Or/Doré (ELIJAH'GOD Gold) */
+  --color-secondary: #D4AF37;
+  --color-gold-light: #F0D06F;
+  --color-gold-dark: #B8860B;
   --color-secondary-rgb: 212, 175, 55;
 
-  /* Bleu marine (Header/Footer) */
-  --color-navy: #001a4d;
-  --color-navy-light: #3b5998;
-  --color-navy-dark: #000d26;
+  /* Bleu marine (Header/Footer) - remplacé par noir/bronze */
+  --color-navy: #1a1a1a;
+  --color-navy-light: #2d2d2d;
+  --color-navy-dark: #000000;
 
   /* Fond et conteneurs */
   --bg-white: #ffffff;
   --bg-light: #f8f9fa;
-  --bg-cream: #fffaf0;
-  --bg-dark: #1a1a2e;
-  --bg-dark-secondary: #16213e;
+  --bg-cream: #FFF8E7;
+  --bg-dark: #0a0a0a;
+  --bg-dark-secondary: #1a1a1a;
 
   /* Texte */
   --text-primary: #333333;
@@ -42,7 +42,7 @@
   /* Alias pour compatibilité */
   --color-text: #333333;
   --color-white: #ffffff;
-  --color-gold: #d4af37;
+  --color-gold: #D4AF37;
 
   /* Bordures */
   --border-color: #e0e0e0;

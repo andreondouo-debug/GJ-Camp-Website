@@ -1,26 +1,19 @@
 // Service Worker pour PWA - GJ Camp
-// ✅ Gestion du cache par version pour forcer le rechargement de la dernière version
-
-const APP_VERSION = '0.1.1'; // Synchronisé avec package.json
-const BUILD_DATE = '2026-02-04-13h17'; // Format: YYYY-MM-DD
-const CACHE_VERSION = `v${APP_VERSION}-${BUILD_DATE}`;
-const CACHE_NAME = `gj-camp-${CACHE_VERSION}`;
+const CACHE_NAME = 'gj-camp-v1';
 const urlsToCache = [
-  `/?v=${CACHE_VERSION}`,
-  `/manifest.json?v=${CACHE_VERSION}`,
-  `/images/crpt-logo.png?v=${CACHE_VERSION}`
+  '/',
+  '/manifest.json',
+  '/images/logo-192.png',
+  '/images/logo-512.png'
 ];
 
 // Installation du Service Worker
 self.addEventListener('install', (event) => {
-  console.log('🚀 Service Worker: Installation en cours...', CACHE_VERSION);
-  // Force l'activation immédiate sans attendre
-  self.skipWaiting();
-  
+  console.log('🚀 Service Worker: Installation en cours...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('✅ Cache ouvert:', CACHE_NAME);
+        console.log('✅ Cache ouvert');
         // Essayer d'ajouter les URLs au cache, mais ne pas échouer si certaines ne se trouvent pas
         return cache.addAll(urlsToCache).catch((error) => {
           console.log('⚠️ Certaines ressources ne peuvent pas être mises en cache:', error);
@@ -31,181 +24,81 @@ self.addEventListener('install', (event) => {
 
 // Activation du Service Worker
 self.addEventListener('activate', (event) => {
-  console.log('✅ Service Worker: Activé', CACHE_VERSION);
-  // Prendre le contrôle immédiatement de tous les clients
+  console.log('✅ Service Worker: Activé');
   event.waitUntil(
-    Promise.all([
-      // Supprimer les anciens caches
-      caches.keys().then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
-              console.log('🗑️ Suppression ancien cache:', cacheName);
-              return caches.delete(cacheName);
-            }
-          })
-        );
-      }),
-      // Prendre le contrôle immédiatement
-      self.clients.claim()
-    ])
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('🗑️ Suppression ancien cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
 });
 
-// Interception des requêtes réseau - Network First Strategy avec versioning automatique
-
+// Interception des requêtes réseau
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-  
-  // Ajouter automatiquement le paramètre de version pour forcer le rechargement
-  const shouldAddVersion = (
-    url.pathname.endsWith('.js') ||
-    url.pathname.endsWith('.css') ||
-    url.pathname.endsWith('.json') ||
-    url.pathname === '/'
-  );
-  
-  if (shouldAddVersion && !url.searchParams.has('v')) {
-    url.searchParams.set('v', CACHE_VERSION);
-    const versionedRequest = new Request(url.toString(), {
-      method: event.request.method,
-      headers: event.request.headers,
-      mode: event.request.mode,
-      credentials: event.request.credentials,
-      redirect: event.request.redirect
-    });
-    event.respondWith(
-      fetch(versionedRequest)
-        .then((response) => {
-          if (response && response.status === 200) {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(versionedRequest, responseToCache);
-            });
-          }
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => {
+        // Cache hit - retourner la réponse depuis le cache
+        if (response) {
           return response;
-        })
-        .catch(() => caches.match(event.request))
-    );
-    return;
-  }
-  
-  // Stratégie Network First pour les API
-  if (url.pathname.startsWith('/api/')) {
-    // Ne mettre en cache QUE les requêtes GET
-    if (event.request.method !== 'GET') {
-      // Laisser passer les requêtes non-GET (POST, PUT, DELETE) sans les cacher
-      event.respondWith(fetch(event.request));
-      return;
-    }
-    
-    // Stratégie network first pour les API GET uniquement
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          // Mettre en cache la réponse API si succès
-          if (response && response.status === 200) {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
+        }
+
+        // Clone de la requête
+        const fetchRequest = event.request.clone();
+
+        return fetch(fetchRequest).then((response) => {
+          // Vérifier si réponse valide
+          if (!response || response.status !== 200 || response.type !== 'basic') {
+            return response;
+          }
+
+          // Clone de la réponse
+          const responseToCache = response.clone();
+
+          caches.open(CACHE_NAME)
+            .then((cache) => {
               cache.put(event.request, responseToCache);
             });
-          }
-          return response;
-        })
-        .catch(() => {
-          // Fallback cache si offline
-          return caches.match(event.request);
-        })
-    );
-    return;
-  }
 
-  // Stratégie network first pour les pages principales et fichiers statiques
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Mettre en cache si succès et si fichier statique ou HTML
-        if (response && response.status === 200 && (
-          url.pathname.endsWith('.js') ||
-          url.pathname.endsWith('.css') ||
-          url.pathname.endsWith('.png') ||
-          url.pathname.endsWith('.jpg') ||
-          url.pathname.endsWith('.jpeg') ||
-          url.pathname.endsWith('.svg') ||
-          url.pathname.endsWith('.json') ||
-          url.pathname === '/'
-        )) {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        // Fallback cache si offline
-        return caches.match(event.request).then((cachedResponse) => {
-          return cachedResponse || caches.match('/');
+          return response;
+        }).catch(() => {
+          // En cas d'échec, retourner une page offline personnalisée
+          return caches.match('/');
         });
       })
   );
 });
 
-// Gestion des notifications push
+// Gestion des notifications push (optionnel)
 self.addEventListener('push', (event) => {
-  console.log('📩 Push notification reçue');
-  
-  let notificationData = {
-    title: 'GJ Camp',
-    body: 'Nouvelle notification',
-    icon: 'https://res.cloudinary.com/dbouijio-1/image/upload/v1767949247/gj-camp/logo/raujk6jdnoioiqgjop2f.jpg',
-    badge: 'https://res.cloudinary.com/dbouijio-1/image/upload/v1767949247/gj-camp/logo/raujk6jdnoioiqgjop2f.jpg',
+  const options = {
+    body: event.data ? event.data.text() : 'Nouvelle notification GJ Camp',
+    icon: '/images/logo-192.png',
+    badge: '/images/logo-192.png',
     vibrate: [200, 100, 200],
-    data: { url: '/' }
+    data: {
+      dateOfArrival: Date.now(),
+      primaryKey: 1
+    }
   };
 
-  if (event.data) {
-    try {
-      const data = event.data.json();
-      notificationData = {
-        title: data.title || 'GJ Camp',
-        body: data.body || 'Nouvelle notification',
-        icon: data.icon || '/images/logo-gj.png',
-        badge: data.badge || '/images/logo-gj.png',
-        vibrate: data.vibrate || [200, 100, 200],
-        data: data.data || { url: '/' }
-      };
-    } catch (error) {
-      console.error('❌ Erreur parsing notification:', error);
-      notificationData.body = event.data.text();
-    }
-  }
-
   event.waitUntil(
-    self.registration.showNotification(notificationData.title, notificationData)
+    self.registration.showNotification('GJ Camp', options)
   );
 });
 
 // Gestion des clics sur notifications
 self.addEventListener('notificationclick', (event) => {
-  console.log('🔔 Notification cliquée');
+  console.log('🔔 Notification cliquée:', event.notification.tag);
   event.notification.close();
 
-  const urlToOpen = event.notification.data?.url || '/';
-
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then((windowClients) => {
-        // Chercher si une fenêtre est déjà ouverte
-        for (let client of windowClients) {
-          if (client.url.includes(urlToOpen) && 'focus' in client) {
-            return client.focus();
-          }
-        }
-        // Sinon, ouvrir une nouvelle fenêtre
-        if (clients.openWindow) {
-          return clients.openWindow(urlToOpen);
-        }
-      })
+    clients.openWindow('/')
   );
 });

@@ -28,7 +28,7 @@ const sendEmailViaBrevoAPI = async (to, subject, htmlContent, textContent = '') 
   
   const payload = {
     sender: {
-      name: "GJ Camp",
+      name: "ELIJAH'GOD",
       email: emailFrom
     },
     to: [
@@ -80,7 +80,7 @@ const sendVerificationEmail = async (email, firstName, verificationToken) => {
   
   const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email/${verificationToken}`;
   
-  const subject = '✉️ Vérifiez votre adresse email - GJ Camp';
+  const subject = '✉️ Vérifiez votre adresse email - ELIJAH’GOD';
   
   const htmlContent = `
     <!DOCTYPE html>
@@ -98,7 +98,7 @@ const sendVerificationEmail = async (email, firstName, verificationToken) => {
       <body>
         <div class="container">
           <div class="header">
-            <h1>✉️ Bienvenue chez GJ Camp !</h1>
+            <h1>✉️ Bienvenue chez ELIJAH'GOD !</h1>
           </div>
           <div class="content">
             <h2>Bonjour ${firstName},</h2>
@@ -115,12 +115,12 @@ const sendVerificationEmail = async (email, firstName, verificationToken) => {
             
             <p><strong>⏰ Ce lien expire dans 24 heures.</strong></p>
             
-            <p>Si vous n'avez pas créé de compte sur GJ Camp, ignorez cet email.</p>
+            <p>Si vous n'avez pas créé de compte sur ELIJAH'GOD, ignorez cet email.</p>
             
-            <p>Cordialement,<br>L'équipe GJ Camp</p>
+            <p>Cordialement,<br>L'équipe ELIJAH'GOD</p>
           </div>
           <div class="footer">
-            <p>© ${new Date().getFullYear()} GJ Camp - Tous droits réservés</p>
+            <p>© ${new Date().getFullYear()} ELIJAH'GOD - Tous droits réservés</p>
           </div>
         </div>
       </body>
@@ -130,7 +130,7 @@ const sendVerificationEmail = async (email, firstName, verificationToken) => {
   const textContent = `
     Bonjour ${firstName},
     
-    Merci de vous être inscrit sur GJ Camp. Pour activer votre compte, cliquez sur ce lien :
+    Merci de vous être inscrit sur ELIJAH'GOD. Pour activer votre compte, cliquez sur ce lien :
     ${verificationUrl}
     
     Ce lien expire dans 24 heures.
@@ -138,7 +138,7 @@ const sendVerificationEmail = async (email, firstName, verificationToken) => {
     Si vous n'avez pas créé de compte, ignorez cet email.
     
     Cordialement,
-    L'équipe GJ Camp
+    L'équipe ELIJAH'GOD
   `;
   
   return await sendEmailViaBrevoAPI(email, subject, htmlContent, textContent);
@@ -158,7 +158,7 @@ const resendVerificationEmail = async (email, firstName, verificationToken) => {
 const sendPasswordResetRequestEmail = async (email, firstName) => {
   console.log('📧 Préparation email de demande de réinitialisation pour:', email);
   
-  const subject = '🔐 Demande de réinitialisation de mot de passe - GJ Camp';
+  const subject = '🔐 Demande de réinitialisation de mot de passe - ELIJAH’GOD';
   
   const htmlContent = `
     <!DOCTYPE html>
@@ -227,7 +227,7 @@ const sendPasswordResetEmail = async (email, firstName, resetToken) => {
   
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
   
-  const subject = '✅ Réinitialisation de mot de passe approuvée - GJ Camp';
+  const subject = '✅ Réinitialisation de mot de passe approuvée - ELIJAH’GOD';
   
   const htmlContent = `
     <!DOCTYPE html>

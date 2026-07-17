@@ -30,8 +30,8 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-content">
         <div className="footer-left">
-          <img src={logoUrl} alt="Génération Josué" className="footer-logo" />
-          <p className="footer-text">© {new Date().getFullYear()} Génération Josué — Tous droits réservés</p>
+          <img src={logoUrl} alt="ELIJAH'GOD" className="footer-logo" />
+          <p className="footer-text">© {new Date().getFullYear()} <span className="brand-name-gold">ELIJAH'GOD</span> — Tous droits réservés</p>
           <p className="footer-version" style={{ fontSize: '0.75rem', color: '#999', marginTop: '0.5rem' }}>
             v{VERSION_INFO.version} • {VERSION_INFO.buildDate}
           </p>

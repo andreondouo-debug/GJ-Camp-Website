@@ -126,6 +126,16 @@ exports.createRegistration = async (req, res) => {
       return res.status(400).json({ message: 'Veuillez préciser vos allergies.' });
     }
 
+    // Convertir la date du format JJ/MM/AAAA en Date
+    let parsedDateOfBirth;
+    if (dateOfBirth && typeof dateOfBirth === 'string' && dateOfBirth.includes('/')) {
+      const [day, month, year] = dateOfBirth.split('/');
+      parsedDateOfBirth = new Date(year, month - 1, day);
+      console.log('📅 Date convertie:', dateOfBirth, '→', parsedDateOfBirth);
+    } else {
+      parsedDateOfBirth = new Date(dateOfBirth);
+    }
+
     // Créer l'inscription
     const registration = new Registration({
       user: user._id,
@@ -133,7 +143,7 @@ exports.createRegistration = async (req, res) => {
       lastName: lastName || user.lastName,
       email: email || user.email,
       sex,
-      dateOfBirth,
+      dateOfBirth: parsedDateOfBirth,
       address,
       phone,
       refuge,
@@ -515,6 +525,16 @@ exports.createGuestRegistration = async (req, res) => {
       return res.status(400).json({ message: 'Veuillez préciser les allergies de votre invité.' });
     }
 
+    // Convertir la date du format JJ/MM/AAAA en Date
+    let parsedDateOfBirth;
+    if (dateOfBirth && typeof dateOfBirth === 'string' && dateOfBirth.includes('/')) {
+      const [day, month, year] = dateOfBirth.split('/');
+      parsedDateOfBirth = new Date(year, month - 1, day);
+      console.log('📅 Date invité convertie:', dateOfBirth, '→', parsedDateOfBirth);
+    } else {
+      parsedDateOfBirth = new Date(dateOfBirth);
+    }
+
     // Créer l'inscription invité
     console.log('📝 Création inscription invité...');
     const guestRegistration = new Registration({
@@ -525,7 +545,7 @@ exports.createGuestRegistration = async (req, res) => {
       lastName,
       email,
       sex,
-      dateOfBirth,
+      dateOfBirth: parsedDateOfBirth,
       address,
       phone,
       refuge,
@@ -1427,6 +1447,16 @@ exports.createRegistrationWithoutPayment = async (req, res) => {
     const settings = await Settings.findOne();
     const maxAmount = settings?.settings?.registrationMaxAmount || 120;
 
+    // Convertir la date du format JJ/MM/AAAA en Date
+    let parsedDateOfBirth;
+    if (dateOfBirth && typeof dateOfBirth === 'string' && dateOfBirth.includes('/')) {
+      const [day, month, year] = dateOfBirth.split('/');
+      parsedDateOfBirth = new Date(year, month - 1, day);
+      console.log('📅 Date admin convertie:', dateOfBirth, '→', parsedDateOfBirth);
+    } else {
+      parsedDateOfBirth = new Date(dateOfBirth);
+    }
+
     // ===== CRÉER L'INSCRIPTION (statut: pending, montant: 0) =====
     const registration = new Registration({
       user: user._id,
@@ -1435,7 +1465,7 @@ exports.createRegistrationWithoutPayment = async (req, res) => {
       lastName,
       email: email.toLowerCase(),
       sex,
-      dateOfBirth,
+      dateOfBirth: parsedDateOfBirth,
       address,
       phone,
       refuge,

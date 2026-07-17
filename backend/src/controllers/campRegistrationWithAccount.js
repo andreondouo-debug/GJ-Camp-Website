@@ -244,6 +244,16 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
       );
     }
 
+    // Convertir la date du format JJ/MM/AAAA en Date
+    let parsedDateOfBirth;
+    if (dateOfBirth && typeof dateOfBirth === 'string' && dateOfBirth.includes('/')) {
+      const [day, month, year] = dateOfBirth.split('/');
+      parsedDateOfBirth = new Date(year, month - 1, day);
+      console.log('📅 Date convertie:', dateOfBirth, '→', parsedDateOfBirth);
+    } else {
+      parsedDateOfBirth = new Date(dateOfBirth);
+    }
+
     // ===== CRÉER L'INSCRIPTION =====
     const registrationData = {
       user: user._id,
@@ -251,7 +261,7 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
       lastName: lastName || user.lastName,
       email: email || user.email,
       sex,
-      dateOfBirth,
+      dateOfBirth: parsedDateOfBirth,
       address,
       phone,
       refuge,

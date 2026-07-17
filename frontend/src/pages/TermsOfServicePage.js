@@ -19,7 +19,7 @@ const TermsOfServicePage = () => {
             <h2 style={{ color: 'var(--color-red)', marginBottom: '15px' }}>1. Objet</h2>
             <p>
               Les présentes Conditions Générales d'Utilisation (CGU) régissent l'utilisation du site web 
-              et de la plateforme Génération Josué (GJ Camp), accessible à l'adresse www.gj-camp.fr.
+              et de la plateforme <span className="brand-name-gold">ELIJAH'GOD</span>, accessible à l'adresse www.elijahgod.fr.
             </p>
             <p style={{ marginTop: '10px' }}>
               En créant un compte et en utilisant nos services, vous acceptez sans réserve les présentes CGU.
@@ -29,9 +29,9 @@ const TermsOfServicePage = () => {
           <section style={{ marginBottom: '30px' }}>
             <h2 style={{ color: 'var(--color-red)', marginBottom: '15px' }}>2. Éditeur du site</h2>
             <ul style={{ marginLeft: '20px' }}>
-              <li><strong>Nom :</strong> Génération Josué (GJ Camp)</li>
+              <li><strong>Nom :</strong> <span className="brand-name-gold">ELIJAH'GOD</span></li>
               <li><strong>Nature :</strong> Organisation à but non lucratif</li>
-              <li><strong>Email :</strong> contact@gj-camp.fr</li>
+              <li><strong>Email :</strong> contact@elijahgod.fr</li>
               <li><strong>Hébergeur :</strong> MongoDB Atlas (Amazon Web Services)</li>
             </ul>
           </section>
@@ -66,10 +66,10 @@ const TermsOfServicePage = () => {
 
           <section style={{ marginBottom: '30px' }}>
             <h2 style={{ color: 'var(--color-red)', marginBottom: '15px' }}>4. Services proposés</h2>
-            <p>La plateforme GJ Camp offre les services suivants :</p>
+            <p>La plateforme <span className="brand-name-gold">ELIJAH'GOD</span> offre les services suivants :</p>
             <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
               <li>Gestion de profil utilisateur</li>
-              <li>Inscription aux camps Génération Josué</li>
+              <li>Demande de devis personnalisés</li>
               <li>Sélection d'activités</li>
               <li>Accès aux programmes et plannings</li>
               <li>Communication avec les organisateurs</li>
@@ -154,7 +154,7 @@ const TermsOfServicePage = () => {
 
             <h3 style={{ fontSize: '16px', marginTop: '15px', marginBottom: '10px' }}>9.2 Limitation de responsabilité</h3>
             <p>
-              GJ Camp ne saurait être tenu responsable :
+              <span className="brand-name-gold">ELIJAH'GOD</span> ne saurait être tenu responsable :
             </p>
             <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
               <li>Des dommages indirects résultant de l'utilisation du service</li>
@@ -176,7 +176,7 @@ const TermsOfServicePage = () => {
               . Cette action entraîne l'anonymisation de vos données personnelles.
             </p>
 
-            <h3 style={{ fontSize: '16px', marginTop: '15px', marginBottom: '10px' }}>10.2 Par GJ Camp</h3>
+            <h3 style={{ fontSize: '16px', marginTop: '15px', marginBottom: '10px' }}>10.2 Par <span className="brand-name-gold">ELIJAH'GOD</span></h3>
             <p>
               Nous nous réservons le droit de suspendre ou supprimer votre compte en cas de :
             </p>
@@ -212,7 +212,7 @@ const TermsOfServicePage = () => {
             <h2 style={{ color: 'var(--color-red)', marginBottom: '15px' }}>13. Contact</h2>
             <p>Pour toute question concernant les présentes CGU :</p>
             <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
-              <li><strong>Email :</strong> contact@gj-camp.fr</li>
+              <li><strong>Email :</strong> contact@elijahgod.fr</li>
               <li><strong>Support :</strong> Via votre tableau de bord utilisateur</li>
             </ul>
           </section>
