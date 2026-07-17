@@ -2,15 +2,22 @@ const axios = require('axios');
 
 class PayPalService {
   constructor() {
-    this.clientId = process.env.PAYPAL_CLIENT_ID;
-    this.clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-    // Utiliser PAYPAL_MODE pour déterminer l'environnement (sandbox ou live)
-    // Par défaut: sandbox pour éviter les erreurs avec credentials de test
+    // Lire le mode depuis PAYPAL_MODE (à configurer sur Render)
+    // Par défaut sandbox pour la sécurité
     const mode = process.env.PAYPAL_MODE || 'sandbox';
-    this.baseURL = mode === 'live' 
-      ? 'https://api.paypal.com'
-      : 'https://api-m.sandbox.paypal.com';
-    
+
+    // Utiliser PAYPAL_LIVE_* ou PAYPAL_SANDBOX_* selon le mode
+    // (correspond aux variables configurées sur Render)
+    if (mode === 'live') {
+      this.clientId = process.env.PAYPAL_LIVE_CLIENT_ID || process.env.PAYPAL_CLIENT_ID;
+      this.clientSecret = process.env.PAYPAL_LIVE_CLIENT_SECRET || process.env.PAYPAL_CLIENT_SECRET;
+      this.baseURL = 'https://api.paypal.com';
+    } else {
+      this.clientId = process.env.PAYPAL_SANDBOX_CLIENT_ID || process.env.PAYPAL_CLIENT_ID;
+      this.clientSecret = process.env.PAYPAL_SANDBOX_CLIENT_SECRET || process.env.PAYPAL_CLIENT_SECRET;
+      this.baseURL = 'https://api-m.sandbox.paypal.com';
+    }
+
     console.log('🔧 PayPal Service configuré:', {
       mode: mode,
       baseURL: this.baseURL,
