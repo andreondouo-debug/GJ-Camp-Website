@@ -656,24 +656,17 @@ exports.forgotPassword = async (req, res) => {
 
     // Générer le token de réinitialisation
     const resetToken = user.generatePasswordResetToken();
+    // Approuver directement sans intervention admin
+    user.resetPasswordApproved = true;
     await user.save({ validateBeforeSave: false });
 
-    // Envoyer l'email de demande (pas encore le lien de réinitialisation)
-    await sendPasswordResetRequestEmail(user.email, user.firstName);
-    
-    // Notifier les admins de la demande de réinitialisation
-    const pushService = require('../services/pushService');
-    const admins = await User.find({ role: { $in: ['admin', 'responsable'] } }).select('_id');
-    if (admins.length > 0) {
-      pushService.notifyPasswordResetRequest(admins.map(a => a._id), user).catch(err => 
-        console.error('Erreur notification push reset:', err)
-      );
-    }
+    // Envoyer directement le lien de réinitialisation
+    await sendPasswordResetEmail(user.email, user.firstName, resetToken);
 
-    console.log(`🔐 Demande de réinitialisation créée pour ${user.email}, en attente d'approbation admin`);
+    console.log(`🔐 Lien de réinitialisation envoyé directement à ${user.email}`);
     
     res.status(200).json({
-      message: 'Demande de réinitialisation envoyée. Un administrateur doit approuver votre demande avant que vous ne receviez le lien de réinitialisation.'
+      message: 'Un email avec le lien de réinitialisation vous a été envoyé. Pensez à vérifier vos spams.'
     });
   } catch (error) {
     console.error('Erreur lors de la demande de réinitialisation:', error);
@@ -704,12 +697,11 @@ exports.resetPassword = async (req, res) => {
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
       resetPasswordExpires: { $gt: Date.now() },
-      resetPasswordApproved: true, // Doit être approuvé par un admin
     }).select('+resetPasswordToken');
 
     if (!user) {
       return res.status(400).json({ 
-        message: 'Token invalide, expiré ou non approuvé par un administrateur' 
+        message: 'Lien de réinitialisation invalide ou expiré. Veuillez faire une nouvelle demande.'
       });
     }
 

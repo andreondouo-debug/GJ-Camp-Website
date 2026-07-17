@@ -35,21 +35,8 @@ const ForgotPasswordPage = () => {
           {!success ? (
             <>
               <p style={{ textAlign: 'center', marginBottom: '20px', color: '#666' }}>
-                Entrez votre adresse email pour demander une réinitialisation de mot de passe.
+                Entrez votre adresse email pour recevoir un lien de réinitialisation de mot de passe.
               </p>
-              
-              <div style={{ 
-                backgroundColor: '#fff3cd', 
-                border: '1px solid #ffc107', 
-                borderRadius: '8px', 
-                padding: '15px', 
-                marginBottom: '20px' 
-              }}>
-                <p style={{ margin: 0, fontSize: '14px', color: '#856404' }}>
-                  <strong>⚠️ Important :</strong> Pour des raisons de sécurité, votre demande devra être
-                  approuvée par un administrateur avant que vous ne receviez le lien de réinitialisation.
-                </p>
-              </div>
 
               {error && <div className="form-error">{error}</div>}
 
@@ -95,10 +82,10 @@ const ForgotPasswordPage = () => {
               }}>
                 <h3 style={{ marginTop: 0, color: '#0c5460' }}>📬 Prochaines étapes :</h3>
                 <ol style={{ marginBottom: 0, paddingLeft: '20px', color: '#0c5460' }}>
-                  <li>Vous recevrez un premier email confirmant votre demande</li>
-                  <li>Un administrateur examinera votre demande</li>
-                  <li>Une fois approuvée, vous recevrez un email avec le lien de réinitialisation</li>
-                  <li>Vous aurez 24 heures pour créer un nouveau mot de passe</li>
+                  <li>Un email avec le lien de réinitialisation vous a été envoyé</li>
+                  <li>Pensez à vérifier vos spams si vous ne le voyez pas</li>
+                  <li>Cliquez sur le lien dans l'email pour créer un nouveau mot de passe</li>
+                  <li>Le lien est valable <strong>24 heures</strong></li>
                 </ol>
               </div>
 
