@@ -80,8 +80,8 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
       ? (process.env.REACT_APP_PAYPAL_LIVE_CLIENT_ID || process.env.REACT_APP_PAYPAL_CLIENT_ID)
       : (process.env.REACT_APP_PAYPAL_SANDBOX_CLIENT_ID || process.env.REACT_APP_PAYPAL_CLIENT_ID);
     
-    if (!clientId) {
-      setError('Client ID PayPal non configuré');
+    if (!clientId || clientId === 'VOTRE_CLIENT_ID_LIVE_ICI' || clientId.startsWith('votre')) {
+      setError('⚠️ Paiement en ligne temporairement indisponible. Veuillez choisir le paiement en espèces ou contacter un responsable.');
       paypalScriptLoading = false;
       return;
     }
