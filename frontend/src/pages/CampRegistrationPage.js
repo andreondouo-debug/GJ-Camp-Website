@@ -566,6 +566,18 @@ const CampRegistrationPage = () => {
                 <span>Montant sélectionné :</span>
                 <strong>{form.amountPaid}€</strong>
               </div>
+              {form.paymentMethod === 'paypal' && (
+                <div className="summary-row" style={{ color: '#e67e22', fontSize: '13px' }}>
+                  <span>Frais PayPal estimés (3,4% + 0,35€) :</span>
+                  <strong>-{(form.amountPaid * 0.034 + 0.35).toFixed(2)}€</strong>
+                </div>
+              )}
+              {form.paymentMethod === 'paypal' && (
+                <div className="summary-row" style={{ color: '#27ae60', borderTop: '1px solid #eee', paddingTop: '6px' }}>
+                  <span>Vous recevrez net :</span>
+                  <strong>{(form.amountPaid - (form.amountPaid * 0.034 + 0.35)).toFixed(2)}€</strong>
+                </div>
+              )}
               <div className="summary-row remaining">
                 <span>Reste à payer :</span>
                 <strong>{Math.max(0, form.numberOfDays * 40 - form.amountPaid)}€</strong>

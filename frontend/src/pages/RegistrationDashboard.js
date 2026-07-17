@@ -316,7 +316,11 @@ const RegistrationDashboard = () => {
     partial: filteredRegistrations.filter(r => r.paymentStatus === 'partial').length,
     unpaid: filteredRegistrations.filter(r => r.paymentStatus === 'unpaid').length,
     totalRevenue: filteredRegistrations.reduce((sum, r) => sum + (r.amountPaid || 0), 0),
-    totalRemaining: filteredRegistrations.reduce((sum, r) => sum + (r.amountRemaining || 0), 0)
+    totalRemaining: filteredRegistrations.reduce((sum, r) => sum + (r.amountRemaining || 0), 0),
+    // Frais PayPal uniquement sur les paiements PayPal (pas espèces)
+    totalPaypalFees: filteredRegistrations
+      .filter(r => r.paypalMode && r.paypalMode !== 'cash')
+      .reduce((sum, r) => sum + Math.round(((r.amountPaid || 0) * 0.034 + 0.35) * 100) / 100, 0)
   };
 
   const stats = {
@@ -324,7 +328,10 @@ const RegistrationDashboard = () => {
     paid: registrations.filter(r => r.paymentStatus === 'paid').length,
     partial: registrations.filter(r => r.paymentStatus === 'partial').length,
     unpaid: registrations.filter(r => r.paymentStatus === 'unpaid').length,
-    totalRevenue: registrations.reduce((sum, r) => sum + (r.amountPaid || 0), 0)
+    totalRevenue: registrations.reduce((sum, r) => sum + (r.amountPaid || 0), 0),
+    totalPaypalFees: registrations
+      .filter(r => r.paypalMode && r.paypalMode !== 'cash')
+      .reduce((sum, r) => sum + Math.round(((r.amountPaid || 0) * 0.034 + 0.35) * 100) / 100, 0)
   };
 
   const SortIcon = ({ column }) => {
@@ -447,6 +454,24 @@ const RegistrationDashboard = () => {
             <p>Total payé</p>
           </div>
         </div>
+        <div className="stat-card" style={{ borderLeft: '4px solid #e67e22' }}>
+          <div className="stat-icon">
+            <DollarIcon size={28} color="#e67e22" />
+          </div>
+          <div className="stat-info">
+            <h3 style={{ color: '#e67e22' }}>-{stats.totalPaypalFees.toFixed(2)}€</h3>
+            <p>Frais PayPal (3,4%+0,35€)</p>
+          </div>
+        </div>
+        <div className="stat-card" style={{ borderLeft: '4px solid #27ae60' }}>
+          <div className="stat-icon">
+            <DollarIcon size={28} color="#27ae60" />
+          </div>
+          <div className="stat-info">
+            <h3 style={{ color: '#27ae60' }}>{(stats.totalRevenue - stats.totalPaypalFees).toFixed(2)}€</h3>
+            <p>Net reçu</p>
+          </div>
+        </div>
       </div>
 
       {/* Statistiques filtrées */}
@@ -457,6 +482,14 @@ const RegistrationDashboard = () => {
             <div className="stat-item">
               <span className="stat-label">Total payé:</span>
               <span className="stat-value">{filteredStats.totalRevenue}€</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Frais PayPal estimés:</span>
+              <span className="stat-value" style={{ color: '#e67e22' }}>-{filteredStats.totalPaypalFees.toFixed(2)}€</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Net reçu:</span>
+              <span className="stat-value" style={{ color: '#27ae60' }}>{(filteredStats.totalRevenue - filteredStats.totalPaypalFees).toFixed(2)}€</span>
             </div>
             <div className="stat-item">
               <span className="stat-label">Total restant:</span>
