@@ -416,6 +416,22 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
 
     const registration = new Registration(registrationData);
 
+    // 🔍 Log avant sauvegarde pour débogage
+    console.log('📋 Données inscription à sauvegarder:', {
+      user: registrationData.user,
+      firstName: registrationData.firstName,
+      lastName: registrationData.lastName,
+      email: registrationData.email,
+      sex: registrationData.sex,
+      dateOfBirth: registrationData.dateOfBirth,
+      refuge: registrationData.refuge,
+      numberOfDays: registrationData.numberOfDays,
+      totalPrice: registrationData.totalPrice,
+      amountPaid: registrationData.amountPaid,
+      paymentStatus: registrationData.paymentStatus,
+      paypalMode: registrationData.paypalMode
+    });
+
     await registration.save();
     console.log('✅ Inscription créée:', registration._id);
 
@@ -536,9 +552,16 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Erreur inscription camp avec compte:', error);
+    // Extraire les erreurs de validation Mongoose
+    let detailedMessage = error.message;
+    if (error.name === 'ValidationError') {
+      detailedMessage = Object.values(error.errors).map(e => e.message).join(' | ');
+    }
+    console.error('❌ Détail:', detailedMessage);
     res.status(500).json({ 
-      message: 'Erreur lors de l\'inscription',
-      error: error.message 
+      message: detailedMessage || 'Erreur lors de l\'inscription',
+      error: error.message,
+      type: error.name
     });
   }
 };

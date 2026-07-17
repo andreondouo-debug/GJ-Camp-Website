@@ -170,7 +170,11 @@ const CampRegistrationPage = () => {
       
     } catch (err) {
       console.error('❌ Erreur inscription:', err);
-      setError(err.response?.data?.message || 'Erreur lors de l\'inscription');
+      const errData = err.response?.data;
+      const msg = errData?.type === 'ValidationError'
+        ? `Erreur de validation : ${errData.message}`
+        : (errData?.message || errData?.error || 'Erreur lors de l\'inscription');
+      setError(msg);
       setLoading(false);
     }
   };
