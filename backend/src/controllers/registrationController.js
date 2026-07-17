@@ -30,6 +30,7 @@ exports.createRegistration = async (req, res) => {
       hasAllergies,
       allergyDetails,
       amountPaid,
+      numberOfDays,
       paymentDetails
     } = req.body;
 
@@ -117,8 +118,13 @@ exports.createRegistration = async (req, res) => {
     // ✅ Utiliser le montant vérifié par PayPal
     const verifiedAmount = verification.isDevelopmentMode ? paid : verification.amount;
 
-    const totalPrice = 120;
-    const remaining = totalPrice - verifiedAmount;
+    // Calculer le totalPrice selon le nombre de jours (40€/jour, max 120€)
+    const validDays = [1, 2, 3];
+    const days = validDays.includes(parseInt(numberOfDays)) ? parseInt(numberOfDays) : 3;
+    const totalPrice = days * 40; // 1j=40€, 2j=80€, 3j=120€
+    console.log(`📅 Nombre de jours: ${days} → Total: ${totalPrice}€`);
+
+    const remaining = Math.max(0, totalPrice - verifiedAmount);
     const status = remaining === 0 ? 'paid' : (verifiedAmount > 0 ? 'partial' : 'unpaid');
 
     // Si allergies cochées, vérifier que les détails sont fournis
@@ -149,6 +155,7 @@ exports.createRegistration = async (req, res) => {
       refuge,
       hasAllergies: !!hasAllergies,
       allergyDetails: hasAllergies ? allergyDetails : null,
+      numberOfDays: days,
       totalPrice,
       amountPaid: verifiedAmount,
       amountRemaining: remaining,

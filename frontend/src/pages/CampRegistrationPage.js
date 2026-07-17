@@ -24,6 +24,7 @@ const CampRegistrationPage = () => {
     refuge: '',
     hasAllergies: false,
     allergyDetails: '',
+    numberOfDays: 3,
     paymentMethod: 'paypal', // Mode de paiement par défaut
     amountPaid: 20
   });
@@ -441,6 +442,24 @@ const CampRegistrationPage = () => {
             </div>
 
             <div className="form-field">
+              <label>Nombre de jours de présence *</label>
+              <div className="payment-buttons">
+                {[1, 2, 3].map(d => (
+                  <button
+                    key={d}
+                    type="button"
+                    className={`payment-btn ${form.numberOfDays === d ? 'active' : ''}`}
+                    onClick={() => setForm(prev => ({ ...prev, numberOfDays: d, amountPaid: Math.min(prev.amountPaid, d * 40) }))}
+                  >
+                    <span>{d} jour{d > 1 ? 's' : ''}</span>
+                    <small>{d * 40}€</small>
+                  </button>
+                ))}
+              </div>
+              <p style={{ fontSize: '13px', color: '#666', marginTop: '6px' }}>40€/jour · Total sélectionné : <strong>{form.numberOfDays * 40}€</strong></p>
+            </div>
+
+            <div className="form-field">
               <label className="checkbox-label">
                 <input
                   type="checkbox"
@@ -470,7 +489,7 @@ const CampRegistrationPage = () => {
           <div className="form-section payment-section">
             <h3 className="section-title">Frais d'inscription</h3>
             <div className="payment-info">
-              <p className="total-price">Total : <strong>{maxAmount}€</strong></p>
+              <p className="total-price">Total : <strong>{form.numberOfDays * 40}€</strong> ({form.numberOfDays} jour{form.numberOfDays > 1 ? 's' : ''})</p>
             </div>
             
             <div className="form-field">
@@ -527,7 +546,7 @@ const CampRegistrationPage = () => {
               </div>
               
               <div className="custom-amount-field">
-                <label htmlFor="customAmount">Ou entrez un montant personnalisé ({minAmount}-{maxAmount}€) :</label>
+                <label htmlFor="customAmount">Ou entrez un montant personnalisé ({minAmount}-{form.numberOfDays * 40}€) :</label>
                 <input
                   type="number"
                   id="customAmount"
@@ -535,9 +554,9 @@ const CampRegistrationPage = () => {
                   value={form.amountPaid}
                   onChange={handleChange}
                   min={minAmount}
-                  max={maxAmount}
+                  max={form.numberOfDays * 40}
                   step="1"
-                  placeholder={`Ex: ${Math.floor((minAmount + maxAmount) / 2)}`}
+                  placeholder={`Ex: ${form.numberOfDays * 40}`}
                 />
               </div>
             </div>
@@ -549,7 +568,7 @@ const CampRegistrationPage = () => {
               </div>
               <div className="summary-row remaining">
                 <span>Reste à payer :</span>
-                <strong>{maxAmount - form.amountPaid}€</strong>
+                <strong>{Math.max(0, form.numberOfDays * 40 - form.amountPaid)}€</strong>
               </div>
             </div>
           </div>

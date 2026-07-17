@@ -96,6 +96,12 @@ const registrationSchema = new mongoose.Schema({
       comment: 'Parent a explicitement accepté le traitement des données'
     }
   },
+  numberOfDays: {
+    type: Number,
+    enum: [1, 2, 3],
+    default: 3,
+    comment: 'Nombre de jours de présence au camp (1j=40€, 2j=80€, 3j=120€)'
+  },
   totalPrice: {
     type: Number,
     default: 120

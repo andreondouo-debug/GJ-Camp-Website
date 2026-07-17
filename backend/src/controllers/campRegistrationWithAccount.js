@@ -39,6 +39,7 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
       allergyDetails,
       amountPaid,
       paymentMethod, // 'paypal' ou 'cash'
+      numberOfDays,
       paymentDetails
     } = req.body;
 
@@ -174,8 +175,13 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
     }
 
     // ===== CALCUL DU STATUT =====
-    const totalPrice = 120;
-    const remaining = totalPrice - verifiedAmount;
+    // Calculer le totalPrice selon le nombre de jours (40€/jour)
+    const validDays = [1, 2, 3];
+    const days = validDays.includes(parseInt(numberOfDays)) ? parseInt(numberOfDays) : 3;
+    const totalPrice = days * 40; // 1j=40€, 2j=80€, 3j=120€
+    console.log(`📅 Nombre de jours: ${days} → Total: ${totalPrice}€`);
+
+    const remaining = Math.max(0, totalPrice - verifiedAmount);
     // Status selon enum du modèle: 'unpaid', 'partial', 'paid'
     const status = remaining === 0 ? 'paid' : (verifiedAmount > 0 ? 'partial' : 'unpaid');
 
@@ -267,6 +273,7 @@ exports.createCampRegistrationWithAccount = async (req, res) => {
       refuge,
       hasAllergies: !!hasAllergies,
       allergyDetails: hasAllergies ? allergyDetails : null,
+      numberOfDays: days,
       totalPrice,
       amountPaid: verifiedAmount,
       amountRemaining: remaining,
