@@ -77,8 +77,8 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
     setError(null);
     
     const clientId = paypalMode === 'live' 
-      ? process.env.REACT_APP_PAYPAL_LIVE_CLIENT_ID
-      : process.env.REACT_APP_PAYPAL_SANDBOX_CLIENT_ID;
+      ? (process.env.REACT_APP_PAYPAL_LIVE_CLIENT_ID || process.env.REACT_APP_PAYPAL_CLIENT_ID)
+      : (process.env.REACT_APP_PAYPAL_SANDBOX_CLIENT_ID || process.env.REACT_APP_PAYPAL_CLIENT_ID);
     
     if (!clientId) {
       setError('Client ID PayPal non configuré');
