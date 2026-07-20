@@ -206,6 +206,11 @@ const PayPalButton = ({ amount, onSuccess, onError, onCancel }) => {
       },
       onError: (err) => {
         console.error('❌ Erreur PayPal:', err);
+        // Détecter la restriction du compte marchand
+        const errString = String(err?.message || err || '');
+        if (errString.includes('PAYEE_ACCOUNT_RESTRICTED') || errString.includes('merchant account is restricted')) {
+          setError('⚠️ Le paiement par carte est momentanément indisponible. Merci de choisir le paiement en espèces ou de réessayer plus tard.');
+        }
         if (onError) onError(err);
       },
       onCancel: (data) => {
