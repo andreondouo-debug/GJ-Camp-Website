@@ -10,11 +10,32 @@ const mongoose = require('mongoose');
  * Utilisé pour les paiements en espèces uniquement.
  */
 const preRegistrationSchema = new mongoose.Schema({
-  // Utilisateur qui fait la demande
+  // Utilisateur qui fait la demande (null si compte pas encore créé - cas Revolut)
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    default: null
+  },
+
+  // Mot de passe hashé (uniquement si le compte n'existe pas encore - cas Revolut)
+  password: {
+    type: String,
+    default: null,
+    select: false
+  },
+
+  // Méthode de paiement déclarée ('cash' ou 'revolut')
+  paymentMethod: {
+    type: String,
+    enum: ['cash', 'revolut'],
+    default: 'cash'
+  },
+
+  // Nombre de jours de présence (1j=40€, 2j=80€, 3j=120€)
+  numberOfDays: {
+    type: Number,
+    enum: [1, 2, 3],
+    default: 3
   },
   
   // Invité ou non

@@ -518,11 +518,11 @@ function PayoutManagementPage() {
           <div className="tab-content">
             {/* ===== RÉSUMÉ FINANCIER ===== */}
             {registrations.length > 0 && (() => {
-              const paypalRegs = registrations.filter(r => r.paypalMode && r.paypalMode !== 'cash');
-              const cashRegs   = registrations.filter(r => r.paypalMode === 'cash');
+              const paypalRegs = registrations.filter(r => r.paypalMode && !['cash', 'revolut'].includes(r.paypalMode));
+              const cashRegs   = registrations.filter(r => ['cash', 'revolut'].includes(r.paypalMode));
               const totalPaypal = paypalRegs.reduce((s, r) => s + (r.amountPaid || 0), 0);
               const totalCash   = cashRegs.reduce((s, r) => s + (r.amountPaid || 0), 0);
-              // Frais PayPal : 3,4% + 0,35€ par transaction (absorbés par GJ Camp)
+              // Frais PayPal : 3,4% + 0,35€ par transaction (absorbés par le compte principal)
               const paypalFees  = paypalRegs.reduce((s, r) => s + Math.round(((r.amountPaid || 0) * 0.034 + 0.35) * 100) / 100, 0);
               const netReceived = totalPaypal - paypalFees; // Ce que reçoit vraiment le compte
               return (

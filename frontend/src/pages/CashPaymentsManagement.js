@@ -339,13 +339,20 @@ const CashPaymentsManagement = () => {
               <>
                 <div className="info-banner">
                   <strong>🆕 Nouvelles demandes d'inscription</strong>
-                  <p>Ces personnes ont déclaré un paiement espèces mais leur inscription n'est PAS encore créée. Validez pour créer l'inscription.</p>
+                  <p>Ces personnes ont déclaré un paiement (espèces ou Revolut) mais leur inscription n'est PAS encore créée. Vérifiez la réception du paiement puis validez pour créer le compte et l'inscription.</p>
                 </div>
                 {preRegistrations.map(preReg => (
                   <div key={preReg._id} className="payment-card pre-registration-card">
                     <div className="payment-header">
                       <div className="user-info">
-                        <h3>{preReg.firstName} {preReg.lastName}</h3>
+                        <h3>
+                          {preReg.firstName} {preReg.lastName}
+                          {preReg.paymentMethod === 'revolut' ? (
+                            <span style={{ marginLeft: '8px', padding: '2px 8px', borderRadius: '6px', background: '#ede9fe', color: '#5b21b6', fontSize: '12px', fontWeight: 'bold' }}>🔗 Revolut</span>
+                          ) : (
+                            <span style={{ marginLeft: '8px', padding: '2px 8px', borderRadius: '6px', background: '#f0fdf4', color: '#166534', fontSize: '12px', fontWeight: 'bold' }}>💵 Espèces</span>
+                          )}
+                        </h3>
                         <p>{preReg.email}</p>
                         <p>{preReg.phone}</p>
                       </div>

@@ -161,7 +161,7 @@ const registrationSchema = new mongoose.Schema({
   },
   paypalMode: {
     type: String,
-    enum: ['sandbox', 'live', 'cash'],
+    enum: ['sandbox', 'live', 'cash', 'revolut'],
     default: 'sandbox',
     index: true // Pour filtrer facilement les inscriptions par mode
   }

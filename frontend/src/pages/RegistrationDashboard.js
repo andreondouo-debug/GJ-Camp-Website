@@ -188,6 +188,35 @@ const RegistrationDashboard = () => {
     }
   };
 
+  // ✏️ Mettre à jour le montant payé d'une inscription
+  const handleUpdateAmount = async (reg) => {
+    const total = reg.totalPrice || 120;
+    const input = window.prompt(
+      `Modifier le montant payé pour ${reg.firstName} ${reg.lastName}\n` +
+      `Total : ${total}€ · Actuellement payé : ${reg.amountPaid || 0}€\n\n` +
+      `Entrez le nouveau montant total payé (0 à ${total}) :`,
+      String(reg.amountPaid || 0)
+    );
+    if (input === null) return; // annulé
+    const newAmount = parseFloat(input);
+    if (isNaN(newAmount) || newAmount < 0 || newAmount > total) {
+      alert(`❌ Montant invalide. Il doit être entre 0 et ${total}€.`);
+      return;
+    }
+    try {
+      const response = await axios.patch(
+        `/api/registrations/${reg._id}/update-amount`,
+        { amountPaid: newAmount },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert(response.data.message || '✅ Montant mis à jour');
+      fetchRegistrations();
+    } catch (err) {
+      console.error('Erreur mise à jour montant:', err);
+      alert(err.response?.data?.message || '❌ Erreur lors de la mise à jour du montant');
+    }
+  };
+
   const getStatusBadge = (status) => {
     const badges = {
       paid: { text: 'Payé', class: 'status-paid' },
@@ -317,9 +346,9 @@ const RegistrationDashboard = () => {
     unpaid: filteredRegistrations.filter(r => r.paymentStatus === 'unpaid').length,
     totalRevenue: filteredRegistrations.reduce((sum, r) => sum + (r.amountPaid || 0), 0),
     totalRemaining: filteredRegistrations.reduce((sum, r) => sum + (r.amountRemaining || 0), 0),
-    // Frais PayPal uniquement sur les paiements PayPal (pas espèces)
+    // Frais PayPal uniquement sur les paiements PayPal (pas espèces ni Revolut)
     totalPaypalFees: filteredRegistrations
-      .filter(r => r.paypalMode && r.paypalMode !== 'cash')
+      .filter(r => r.paypalMode && !['cash', 'revolut'].includes(r.paypalMode))
       .reduce((sum, r) => sum + Math.round(((r.amountPaid || 0) * 0.034 + 0.35) * 100) / 100, 0)
   };
 
@@ -330,7 +359,7 @@ const RegistrationDashboard = () => {
     unpaid: registrations.filter(r => r.paymentStatus === 'unpaid').length,
     totalRevenue: registrations.reduce((sum, r) => sum + (r.amountPaid || 0), 0),
     totalPaypalFees: registrations
-      .filter(r => r.paypalMode && r.paypalMode !== 'cash')
+      .filter(r => r.paypalMode && !['cash', 'revolut'].includes(r.paypalMode))
       .reduce((sum, r) => sum + Math.round(((r.amountPaid || 0) * 0.034 + 0.35) * 100) / 100, 0)
   };
 
@@ -673,6 +702,18 @@ const RegistrationDashboard = () => {
                           💵 Espèces
                         </span>
                       )}
+                      {reg.paypalMode === 'revolut' && (
+                        <span style={{ 
+                          padding: '4px 8px', 
+                          borderRadius: '4px', 
+                          background: '#ede9fe', 
+                          color: '#5b21b6',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          🔗 Revolut
+                        </span>
+                      )}
                       {!reg.paypalMode && (
                         <span style={{ 
                           padding: '4px 8px', 
@@ -686,6 +727,14 @@ const RegistrationDashboard = () => {
                       )}
                     </td>
                     <td>
+                      <button
+                        className="delete-registration-btn"
+                        onClick={() => handleUpdateAmount(reg)}
+                        title="Modifier le montant payé"
+                        style={{ marginRight: '6px' }}
+                      >
+                        ✏️
+                      </button>
                       <button
                         className="delete-registration-btn"
                         onClick={() => handleDeleteRegistration(reg._id, reg.firstName, reg.lastName)}

@@ -1116,7 +1116,248 @@ exports.getCashPaymentsStats = async (req, res) => {
   }
 };
 
-// 📋 Lister les PreRegistrations en attente (pour responsables)
+// � REVOLUT : Créer une pré-inscription en attente de validation admin
+// Aucun compte ni inscription n'est créé tant que l'admin n'a pas validé le paiement
+exports.createRevolutPreRegistration = async (req, res) => {
+  try {
+    const {
+      firstName, lastName, email, password,
+      sex, dateOfBirth, address, phone, refuge,
+      hasAllergies, allergyDetails, amountPaid, numberOfDays,
+      isGuest = false
+    } = req.body;
+
+    console.log('💳 Nouvelle pré-inscription Revolut pour:', email);
+
+    // ===== VALIDATIONS =====
+    const validRefuges = ['Lorient', 'Laval', 'Amiens', 'Nantes', 'Autres'];
+    if (!refuge || !validRefuges.includes(refuge)) {
+      return res.status(400).json({ message: 'Veuillez sélectionner un refuge CRPT valide.' });
+    }
+    if (!sex || !['M', 'F'].includes(sex)) {
+      return res.status(400).json({ message: 'Veuillez sélectionner un sexe valide (M ou F).' });
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: 'Email invalide.' });
+    }
+    if (!firstName || !lastName) {
+      return res.status(400).json({ message: 'Le nom et le prénom sont obligatoires.' });
+    }
+    if (!address) {
+      return res.status(400).json({ message: "L'adresse postale est obligatoire." });
+    }
+    if (!phone) {
+      return res.status(400).json({ message: 'Le numéro de téléphone est obligatoire.' });
+    }
+    if (hasAllergies && !allergyDetails) {
+      return res.status(400).json({ message: 'Veuillez préciser vos allergies.' });
+    }
+
+    // Vérifier compte existant
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+
+    // Si compte existant : vérifier qu'il n'a pas déjà une inscription ou une demande en attente
+    if (existingUser) {
+      const existingReg = await Registration.findOne({ user: existingUser._id, isGuest: { $ne: true } });
+      if (existingReg) {
+        return res.status(409).json({ message: '❌ Vous avez déjà une inscription active au camp.' });
+      }
+      const pendingReq = await PreRegistration.findOne({ user: existingUser._id, status: 'pending' });
+      if (pendingReq) {
+        return res.status(409).json({ message: '⏳ Vous avez déjà une demande en attente de validation.' });
+      }
+    } else {
+      // Nouveau compte : valider le mot de passe
+      if (!password) {
+        return res.status(400).json({ message: 'Le mot de passe est requis pour créer un compte.' });
+      }
+      const pwdErrors = [];
+      if (password.length < 8) pwdErrors.push('au moins 8 caractères');
+      if (!/[A-Z]/.test(password)) pwdErrors.push('une lettre majuscule');
+      if (!/[a-z]/.test(password)) pwdErrors.push('une lettre minuscule');
+      if (!/[0-9]/.test(password)) pwdErrors.push('un chiffre');
+      if (!/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(password)) pwdErrors.push('un caractère spécial (!@#$%&*...)');
+      if (pwdErrors.length > 0) {
+        return res.status(400).json({ message: `🔒 Mot de passe trop faible ! Il doit contenir : ${pwdErrors.join(', ')}.` });
+      }
+      const pendingReq = await PreRegistration.findOne({ email: email.toLowerCase(), status: 'pending' });
+      if (pendingReq) {
+        return res.status(409).json({ message: '⏳ Une demande est déjà en attente de validation pour cet email.' });
+      }
+    }
+
+    // Montant et jours
+    const settings = await Settings.findOne();
+    const minAmount = settings?.settings?.registrationMinAmount || 20;
+    const days = [1, 2, 3].includes(parseInt(numberOfDays)) ? parseInt(numberOfDays) : 3;
+    const totalPrice = days * 40;
+    const paid = parseFloat(amountPaid);
+    if (isNaN(paid) || paid < minAmount || paid > totalPrice) {
+      return res.status(400).json({ message: `Le montant doit être entre ${minAmount}€ et ${totalPrice}€.` });
+    }
+
+    // Convertir la date JJ/MM/AAAA
+    let parsedDate;
+    if (dateOfBirth && typeof dateOfBirth === 'string' && dateOfBirth.includes('/')) {
+      const [day, month, year] = dateOfBirth.split('/');
+      parsedDate = new Date(year, month - 1, day);
+    } else {
+      parsedDate = new Date(dateOfBirth);
+    }
+    if (!dateOfBirth || isNaN(parsedDate.getTime())) {
+      return res.status(400).json({ message: 'La date de naissance est invalide (format JJ/MM/AAAA attendu).' });
+    }
+
+    // Hasher le mot de passe si nouveau compte
+    let hashedPassword = null;
+    if (!existingUser && password) {
+      hashedPassword = await bcrypt.hash(password, 10);
+    }
+
+    // Créer la pré-inscription (aucun compte ni inscription créés à ce stade)
+    const preRegistration = new PreRegistration({
+      user: existingUser ? existingUser._id : null,
+      password: hashedPassword,
+      paymentMethod: 'revolut',
+      numberOfDays: days,
+      isGuest: !!isGuest,
+      firstName, lastName, email: email.toLowerCase(),
+      sex, dateOfBirth: parsedDate, address, phone, refuge,
+      hasAllergies: !!hasAllergies,
+      allergyDetails: hasAllergies ? allergyDetails : null,
+      cashAmount: paid,
+      status: 'pending',
+      submittedAt: new Date(),
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent']
+    });
+
+    await preRegistration.save();
+    console.log('✅ Pré-inscription Revolut créée:', preRegistration._id);
+
+    // Email au participant : demande prise en compte, en attente de validation
+    try {
+      await sendCampRegistrationConfirmation(
+        preRegistration.email,
+        preRegistration.firstName,
+        {
+          email: preRegistration.email,
+          firstName: preRegistration.firstName,
+          amountPaid: 0,
+          amountRemaining: totalPrice,
+          paymentStatus: 'pending_validation',
+          cashAmount: paid
+        },
+        { cashPaymentPending: true, cashAmount: paid }
+      );
+      console.log('✅ Email de prise en compte envoyé au participant Revolut');
+    } catch (emailError) {
+      console.error('⚠️ Erreur email participant Revolut:', emailError.message);
+    }
+
+    // Notifier le responsable du campus
+    try {
+      const campus = await Campus.findOne({ name: refuge }).populate('responsable');
+      if (campus && campus.responsable) {
+        await sendCashPaymentRequestToResponsable(
+          campus.responsable.email,
+          campus.responsable.firstName,
+          preRegistration,
+          campus.name
+        );
+        console.log('✅ Email envoyé au responsable:', campus.responsable.email);
+      }
+    } catch (emailError) {
+      console.error('⚠️ Erreur email responsable Revolut:', emailError.message);
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: '✅ Votre inscription est prise en compte ! Elle est en attente de votre paiement et de la validation d\'un responsable.',
+      preRegistration: {
+        _id: preRegistration._id,
+        status: 'pending',
+        amount: paid
+      },
+      instructions: {
+        important: '⏳ Votre inscription n\'est pas encore définitive',
+        step1: 'Effectuez votre paiement de ' + paid + '€ via le lien de paiement fourni',
+        step2: 'Un responsable vérifiera la réception du paiement',
+        step3: 'Votre compte et votre inscription seront alors créés automatiquement',
+        step4: 'Vous recevrez un email de confirmation',
+        access: '🚫 Vous n\'avez pas encore accès au tableau de bord ni aux activités'
+      }
+    });
+  } catch (error) {
+    console.error('❌ Erreur pré-inscription Revolut:', error);
+    return res.status(500).json({ message: 'Erreur lors de la pré-inscription', error: error.message });
+  }
+};
+
+// ✏️ Mettre à jour le montant payé d'une inscription (admin/responsable)
+exports.updateRegistrationAmount = async (req, res) => {
+  try {
+    const { amountPaid, note } = req.body;
+    const newAmount = parseFloat(amountPaid);
+    if (isNaN(newAmount) || newAmount < 0) {
+      return res.status(400).json({ message: '❌ Montant invalide' });
+    }
+
+    const registration = await Registration.findById(req.params.id);
+    if (!registration) {
+      return res.status(404).json({ message: '❌ Inscription non trouvée' });
+    }
+
+    const totalPrice = registration.totalPrice || 120;
+    if (newAmount > totalPrice) {
+      return res.status(400).json({ message: `❌ Le montant ne peut pas dépasser ${totalPrice}€` });
+    }
+
+    const previousAmount = registration.amountPaid || 0;
+    registration.amountPaid = newAmount;
+    registration.amountRemaining = Math.max(0, totalPrice - newAmount);
+    registration.paymentStatus = registration.amountRemaining === 0 ? 'paid' : (newAmount > 0 ? 'partial' : 'unpaid');
+
+    if (!Array.isArray(registration.cashPayments)) registration.cashPayments = [];
+    registration.cashPayments.push({
+      amount: newAmount - previousAmount,
+      status: 'validated',
+      submittedAt: new Date(),
+      validatedAt: new Date(),
+      validatedBy: req.user.userId,
+      note: note || `Ajustement admin: ${previousAmount}€ → ${newAmount}€`
+    });
+
+    await registration.save();
+
+    try {
+      await payoutService.createPayoutForRegistration(registration._id, req.user.userId);
+    } catch (payoutError) {
+      console.error('⚠️ Erreur payout après ajustement:', payoutError.message);
+    }
+
+    try {
+      await sendCampRegistrationConfirmation(
+        registration.email,
+        registration.firstName,
+        registration,
+        { cashPaymentValidated: true, validatedAmount: newAmount }
+      );
+    } catch (emailError) {
+      console.error('⚠️ Erreur email ajustement:', emailError.message);
+    }
+
+    res.status(200).json({
+      message: `✅ Montant mis à jour : ${newAmount}€ payés (${registration.amountRemaining}€ restants)`,
+      registration
+    });
+  } catch (error) {
+    console.error('❌ Erreur mise à jour montant:', error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+};
+
+// �📋 Lister les PreRegistrations en attente (pour responsables)
 exports.getPendingPreRegistrations = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -1165,8 +1406,8 @@ exports.validatePreRegistration = async (req, res) => {
     const { preRegistrationId } = req.params;
     const { amountValidated, note } = req.body;
 
-    // Récupérer la pre-registration
-    const preReg = await PreRegistration.findById(preRegistrationId);
+    // Récupérer la pre-registration (avec le mot de passe si présent)
+    const preReg = await PreRegistration.findById(preRegistrationId).select('+password');
     if (!preReg) {
       return res.status(404).json({ message: '❌ Demande d\'inscription non trouvée' });
     }
@@ -1175,20 +1416,51 @@ exports.validatePreRegistration = async (req, res) => {
       return res.status(400).json({ message: '❌ Cette demande a déjà été traitée' });
     }
 
-    // Vérifier que l'utilisateur existe toujours
-    const user = await User.findById(preReg.user);
-    if (!user) {
-      return res.status(404).json({ message: '❌ Utilisateur non trouvé' });
+    // Récupérer OU créer le compte utilisateur
+    let user;
+    if (preReg.user) {
+      // Compte déjà existant (cas espèces, ou Revolut avec compte existant)
+      user = await User.findById(preReg.user);
+      if (!user) {
+        return res.status(404).json({ message: '❌ Utilisateur non trouvé' });
+      }
+    } else {
+      // 🆕 Cas Revolut sans compte : créer le compte maintenant
+      const existing = await User.findOne({ email: preReg.email.toLowerCase() });
+      if (existing) {
+        user = existing;
+      } else {
+        user = new User({
+          firstName: preReg.firstName,
+          lastName: preReg.lastName,
+          email: preReg.email.toLowerCase(),
+          password: preReg.password, // déjà hashé lors de la pré-inscription
+          role: 'utilisateur',
+          phoneNumber: preReg.phone,
+          ministryRole: preReg.refuge,
+          isEmailVerified: true,
+          emailVerifiedAt: new Date(),
+          isActive: true
+        });
+        await user.save();
+        console.log('✅ Compte créé lors de la validation Revolut:', user.email);
+      }
+      preReg.user = user._id;
     }
 
-    // Créer l'inscription maintenant que le paiement est validé
-    const validatedAmount = amountValidated || preReg.cashAmount;
-    const totalPrice = 120;
-    const remaining = totalPrice - validatedAmount;
+    // Calculer le prix total selon le nombre de jours (40€/jour)
+    const days = [1, 2, 3].includes(preReg.numberOfDays) ? preReg.numberOfDays : 3;
+    const totalPrice = days * 40;
+    const validatedAmount = amountValidated != null ? parseFloat(amountValidated) : preReg.cashAmount;
+    const remaining = Math.max(0, totalPrice - validatedAmount);
     const status = remaining === 0 ? 'paid' : (validatedAmount > 0 ? 'partial' : 'unpaid');
 
+    // Mode de paiement (cash ou revolut)
+    const isRevolut = preReg.paymentMethod === 'revolut';
+    const paymentMode = isRevolut ? 'revolut' : 'cash';
+
     const registration = new Registration({
-      user: preReg.user,
+      user: user._id,
       isGuest: preReg.isGuest,
       registeredBy: preReg.registeredBy,
       firstName: preReg.firstName,
@@ -1201,19 +1473,20 @@ exports.validatePreRegistration = async (req, res) => {
       refuge: preReg.refuge,
       hasAllergies: preReg.hasAllergies,
       allergyDetails: preReg.allergyDetails,
+      numberOfDays: days,
       totalPrice,
       amountPaid: validatedAmount,
       amountRemaining: remaining,
       paymentStatus: status,
       paymentMethod: 'cash',
-      paypalMode: 'cash',
+      paypalMode: paymentMode,
       cashPayments: [{
         amount: validatedAmount,
         status: 'validated',
         submittedAt: preReg.submittedAt,
         validatedAt: new Date(),
         validatedBy: req.user.userId,
-        note: note || `Validation initiale depuis pre-registration ${preRegistrationId}`
+        note: note || `Validation ${isRevolut ? 'paiement Revolut' : 'paiement espèces'} depuis pre-registration ${preRegistrationId}`
       }]
     });
 

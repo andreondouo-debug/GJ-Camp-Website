@@ -80,6 +80,8 @@ const UserDashboard = () => {
   const [partialAmount, setPartialAmount] = useState(0);
   const [showPayPalButton, setShowPayPalButton] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('paypal'); // 'paypal' ou 'cash'
+  const [paymentMode, setPaymentMode] = useState('paypal'); // mode global: 'paypal' ou 'revolut'
+  const [revolutLink, setRevolutLink] = useState('');
   const { token, user } = useContext(AuthContext);
 
   useEffect(() => {
@@ -91,6 +93,14 @@ const UserDashboard = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  // Charger le mode de paiement global
+  useEffect(() => {
+    axios.get('/api/settings').then(res => {
+      setPaymentMode(res.data.settings?.paymentMode || 'paypal');
+      setRevolutLink(res.data.settings?.revolutLink || '');
+    }).catch(() => {});
+  }, []);
 
   // Recharger les activités quand les sélections de l'utilisateur changent
   useEffect(() => {
@@ -282,6 +292,35 @@ const UserDashboard = () => {
       setPaymentMethod('paypal');
     } catch (err) {
       console.error('Erreur lors de l\'enregistrement du paiement espèces:', err);
+      alert(err.response?.data?.message || '❌ Erreur lors de l\'enregistrement du paiement');
+    }
+  };
+
+  // 🔗 Paiement complémentaire via Revolut : enregistre une demande en attente + redirige vers le lien
+  const handleRevolutPayment = async () => {
+    try {
+      const targetRegistration = selectedGuest || registration;
+      await axios.post(
+        `/api/registrations/${targetRegistration._id}/cash-payment`,
+        { amount: parseFloat(partialAmount), note: 'Paiement Revolut (en attente de vérification)' },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Ouvrir le lien de paiement Revolut
+      if (revolutLink && revolutLink.trim() !== '') {
+        window.open(revolutLink, '_blank', 'noopener,noreferrer');
+      }
+
+      alert(`✅ Opération prise en compte ! Effectuez le paiement de ${partialAmount}€ via le lien. Un responsable validera votre paiement après vérification.`);
+
+      if (selectedGuest) { fetchUserGuests(); } else { fetchUserRegistration(); }
+      setShowPaymentModal(false);
+      setSelectedGuest(null);
+      setPartialAmount(0);
+      setShowPayPalButton(false);
+      setPaymentMethod('paypal');
+    } catch (err) {
+      console.error('Erreur paiement Revolut:', err);
       alert(err.response?.data?.message || '❌ Erreur lors de l\'enregistrement du paiement');
     }
   };
@@ -760,7 +799,7 @@ const UserDashboard = () => {
                         }}
                       />
                       <span className="method-icon">💳</span>
-                      <span className="method-text">PayPal / CB</span>
+                      <span className="method-text">{paymentMode === 'revolut' ? 'Carte (Revolut)' : 'PayPal / CB'}</span>
                     </label>
                     
                     <label className={`payment-method-option-modal ${paymentMethod === 'cash' ? 'active' : ''}`}>
@@ -790,24 +829,41 @@ const UserDashboard = () => {
                     </ul>
                   </div>
                 )}
+
+                {paymentMethod === 'paypal' && paymentMode === 'revolut' && (
+                  <div className="cash-info-modal">
+                    <p>💳 <strong>Paiement par carte (Revolut)</strong></p>
+                    <ul>
+                      <li>Vous serez redirigé vers la page de paiement</li>
+                      <li>Un responsable validera après vérification</li>
+                      <li>Votre solde sera mis à jour ensuite</li>
+                    </ul>
+                  </div>
+                )}
                 
                 {!showPayPalButton && partialAmount > 0 && partialAmount <= (selectedGuest || registration).amountRemaining && (
                   <button 
                     className="btn-validate-amount"
                     onClick={() => {
                       if (paymentMethod === 'paypal') {
-                        setShowPayPalButton(true);
+                        if (paymentMode === 'revolut') {
+                          handleRevolutPayment();
+                        } else {
+                          setShowPayPalButton(true);
+                        }
                       } else {
                         handleCashPayment();
                       }
                     }}
                   >
-                    ✓ {paymentMethod === 'paypal' ? `Valider et payer ${partialAmount}€` : `Enregistrer paiement espèces ${partialAmount}€`}
+                    ✓ {paymentMethod === 'paypal'
+                      ? (paymentMode === 'revolut' ? `Payer ${partialAmount}€ par carte` : `Valider et payer ${partialAmount}€`)
+                      : `Enregistrer paiement espèces ${partialAmount}€`}
                   </button>
                 )}
               </div>
 
-              {showPayPalButton && paymentMethod === 'paypal' && partialAmount > 0 && partialAmount <= (selectedGuest || registration).amountRemaining && (
+              {showPayPalButton && paymentMethod === 'paypal' && paymentMode !== 'revolut' && partialAmount > 0 && partialAmount <= (selectedGuest || registration).amountRemaining && (
                 <div className="paypal-container-modal">
                   <PayPalButton
                     amount={parseFloat(partialAmount)}

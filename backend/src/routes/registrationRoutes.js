@@ -12,6 +12,9 @@ router.post('/camp-with-account', registrationController.createCampRegistrationW
 // Route publique de validation AVANT paiement (dry-run, ne crée rien)
 router.post('/validate-camp-registration', registrationController.validateCampRegistration);
 
+// Route publique : pré-inscription Revolut (aucun compte créé, en attente validation admin)
+router.post('/revolut-preregistration', registrationController.createRevolutPreRegistration);
+
 // Route admin pour créer inscription sans paiement
 router.post('/create-without-payment', 
   auth, 
@@ -91,6 +94,14 @@ router.get(
 	requireVerifiedEmail,
 	authorize('referent', 'responsable', 'admin'),
 	registrationController.getAllRegistrations
+);
+// Mettre à jour le montant payé d'une inscription (admin/responsable)
+router.patch(
+	'/:id/update-amount',
+	auth,
+	requireVerifiedEmail,
+	authorize('responsable', 'admin'),
+	registrationController.updateRegistrationAmount
 );
 router.patch(
 	'/:id/payment-status',

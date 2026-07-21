@@ -124,6 +124,10 @@ const SettingsPage = () => {
     
     // Configuration PayPal
     paypalMode: 'sandbox', // 'sandbox' ou 'live'
+
+    // Mode de paiement global du camp
+    paymentMode: 'paypal', // 'paypal' ou 'revolut'
+    revolutLink: '', // Lien de paiement Revolut
   });
 
   const [loading, setLoading] = useState(false);
@@ -3035,7 +3039,86 @@ const SettingsPage = () => {
       {activeTab === 'payments' && (
         <div className="settings-section">
           <h2>💳 Configuration des Paiements</h2>
-          
+
+          {/* ===== SWITCH MODE DE PAIEMENT GLOBAL ===== */}
+          <div style={{
+            background: '#f0f4ff',
+            border: '2px solid #667eea',
+            borderRadius: '12px',
+            padding: '20px',
+            marginBottom: '25px'
+          }}>
+            <label style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px', display: 'block' }}>
+              🔀 Mode de paiement des inscriptions
+            </label>
+            <p style={{ color: '#555', fontSize: '14px', marginBottom: '15px' }}>
+              Choisissez comment les participants paient leur inscription au camp.
+            </p>
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setSettings({ ...settings, paymentMode: 'paypal' })}
+                style={{
+                  flex: 1, minWidth: '200px', padding: '20px', borderRadius: '12px',
+                  border: (settings.paymentMode || 'paypal') === 'paypal' ? '3px solid #0070ba' : '2px solid #d1d5db',
+                  background: (settings.paymentMode || 'paypal') === 'paypal' ? '#e0f2fe' : '#f9fafb',
+                  cursor: 'pointer', textAlign: 'center'
+                }}
+              >
+                <div style={{ fontSize: '40px', marginBottom: '10px' }}>💳</div>
+                <div style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '5px' }}>PayPal / Carte</div>
+                <div style={{ fontSize: '13px', color: '#666' }}>Paiement en ligne automatique</div>
+                {(settings.paymentMode || 'paypal') === 'paypal' && (
+                  <div style={{ marginTop: '10px', color: '#0070ba', fontWeight: 'bold' }}>✓ Actif</div>
+                )}
+              </button>
+
+              <button
+                onClick={() => setSettings({ ...settings, paymentMode: 'revolut' })}
+                style={{
+                  flex: 1, minWidth: '200px', padding: '20px', borderRadius: '12px',
+                  border: settings.paymentMode === 'revolut' ? '3px solid #191c1f' : '2px solid #d1d5db',
+                  background: settings.paymentMode === 'revolut' ? '#e5e7eb' : '#f9fafb',
+                  cursor: 'pointer', textAlign: 'center'
+                }}
+              >
+                <div style={{ fontSize: '40px', marginBottom: '10px' }}>🔗</div>
+                <div style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '5px' }}>Lien Revolut</div>
+                <div style={{ fontSize: '13px', color: '#666' }}>Redirection + validation manuelle admin</div>
+                {settings.paymentMode === 'revolut' && (
+                  <div style={{ marginTop: '10px', color: '#191c1f', fontWeight: 'bold' }}>✓ Actif</div>
+                )}
+              </button>
+            </div>
+
+            {/* Champ lien Revolut - visible seulement en mode revolut */}
+            {settings.paymentMode === 'revolut' && (
+              <div>
+                <label style={{ fontWeight: 'bold', marginBottom: '8px', display: 'block' }}>
+                  🔗 Lien de paiement Revolut
+                </label>
+                <input
+                  type="url"
+                  name="revolutLink"
+                  value={settings.revolutLink || ''}
+                  onChange={handleChange}
+                  placeholder="https://revolut.me/votrelien"
+                  style={{
+                    width: '100%', padding: '12px 16px', borderRadius: '8px',
+                    border: '2px solid #d1d5db', fontSize: '15px'
+                  }}
+                />
+                <p style={{ fontSize: '13px', color: '#666', marginTop: '6px' }}>
+                  Les participants seront redirigés vers ce lien pour payer. Vous validerez manuellement chaque inscription après vérification sur votre compte.
+                </p>
+                {(!settings.revolutLink || settings.revolutLink.trim() === '') && (
+                  <p style={{ fontSize: '13px', color: '#dc2626', marginTop: '4px', fontWeight: 'bold' }}>
+                    ⚠️ Le lien Revolut est obligatoire en mode Revolut.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
           <div style={{
             background: '#fee2e2',
             border: '2px solid #ef4444',
@@ -3045,6 +3128,7 @@ const SettingsPage = () => {
           }}>
             <strong>⚠️ ATTENTION :</strong> Le mode LIVE utilise de vraies transactions avec de l'argent réel.
             <br/>Utilisez le mode SANDBOX pour les tests sans frais réels.
+            <br/><em>(La configuration PayPal ci-dessous ne s'applique que si le mode de paiement est "PayPal / Carte".)</em>
           </div>
 
           <div className="settings-grid">

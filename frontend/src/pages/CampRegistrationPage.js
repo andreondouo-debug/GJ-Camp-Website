@@ -37,6 +37,9 @@ const CampRegistrationPage = () => {
   const [validatedForm, setValidatedForm] = useState(null);
   const [minAmount, setMinAmount] = useState(20);
   const [maxAmount, setMaxAmount] = useState(120);
+  const [paymentMode, setPaymentMode] = useState('paypal'); // 'paypal' ou 'revolut'
+  const [revolutLink, setRevolutLink] = useState('');
+  const [revolutSubmitted, setRevolutSubmitted] = useState(false);
 
   // Charger les paramètres d'inscription au montage
   React.useEffect(() => {
@@ -48,6 +51,8 @@ const CampRegistrationPage = () => {
         const max = Number(settings?.registrationMaxAmount) || 120;
         setMinAmount(min);
         setMaxAmount(max);
+        setPaymentMode(settings?.paymentMode || 'paypal');
+        setRevolutLink(settings?.revolutLink || '');
         // Mettre à jour le montant par défaut si nécessaire
         setForm(prev => ({ ...prev, amountPaid: min }));
       } catch (err) {
@@ -128,12 +133,18 @@ const CampRegistrationPage = () => {
           return;
         }
 
-        // Afficher PayPal pour paiement en ligne
-        console.log('✅ Informations validées côté serveur, affichage PayPal');
-        setValidatedForm(form);
-        setShowPayPal(true);
-        setMessage('✅ Informations validées ! Vous pouvez procéder au paiement en toute sécurité.');
-        setLoading(false);
+        // 🔀 Selon le mode de paiement configuré par l'admin
+        if (paymentMode === 'revolut') {
+          // Mode Revolut : créer une pré-inscription puis rediriger vers le lien
+          await handleRevolutRegistration();
+        } else {
+          // Mode PayPal : afficher les boutons de paiement
+          console.log('✅ Informations validées côté serveur, affichage PayPal');
+          setValidatedForm(form);
+          setShowPayPal(true);
+          setMessage('✅ Informations validées ! Vous pouvez procéder au paiement en toute sécurité.');
+          setLoading(false);
+        }
       } else {
         // Paiement espèces : envoyer directement sans PayPal
         console.log('✅ Formulaire validé, inscription espèces');
@@ -142,6 +153,48 @@ const CampRegistrationPage = () => {
     } catch (err) {
       console.error('❌ Erreur validation:', err);
       setError(err.response?.data?.message || 'Erreur lors de la validation');
+      setLoading(false);
+    }
+  };
+
+  // 🔗 Inscription en mode Revolut : pré-inscription + redirection vers le lien de paiement
+  const handleRevolutRegistration = async () => {
+    setLoading(true);
+    setMessage(null);
+    setError(null);
+    try {
+      const dataToSend = {
+        ...form,
+        email: form.email.toLowerCase().trim()
+      };
+      const response = await axios.post('/api/registrations/revolut-preregistration', dataToSend, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+
+      const apiMessage = response.data.message || '✅ Inscription prise en compte !';
+      const instructions = response.data.instructions || {};
+      const messageParts = [
+        apiMessage,
+        instructions.important,
+        instructions.step1,
+        instructions.step2,
+        instructions.step3,
+        instructions.step4,
+        instructions.access
+      ].filter(Boolean);
+      setMessage(messageParts.join('\n'));
+      setRevolutSubmitted(true);
+
+      // Rediriger vers le lien de paiement Revolut (nouvel onglet)
+      if (revolutLink && revolutLink.trim() !== '') {
+        setTimeout(() => {
+          window.open(revolutLink, '_blank', 'noopener,noreferrer');
+        }, 1500);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error('❌ Erreur pré-inscription Revolut:', err);
+      setError(err.response?.data?.message || 'Erreur lors de l\'inscription.');
       setLoading(false);
     }
   };
@@ -535,7 +588,7 @@ const CampRegistrationPage = () => {
                   className={`payment-method-btn ${form.paymentMethod === 'paypal' ? 'active' : ''}`}
                   onClick={() => setForm(prev => ({ ...prev, paymentMethod: 'paypal' }))}
                 >
-                  💳 Carte bancaire
+                  💳 {paymentMode === 'revolut' ? 'Payer par carte' : 'Carte bancaire'}
                 </button>
                 <button
                   type="button"
@@ -546,8 +599,9 @@ const CampRegistrationPage = () => {
                 </button>
               </div>
               <p style={{ fontSize: '12px', color: '#888', marginTop: '6px' }}>
-                💳 Paiement par carte bancaire — aucun compte PayPal requis.<br/>
-                Vous avez un compte PayPal ? Vous pouvez aussi l'utiliser lors du paiement.
+                {paymentMode === 'revolut'
+                  ? '💳 Paiement sécurisé par carte. Après validation du formulaire, vous serez redirigé vers la page de paiement. Votre inscription sera confirmée après vérification du paiement par un responsable.'
+                  : '💳 Paiement par carte bancaire — aucun compte PayPal requis. Vous avez un compte PayPal ? Vous pouvez aussi l\'utiliser lors du paiement.'}
               </p>
             </div>
             
@@ -612,7 +666,7 @@ const CampRegistrationPage = () => {
             </div>
           </div>
 
-          {!showPayPal && (
+          {!showPayPal && !revolutSubmitted && (
             <div className="form-actions">
               <button type="submit" className="btn-primary btn-large" disabled={loading}>
                 <span>{loading ? '⏳ Validation en cours...' : '✅ Valider mon inscription'}</span>
@@ -620,6 +674,26 @@ const CampRegistrationPage = () => {
             </div>
           )}
         </form>
+
+        {/* Mode Revolut : après soumission, bouton pour (re)payer via le lien */}
+        {revolutSubmitted && revolutLink && (
+          <div className="paypal-section" style={{ textAlign: 'center' }}>
+            <h3>🔗 Finaliser votre paiement</h3>
+            <p style={{ fontSize: '14px', color: '#555', marginBottom: '12px' }}>
+              Cliquez ci-dessous pour effectuer votre paiement de <strong>{form.amountPaid}€</strong>.
+              Votre inscription sera confirmée après vérification par un responsable.
+            </p>
+            <a
+              href={revolutLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary btn-large"
+              style={{ display: 'inline-block', textDecoration: 'none' }}
+            >
+              💳 Payer {form.amountPaid}€ maintenant
+            </a>
+          </div>
+        )}
 
         {showPayPal && (
           <div className="paypal-section">
