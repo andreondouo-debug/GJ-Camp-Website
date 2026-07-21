@@ -108,12 +108,13 @@ const preRegistrationSchema = new mongoose.Schema({
     default: null
   },
   
-  // Paiement déclaré en espèces
+  // Paiement déclaré (espèces ou Revolut)
+  // Les bornes min/max sont validées côté contrôleur selon les paramètres
+  // configurables (registrationMinAmount) et le nombre de jours choisi.
   cashAmount: {
     type: Number,
     required: true,
-    min: 20,
-    max: 120
+    min: [0, 'Le montant ne peut pas être négatif']
   },
   
   // Statut de la demande
