@@ -190,6 +190,11 @@ userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
 
   try {
+    // 🛡️ Éviter le double hachage : si le mot de passe est déjà un hash bcrypt,
+    // ne pas le re-hacher (certains contrôleurs hachent avant de sauvegarder).
+    if (typeof this.password === 'string' && /^\$2[aby]\$\d{2}\$/.test(this.password)) {
+      return next();
+    }
     // 5 rounds pour performances optimales sur Render free tier (quasi instantané)
     const salt = await bcrypt.genSalt(5);
     this.password = await bcrypt.hash(this.password, salt);
