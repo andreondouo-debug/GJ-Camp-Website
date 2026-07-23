@@ -43,17 +43,15 @@
 /* 🖼️ Cadre d'image uniforme pour toutes les activités (harmonisation portrait/paysage) */
 .planning-activity-image {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  height: 240px;
   margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
   border-radius: 12px;
   background: linear-gradient(135deg, #f3f0fa 0%, #e9e4f5 100%);
   border: 1px solid #ece7f7;
 }
 .planning-activity-image img {
+  display: block;
   width: 100%;
   height: 100%;
   /* contain : affiche l'affiche entière (portrait ou paysage) sans la rogner */
