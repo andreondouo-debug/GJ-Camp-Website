@@ -77,14 +77,14 @@ exports.createActivity = async (req, res) => {
       jour: parseInt(jour)
     };
     
-    // Ajouter l'image si fournie
+    // Ajouter l'image si fournie (URL Cloudinary persistante)
     if (req.files && req.files.image) {
-      activityData.image = `/uploads/${req.files.image[0].filename}`;
+      activityData.image = req.files.image[0].path;
     }
     
-    // Ajouter le PDF si fourni
+    // Ajouter le PDF si fourni (URL Cloudinary persistante)
     if (req.files && req.files.fichierPdf) {
-      activityData.fichierPdf = `/uploads/${req.files.fichierPdf[0].filename}`;
+      activityData.fichierPdf = req.files.fichierPdf[0].path;
     }
     
     const activity = new Activity(activityData);
@@ -126,34 +126,14 @@ exports.updateActivity = async (req, res) => {
     if (jour) activity.jour = parseInt(jour);
     if (referent !== undefined) activity.referent = referent || null;
     
-    // Gérer la mise à jour de l'image
+    // Gérer la mise à jour de l'image (Cloudinary)
     if (req.files && req.files.image) {
-      // Supprimer l'ancienne image si elle existe
-      if (activity.image) {
-        const oldImagePath = path.join(__dirname, '../../', activity.image);
-        try {
-          await fs.unlink(oldImagePath);
-          console.log(`🗑️ Ancienne image supprimée: ${activity.image}`);
-        } catch (err) {
-          console.log('⚠️ Impossible de supprimer l\'ancienne image');
-        }
-      }
-      activity.image = `/uploads/${req.files.image[0].filename}`;
+      activity.image = req.files.image[0].path;
     }
     
-    // Gérer la mise à jour du PDF
+    // Gérer la mise à jour du PDF (Cloudinary)
     if (req.files && req.files.fichierPdf) {
-      // Supprimer l'ancien PDF si il existe
-      if (activity.fichierPdf) {
-        const oldPdfPath = path.join(__dirname, '../../', activity.fichierPdf);
-        try {
-          await fs.unlink(oldPdfPath);
-          console.log(`🗑️ Ancien PDF supprimé: ${activity.fichierPdf}`);
-        } catch (err) {
-          console.log('⚠️ Impossible de supprimer l\'ancien PDF');
-        }
-      }
-      activity.fichierPdf = `/uploads/${req.files.fichierPdf[0].filename}`;
+      activity.fichierPdf = req.files.fichierPdf[0].path;
     }
     
     await activity.save();
