@@ -6,11 +6,33 @@ const pushService = require('../services/pushService');
 // 📋 Récupérer toutes les activités
 exports.getAllActivities = async (req, res) => {
   try {
-    const activities = await Activity.find({ actif: true })
-      .sort({ dateCreation: -1 });
-    
-    console.log(`📋 ${activities.length} activités récupérées`);
-    res.json(activities);
+    const activities = await Activity.find({ actif: true });
+
+    // 🕐 Tri chronologique automatique : par jour puis par heure de début
+    // Gère les formats "HH:MM" et "HHhMM" ainsi que les heures manquantes
+    const toMinutes = (h) => {
+      if (!h || typeof h !== 'string') return Number.MAX_SAFE_INTEGER; // sans heure → à la fin du jour
+      const clean = h.replace('h', ':').replace('H', ':');
+      const [hh, mm] = clean.split(':');
+      const hours = parseInt(hh, 10);
+      const mins = parseInt(mm, 10);
+      if (isNaN(hours)) return Number.MAX_SAFE_INTEGER;
+      return hours * 60 + (isNaN(mins) ? 0 : mins);
+    };
+
+    const sorted = [...activities].sort((a, b) => {
+      const jourA = a.jour || 0;
+      const jourB = b.jour || 0;
+      if (jourA !== jourB) return jourA - jourB; // par jour croissant
+      const heureA = toMinutes(a.heureDebut);
+      const heureB = toMinutes(b.heureDebut);
+      if (heureA !== heureB) return heureA - heureB; // puis par heure croissante
+      // À défaut, garder un ordre stable par date de création
+      return new Date(a.dateCreation) - new Date(b.dateCreation);
+    });
+
+    console.log(`📋 ${sorted.length} activités récupérées (tri chronologique)`);
+    res.json(sorted);
   } catch (error) {
     console.error('❌ Erreur lors de la récupération des activités:', error);
     res.status(500).json({ message: 'Erreur lors de la récupération des activités' });

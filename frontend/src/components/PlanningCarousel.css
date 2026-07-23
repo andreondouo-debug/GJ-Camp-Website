@@ -40,18 +40,25 @@
   border: 2px solid #d4af37;
   box-shadow: 0 4px 16px #d4af3733;
 }
+/* 🖼️ Cadre d'image uniforme pour toutes les activités (harmonisation portrait/paysage) */
 .planning-activity-image {
   width: 100%;
-  height: 180px;
+  aspect-ratio: 4 / 3;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f3f0fa 0%, #e9e4f5 100%);
+  border: 1px solid #ece7f7;
 }
 .planning-activity-image img {
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  /* contain : affiche l'affiche entière (portrait ou paysage) sans la rogner */
+  object-fit: contain;
+  border-radius: 12px;
 }
 .planning-activity-content h3 {
   font-size: 1.1rem;
@@ -110,4 +117,53 @@
   color: #2ecc71;
   margin-top: 2.5rem;
   font-weight: 700;
+}
+
+/* 📱 Responsive : tablettes */
+@media (max-width: 768px) {
+  .planning-carousel {
+    max-width: 95%;
+    margin: 1.2rem auto;
+    padding: 1.5rem 1rem 2rem 1rem;
+  }
+  .planning-activities-group {
+    gap: 1rem;
+  }
+  .planning-activity-card {
+    min-width: 240px;
+    max-width: 100%;
+    padding: 1.2rem 1rem;
+  }
+}
+
+/* 📱 Responsive : téléphones */
+@media (max-width: 480px) {
+  .planning-carousel {
+    max-width: 100%;
+    margin: 1rem auto;
+    padding: 1.2rem 0.8rem 1.8rem 0.8rem;
+    border-radius: 14px;
+  }
+  .planning-creneau-label {
+    font-size: 1.05rem;
+  }
+  .planning-activities-group {
+    gap: 0.8rem;
+  }
+  .planning-activity-card {
+    min-width: 100%;
+    max-width: 100%;
+    padding: 1rem 0.9rem;
+    box-sizing: border-box;
+  }
+  .planning-activity-content h3 {
+    font-size: 1.05rem;
+  }
+  .planning-activity-content p {
+    font-size: 0.92rem;
+  }
+  .planning-btn-valider {
+    width: 100%;
+    padding: 0.8rem 1rem;
+  }
 }
